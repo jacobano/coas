@@ -176,7 +176,7 @@ void receiveSensor(const sensor_msgs::PointCloud2 &cloud)
 				if (x > -3.6 && x < 2.4 && abs(y) < range_dock && abs(y) > 1.2)
 				{
 					data_cloud->points.push_back(cloud_XYZ->points[i]);
-					
+					/*
 					// Left side
 					if (y > 0)
 					{
@@ -221,13 +221,14 @@ void receiveSensor(const sensor_msgs::PointCloud2 &cloud)
 							}
 						}
 					}
+					*/
 				}
 
 				// Front
 				if (x > 2.4 && x < range_dock && abs(y) < range_dock)
 				{
 					data_cloud->points.push_back(cloud_XYZ->points[i]);
-					
+					/*
 					// Front
 					if (x > 0)
 					{
@@ -250,13 +251,14 @@ void receiveSensor(const sensor_msgs::PointCloud2 &cloud)
 							}
 						}
 					}
+					*/
 				}
 
 				// Back
 				if (x > -range_dock && x < -3.6 && abs(y) < range_dock)
 				{
 					data_cloud->points.push_back(cloud_XYZ->points[i]);
-					
+					/*
 					// Front
 					if (x < 0)
 					{
@@ -279,6 +281,7 @@ void receiveSensor(const sensor_msgs::PointCloud2 &cloud)
 							}
 						} //x<0
 					}
+					*/
 				}
 			}
 		}
