@@ -1,0 +1,7 @@
+<launch>
+    <node pkg="rosbag" type="play" name="rosbag" args=" --loop /home/jacobano/USE/Propuestas/Navantia/Informe_Pruebas_20170203/Velodyne/Bags/2017-02-03-11-42-21.bag" required="true"/>
+    <node pkg="mapping" type="mapping" name="filterer_map" required="true"/>
+    <node pkg="rviz" type="rviz" name="rviz" args="-d /home/jacobano/coas_ws/src/detection/rviz/bounding_boxes.rviz" required="true"/>
+    <node pkg="detection" type="euclideanClusterer_node" name="euclideanClusterer_node" required="true" />
+    <node pkg="detection" type="boundingBoxes_node" name="boundingBoxes_node" output="screen" required="true" />
+</launch>
