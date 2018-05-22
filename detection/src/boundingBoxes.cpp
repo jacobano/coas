@@ -27,6 +27,7 @@ void BoundingBoxes::test_cb(const detection::vectorPointCloud input)
     if (input.clouds.size() > 0)
     {
         j = 0;
+        label_box = 0;
         // Trabaja con cada uno de los clusters
         for (int i = 0; i < input.clouds.size(); i++)
         {
@@ -137,6 +138,8 @@ void BoundingBoxes::constructBoundingBoxes()
     box.dimensions.x = maxDistX;
     box.dimensions.y = maxDistY;
     box.dimensions.z = maxDistZ;
+    box.label = label_box;
+    label_box++;
     boxes.boxes.push_back(box);
 }
 
@@ -147,27 +150,15 @@ void BoundingBoxes::postProcess()
     {
         for (int i = 0; i < boxes.boxes.size(); i++)
         {
-            // polygon.clear();
             polygon_cloud.points.clear();
             int polygon_cont = 0;
-            // pose.pose.position.x = boxes.boxes[i].pose.position.x;
-            // pose.pose.position.y = boxes.boxes[i].pose.position.y;
-            // pose.pose.position.z = boxes.boxes[i].pose.position.z;
-            // polygon.push_back(pose);
-            //- polygon_pose.x = boxes.boxes[i].pose.position.x;
-            //- polygon_pose.y = boxes.boxes[i].pose.position.y;
-            //- polygon_pose.z = boxes.boxes[i].pose.position.z;
-            //- polygon_cloud.push_back(polygon_pose);
+
             for (int j = 0; j <= boxes.boxes.size(); j++)
             {
                 dist = dist2Points(boxes.boxes[i].pose.position.x, boxes.boxes[i].pose.position.y, boxes.boxes[i].pose.position.z,
                                    boxes.boxes[j].pose.position.x, boxes.boxes[j].pose.position.y, boxes.boxes[j].pose.position.z);
-                if (0.0 < dist && dist < 8.0)
+                if (0.0 < dist && dist < 10.0)
                 {
-                    // pose.pose.position.x = boxes.boxes[j].pose.position.x;
-                    // pose.pose.position.y = boxes.boxes[j].pose.position.y;
-                    // pose.pose.position.z = boxes.boxes[j].pose.position.z;
-                    // polygon.push_back(pose);
                     if (j == 1)
                     {
                         polygon_pose.x = boxes.boxes[i].pose.position.x;
@@ -179,23 +170,48 @@ void BoundingBoxes::postProcess()
                     polygon_pose.y = boxes.boxes[j].pose.position.y;
                     polygon_pose.z = boxes.boxes[j].pose.position.z;
                     polygon_cloud.push_back(polygon_pose);
-                    //ROS_WARN("dist %f", dist);
                     polygon_cont++;
                 }
             }
-            // Muestra poligono
             for (int i = 0; i < polygon_cont; i++)
             {
                 pcl::compute3DCentroid(polygon_cloud, polygon_centroid);
-                // ROS_WARN("Polygon pose [%i]: x = %f | y = %f | z = %f", i, polygon[i].pose.position.x, polygon[i].pose.position.y, polygon[i].pose.position.z);
-                ROS_WARN("Centroid [%i]: x = %f | y = %f | z = %f", i + 1, polygon_centroid[0], polygon_centroid[1], polygon_centroid[2]);
-
+                //ROS_WARN("Centroid [%i]: x = %f | y = %f | z = %f", i + 1, polygon_centroid[0], polygon_centroid[1], polygon_centroid[2]);
+                // -- Busca dimensiones para el nuevo cluster
+                maxDistXpol = maxDistYpol = maxDistZpol = 0;
+                for (int j = 0; j < polygon_cloud.points.size(); j++)
+                {
+                    for (int k = 0; k < boxes.boxes.size(); k++)
+                    {
+                        if (polygon_cloud.points[j].x == boxes.boxes[k].pose.position.x &&
+                            polygon_cloud.points[j].y == boxes.boxes[k].pose.position.y &&
+                            polygon_cloud.points[j].z == boxes.boxes[k].pose.position.z)
+                        {
+                            if ((fabs(boxes.boxes[k].pose.position.x - polygon_centroid[0]) + boxes.boxes[k].dimensions.x) > maxDistXpol)
+                            {
+                                maxDistXpol = fabs(boxes.boxes[k].pose.position.x - polygon_centroid[0]) + boxes.boxes[k].dimensions.x;
+                                //ROS_WARN("maxdistxpol %f", maxDistXpol);
+                            }
+                            if ((fabs(boxes.boxes[k].pose.position.y - polygon_centroid[1]) + boxes.boxes[k].dimensions.y) > maxDistYpol)
+                            {
+                                maxDistYpol = fabs(boxes.boxes[k].pose.position.y - polygon_centroid[1]) + boxes.boxes[k].dimensions.y;
+                                //ROS_WARN("maxdistypol %f", maxDistYpol);
+                            }
+                            if ((fabs(boxes.boxes[k].pose.position.z - polygon_centroid[2]) + boxes.boxes[k].dimensions.z) > maxDistZpol)
+                            {
+                                maxDistZpol = fabs(boxes.boxes[k].pose.position.z - polygon_centroid[2]) + boxes.boxes[k].dimensions.z;
+                                //ROS_WARN("maxdistzpol %f", maxDistZpol);
+                            }
+                        }
+                    }
+                }
+                // --
                 box1.pose.position.x = polygon_centroid[0];
                 box1.pose.position.y = polygon_centroid[1];
                 box1.pose.position.z = polygon_centroid[2];
-                box1.dimensions.x = 5;
-                box1.dimensions.y = 5;
-                box1.dimensions.z = 3;
+                box1.dimensions.x = maxDistXpol;
+                box1.dimensions.y = maxDistYpol;
+                box1.dimensions.z = maxDistZpol;
                 boxes1.boxes.push_back(box1);
             }
             pub_boxArray1.publish(boxes1);

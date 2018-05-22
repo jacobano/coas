@@ -39,8 +39,9 @@ private:
 
   // Variables
   int j;
+  int label_box;
   Eigen::Vector4f centroid, polygon_centroid;
-  float maxDistX, maxDistY, maxDistZ, xMax, xMin, yMax, yMin, zMax, zMin, centerX, centerY, centerZ;
+  float maxDistX, maxDistY, maxDistZ, xMax, xMin, yMax, yMin, zMax, zMin, centerX, centerY, centerZ, maxDistXpol, maxDistYpol, maxDistZpol;
   jsk_recognition_msgs::BoundingBox box, box1;
   jsk_recognition_msgs::BoundingBoxArray boxes, boxes1;
   std::vector<geometry_msgs::PoseStamped> polygon;
