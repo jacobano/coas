@@ -50,7 +50,7 @@ void EuclideanClusterer::cloud_cb(const boost::shared_ptr<const sensor_msgs::Poi
     //Contains the plane point cloud
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_plane(new pcl::PointCloud<pcl::PointXYZ>());
     // While 30% [90%] of the original cloud is still there
-    while (downsampled_XYZ->points.size() > 0.9 * nr_points)
+    /*while (downsampled_XYZ->points.size() > 1 * nr_points) // atraque = 0.9 // default = 0.3
     {
         // Segment the largest planar component from the remaining cloud
         seg.setInputCloud(downsampled_XYZ);
@@ -76,7 +76,7 @@ void EuclideanClusterer::cloud_cb(const boost::shared_ptr<const sensor_msgs::Poi
         extract.filter(*cloud_f);
         downsampled_XYZ.swap(cloud_f);
         i++;
-    }
+    }*/
 
     // Creating the KdTree object for the search method of the extraction
     pcl::search::KdTree<pcl::PointXYZ>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZ>);
@@ -85,7 +85,7 @@ void EuclideanClusterer::cloud_cb(const boost::shared_ptr<const sensor_msgs::Poi
     std::vector<pcl::PointIndices> cluster_indices;
     pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
     ec.setClusterTolerance(0.8); // default = 0.02 (2cm)
-    ec.setMinClusterSize(30);    // default = 100
+    ec.setMinClusterSize(2);    // Mar = 2// Atraque = 30 // default = 100
     ec.setMaxClusterSize(25000);
     ec.setSearchMethod(tree);
     ec.setInputCloud(downsampled_XYZ);

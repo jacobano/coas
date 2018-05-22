@@ -22,7 +22,7 @@ find_package(catkin REQUIRED COMPONENTS
 find_package(Eigen3 REQUIRED)
 
 # matplotlib-cpp
-find_package(PythonLibs 2.7) 
+# find_package(PythonLibs 2.7) 
 
 FIND_PACKAGE(MRPT REQUIRED graphs;slam;vision;gui;topography)
 
@@ -48,6 +48,13 @@ include_directories(
   include
   ${catkin_INCLUDE_DIRS}
 )
+
+#find_package(octomap REQUIRED)
+#include_directories(${OCTOMAP_INCLUDE_DIRS})
+#link_directories(${OCTOMAP_LIBRARY_DIRS})
+#target_link_libraries(${OCTOMAP_LIBRARIES})
+
+
 include_directories(src ${EIGEN3_INCLUDE_DIR})
 
 add_library(euclideanClusterer src/euclideanClusterer.cpp)

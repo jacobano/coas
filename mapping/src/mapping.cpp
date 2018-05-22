@@ -74,8 +74,9 @@ int tamano, tamano1;
 
 
 // Variables related to the Map
+//int range_sea=100;
+int range_dock=100;
 int range_sea=100;
-int range_dock=10;
 float cell_div = 2; //número de celdas por 1 metro
 
 const int rang = range_dock * cell_div;
@@ -83,7 +84,7 @@ const int rows = 2 * rang + 1;
 const int columns = 2 * rang + 1;
 double cloud_thres_distance = 0.5; //Meters
 
-int phase = 1;
+int phase = 0;
 //phase=0 --> mar abierto
 //phase=1 --> atraque
 
@@ -152,19 +153,23 @@ void receiveSensor(const sensor_msgs::PointCloud2 &cloud)
 				x=cloud_XYZ->points[i].x;
 				y=cloud_XYZ->points[i].y;
 				z=cloud_XYZ->points[i].z;
-								
-				if (abs(x) < range_sea && abs(y) < range_sea )
+				//data_cloud->points.push_back(cloud_XYZ->points[i]);
+				
+				//if (abs(y) < range_sea && abs(x) < range_sea )
+				//if (abs(y) < range_open && abs(x) < range_open )
+				//if ((y < 100 || y > -100) && (x < 100 || x > -100))
+				if ((y > 50) && (x < 100 || x > -100))
 				{
 					//data_cloud->points.push_back(cloud_cluster->points[i]);
 					data_cloud->points.push_back(cloud_XYZ->points[i]);
 										
 					//fprintf(log_pos, "%lf %lf %lf\n", x, y, z);
 				}
+				
 			}
 		}
 		//JAC: Atraque.
-
-		else
+		if (phase == 1)
 		{
 			for (i = 0; i < tamano - 1; i++)
 			{
@@ -285,7 +290,9 @@ void receiveSensor(const sensor_msgs::PointCloud2 &cloud)
 				}
 			}
 		}
-	
+
+
+
 		//Convert the pointcloud to be used in ROS, usin variable sensor_msgs::PointCloud2::Ptr output(new sensor_msgs::PointCloud2);
 		//sensor_msgs::PointCloud2::Ptr output(new sensor_msgs::PointCloud2);
 		//pcl::toROSMsg(*data_cloud, *output);
@@ -293,6 +300,7 @@ void receiveSensor(const sensor_msgs::PointCloud2 &cloud)
 		
 		//Convert the pointcloud to be used in ROS, usin variable sensor_msgs::PointCloud2 output;
 		sensor_msgs::PointCloud2 cloud_filtered;
+		//pcl::toROSMsg(*data_cloud, cloud_filtered);
 		pcl::toROSMsg(*data_cloud, cloud_filtered);
 		cloud_filtered.header.frame_id = cloud.header.frame_id;
 		
@@ -303,6 +311,7 @@ void receiveSensor(const sensor_msgs::PointCloud2 &cloud)
 		
 		// BUILD THE MAP (PointCloud2D)
 		exploration(cloud_filtered);
+		
 		
 		timespec t0_2;
 		clock_gettime(CLOCK_MONOTONIC, &t0_2);
@@ -434,7 +443,7 @@ void exploration(const sensor_msgs::PointCloud2 &nube3d_uav)
 	{
 		for (j = 0; j < columns; j++)
 		{
-			if (cont_V[i][j] < 5 && V[i][j] == 1)
+			if (cont_V[i][j] < 1 && V[i][j] == 1)  //5
 			{
 				V_map[i][j] = 0;
 			}
@@ -484,6 +493,7 @@ void exploration(const sensor_msgs::PointCloud2 &nube3d_uav)
 	
 	//Convert the pointcloud to be used in ROS, usin variable sensor_msgs::PointCloud2 output;
 	pcl::toROSMsg(*fil_data_cloud, filtered_cloud_3D);
+	//pcl::toROSMsg(*fil_cloud_XYZ, filtered_cloud_3D);    //CAMBIO
 	filtered_cloud_3D.header.frame_id = "velodyne";
 	filtered_cloud_3D.header.stamp = ros::Time();
 		

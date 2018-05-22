@@ -7,6 +7,8 @@
 #include <Eigen/Eigen>
 #include <jsk_recognition_msgs/BoundingBox.h>
 #include <jsk_recognition_msgs/BoundingBoxArray.h>
+#include <pcl_conversions/pcl_conversions.h>
+#include <pcl_ros/transforms.h>
 
 class BoundingBoxes
 {
@@ -23,6 +25,8 @@ private:
   void resetVariables();
   void calculateCenters();
   void constructBoundingBoxes();
+  void postProcess();
+  float dist2Points(float x1, float y1, float z1, float x2, float y2, float z2);
 
   // Node handlers
   ros::NodeHandle n;
@@ -31,12 +35,16 @@ private:
   ros::Subscriber sub_vector_pointclouds;
 
   // Publishers
-  ros::Publisher pub_bigDist, pub_smallDist, pub_heightDist, pub_boxArray;
+  ros::Publisher pub_bigDist, pub_smallDist, pub_heightDist, pub_boxArray, pub_boxArray1;
 
   // Variables
   int j;
-  Eigen::Vector4f centroid;
+  Eigen::Vector4f centroid, polygon_centroid;
   float maxDistX, maxDistY, maxDistZ, xMax, xMin, yMax, yMin, zMax, zMin, centerX, centerY, centerZ;
-  jsk_recognition_msgs::BoundingBox box;
-  jsk_recognition_msgs::BoundingBoxArray boxes;
+  jsk_recognition_msgs::BoundingBox box, box1;
+  jsk_recognition_msgs::BoundingBoxArray boxes, boxes1;
+  std::vector<geometry_msgs::PoseStamped> polygon;
+  geometry_msgs::PoseStamped pose;
+  pcl::PointCloud<pcl::PointXYZ> polygon_cloud;
+  pcl::PointXYZ polygon_pose;
 };

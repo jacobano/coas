@@ -1,7 +1,5 @@
 #include <detection/boundingBoxes.h>
 #include "matplotlibcpp/matplotlibcpp.h"
-#include <pcl_conversions/pcl_conversions.h>
-#include <pcl_ros/transforms.h>
 
 namespace plt = matplotlibcpp;
 
@@ -14,6 +12,7 @@ BoundingBoxes::BoundingBoxes()
 
     // Publishers
     pub_boxArray = n.advertise<jsk_recognition_msgs::BoundingBoxArray>("/boundingBoxes", 1);
+    pub_boxArray1 = n.advertise<jsk_recognition_msgs::BoundingBoxArray>("/boundingBoxes1", 1);
 
     loop();
 }
@@ -103,16 +102,16 @@ void BoundingBoxes::test_cb(const detection::vectorPointCloud input)
         }
         // Publica todas las boxes de una vez y limpia el vector de boxes
         pub_boxArray.publish(boxes);
+        postProcess();
         boxes.boxes.clear();
     }
-    std::cout << "Time processing: " << ros::Time::now() - begin << \
-    "(s) Clusters detected: " << input.clouds.size() << std::endl;
+    std::cout << "Time processing: " << ros::Time::now() - begin << "(s) Clusters detected: " << input.clouds.size() << std::endl;
 }
 
 void BoundingBoxes::resetVariables()
 {
     maxDistX = maxDistY = maxDistZ = xMax = xMin = yMax = yMin = zMax = zMin = centerX = centerY = centerZ = 0;
-    box.header.frame_id = boxes.header.frame_id = "velodyne";
+    box.header.frame_id = boxes.header.frame_id = box1.header.frame_id = boxes1.header.frame_id = "velodyne";
     centroid[0] = centroid[1] = centroid[2] = centroid[3] = 0.0;
 }
 
@@ -139,6 +138,77 @@ void BoundingBoxes::constructBoundingBoxes()
     box.dimensions.y = maxDistY;
     box.dimensions.z = maxDistZ;
     boxes.boxes.push_back(box);
+}
+
+void BoundingBoxes::postProcess()
+{
+    float dist;
+    if (boxes.boxes.size() > 0)
+    {
+        for (int i = 0; i < boxes.boxes.size(); i++)
+        {
+            // polygon.clear();
+            polygon_cloud.points.clear();
+            int polygon_cont = 0;
+            // pose.pose.position.x = boxes.boxes[i].pose.position.x;
+            // pose.pose.position.y = boxes.boxes[i].pose.position.y;
+            // pose.pose.position.z = boxes.boxes[i].pose.position.z;
+            // polygon.push_back(pose);
+            //- polygon_pose.x = boxes.boxes[i].pose.position.x;
+            //- polygon_pose.y = boxes.boxes[i].pose.position.y;
+            //- polygon_pose.z = boxes.boxes[i].pose.position.z;
+            //- polygon_cloud.push_back(polygon_pose);
+            for (int j = 0; j <= boxes.boxes.size(); j++)
+            {
+                dist = dist2Points(boxes.boxes[i].pose.position.x, boxes.boxes[i].pose.position.y, boxes.boxes[i].pose.position.z,
+                                   boxes.boxes[j].pose.position.x, boxes.boxes[j].pose.position.y, boxes.boxes[j].pose.position.z);
+                if (0.0 < dist && dist < 8.0)
+                {
+                    // pose.pose.position.x = boxes.boxes[j].pose.position.x;
+                    // pose.pose.position.y = boxes.boxes[j].pose.position.y;
+                    // pose.pose.position.z = boxes.boxes[j].pose.position.z;
+                    // polygon.push_back(pose);
+                    if (j == 1)
+                    {
+                        polygon_pose.x = boxes.boxes[i].pose.position.x;
+                        polygon_pose.y = boxes.boxes[i].pose.position.y;
+                        polygon_pose.z = boxes.boxes[i].pose.position.z;
+                        polygon_cloud.push_back(polygon_pose);
+                    }
+                    polygon_pose.x = boxes.boxes[j].pose.position.x;
+                    polygon_pose.y = boxes.boxes[j].pose.position.y;
+                    polygon_pose.z = boxes.boxes[j].pose.position.z;
+                    polygon_cloud.push_back(polygon_pose);
+                    //ROS_WARN("dist %f", dist);
+                    polygon_cont++;
+                }
+            }
+            // Muestra poligono
+            for (int i = 0; i < polygon_cont; i++)
+            {
+                pcl::compute3DCentroid(polygon_cloud, polygon_centroid);
+                // ROS_WARN("Polygon pose [%i]: x = %f | y = %f | z = %f", i, polygon[i].pose.position.x, polygon[i].pose.position.y, polygon[i].pose.position.z);
+                ROS_WARN("Centroid [%i]: x = %f | y = %f | z = %f", i + 1, polygon_centroid[0], polygon_centroid[1], polygon_centroid[2]);
+
+                box1.pose.position.x = polygon_centroid[0];
+                box1.pose.position.y = polygon_centroid[1];
+                box1.pose.position.z = polygon_centroid[2];
+                box1.dimensions.x = 5;
+                box1.dimensions.y = 5;
+                box1.dimensions.z = 3;
+                boxes1.boxes.push_back(box1);
+            }
+            pub_boxArray1.publish(boxes1);
+            boxes1.boxes.clear();
+        }
+    }
+}
+
+float BoundingBoxes::dist2Points(float x1, float y1, float z1, float x2, float y2, float z2)
+{
+    float dist;
+    dist = sqrt(((x2 - x1) * (x2 - x1)) + ((y2 - y1) * (y2 - y1)) + ((z2 - z1) * (z2 - z1)));
+    return dist;
 }
 
 void BoundingBoxes::loop()

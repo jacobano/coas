@@ -57,6 +57,18 @@
   <build_depend>message_generation</build_depend>
   <build_depend>jsk_recognition_msgs</build_depend>
 
+  <build_depend>octomap</build_depend>
+ 
+<!--
+  <run_depend>roscpp</run_depend>
+  <run_depend>rospy</run_depend>
+  <run_depend>tf</run_depend>
+  <run_depend>eigen</run_depend>
+  <run_depend>std_msgs</run_depend>
+  <run_depend>message_generation</run_depend>
+  <run_depend>jsk_recognition_msgs</run_depend> -->
+
+  
   <build_export_depend>roscpp</build_export_depend>
   <build_export_depend>rospy</build_export_depend>
   <build_export_depend>tf</build_export_depend>
@@ -64,10 +76,14 @@
   <build_export_depend>std_msgs</build_export_depend>
   <build_export_depend>message_runtime</build_export_depend>
   <build_export_depend>jsk_recognition_msgs</build_export_depend>
+  
+  <build_export_depend>octomap</build_export_depend>
 
   <exec_depend>roscpp</exec_depend>
   <exec_depend>rospy</exec_depend>
-  <exec_depend>tf</exec_depend>
+  <exec_depend>tf</exec_depend> 
+
+  <exec_depend>octomap</exec_depend> 
 
 
   <!-- The export tag contains other, unspecified, tags -->
