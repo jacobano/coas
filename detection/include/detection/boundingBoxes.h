@@ -26,6 +26,7 @@ private:
   void calculateCenters();
   void constructBoundingBoxes();
   void postProcess();
+  void postProcess1(const detection::vectorPointCloud clusters);
   float dist2Points(float x1, float y1, float z1, float x2, float y2, float z2);
 
   // Node handlers
@@ -48,4 +49,8 @@ private:
   geometry_msgs::PoseStamped pose;
   pcl::PointCloud<pcl::PointXYZ> polygon_cloud;
   pcl::PointXYZ polygon_pose;
+  // std::vector<std::vector<int>> vec_polygons;
+  // std::vector<int> polygon_label;
+  std::vector<std::map<int, geometry_msgs::PoseStamped>> vec_polygons;
+  std::map<int, geometry_msgs::PoseStamped> poligono;
 };
