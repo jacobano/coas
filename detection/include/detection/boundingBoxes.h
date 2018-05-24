@@ -28,6 +28,7 @@ private:
   void postProcess();
   void postProcess1(const detection::vectorPointCloud clusters);
   float dist2Points(float x1, float y1, float z1, float x2, float y2, float z2);
+  Eigen::Vector4f pc2_centroid(const sensor_msgs::PointCloud2 pc2);
 
   // Node handlers
   ros::NodeHandle n;
