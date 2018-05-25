@@ -13,7 +13,7 @@
 		<param name="frame_id" type="string" value="velodyne" /> <!-- /camera_init -->
 		
 		<!-- maximum range to integrate (speedup!) -->
-		<param name="sensor_model/max_range" value="10.0" /> <!-- 5.0 --> <!-- 150.0 -->
+		<param name="sensor_model/max_range" value="100.0" /> <!-- 5.0 --> <!-- 150.0 -->
 		
 		<!-- data source to integrate (PointCloud2) -->
 		<remap from="cloud_in" to="/map_filtered2" /> <!-- /voxel_cloud --> <!-- /velodyne_cloud_registered --> <!-- /rtabmap/cloud_map -->

@@ -20,7 +20,7 @@ VolexFilter::VolexFilter()
     n = ros::NodeHandle();
 
     // Subscriptions
-    ros::Subscriber velodyne_sub = n.subscribe("/velodyne_points", 1, &VolexFilter::cloud_cb, this);
+    ros::Subscriber velodyne_sub = n.subscribe("/map_filtered2", 1, &VolexFilter::cloud_cb, this);
 
     // Publishers
     pub = n.advertise<sensor_msgs::PointCloud2>("/volexFilterPoints", 1);
