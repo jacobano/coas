@@ -51,7 +51,7 @@ void BoundingBoxes::test_cb(const detection::vectorPointCloud input)
     
         boxes.boxes.clear();
     }
-    std::cout << "Time processing: " << ros::Time::now() - begin << "(s) Clusters detected: " << input.clouds.size() << std::endl;
+    std::cout << "Time processing: " << ros::Time::now() - begin << " | (s) Clusters detected: " << input.clouds.size() << std::endl;
 }
 
 void BoundingBoxes::resetVariables()
@@ -186,7 +186,7 @@ void BoundingBoxes::calcVecPolygons(const detection::vectorPointCloud clusters)
         if (i == boxes.boxes.size() - 1)
         {
             vec_polygons.push_back(poligono);
-            ROS_WARN("poligono size %i |   boxes.boxes.size  %i | vec size %i", poligono.size(), boxes.boxes.size(), vec_polygons.size());
+            //ROS_WARN("poligono size %i |   boxes.boxes.size  %i | vec size %i", poligono.size(), boxes.boxes.size(), vec_polygons.size());
         }
         poligono.clear();
     }
