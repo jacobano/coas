@@ -18,45 +18,6 @@ BoundingBoxes::~BoundingBoxes()
 {
 }
 
-void BoundingBoxes::loopx()
-{
-    // ros::Time begin = ros::Time::now();
-    // //detection::vectorPointCloud input = vectorPointClouds;
-    // if (!input_.clouds.empty())
-    // {
-    //     label_box = 0;
-    //     // Trabaja con cada uno de los clusters
-    //     for (int i = 0; i < input_.clouds.size(); i++)
-    //     {
-    //         pcl::PCLPointCloud2 pcl_pc2;
-    //         pcl_conversions::toPCL(input_.clouds[i], pcl_pc2);
-    //         pcl::PointCloud<pcl::PointXYZ>::Ptr temp_cloud(new pcl::PointCloud<pcl::PointXYZ>);
-    //         pcl::fromPCLPointCloud2(pcl_pc2, *temp_cloud);
-    //         // Reinicializa variables
-    //         resetVariables();
-    //         // Calcula el centroide del cluster
-    //         pcl::compute3DCentroid(*temp_cloud, centroid);
-    //         // Calcula distancias mácimas del cluster
-    //         calcMaxDistancesCluster(*temp_cloud);
-    //         // Calcula el centro del cluster
-    //         calcCenters();
-    //         // Construye la boundingBox
-    //         constructBoundingBoxes(centerX, centerY, centerZ, maxDistX, maxDistY, maxDistZ, true);
-    //     }
-    //     // Publica todas las boxes de una vez y limpia el vector de boxes
-    //     pub_boxArray.publish(boxes);
-    //     // Calcula todos los poligonos posibles entre clusters
-    //     calcVecPolygons(input_);
-    //     // Unifica las boundingBoxes que forman el poligono en una boundingBox
-    //     mergeBoundingBoxes(input_);
-
-    //     boxes.boxes.clear();
-    // }
-    // // std::cout << "Time processing: " << ros::Time::now() - begin << " (s) | Clusters detected: " << input.clouds.size() << std::endl;
-    // std::cout << "Cont callback: " << cont_cb << std::endl;
-    // cont_cb++;
-}
-
 void BoundingBoxes::clusters_cb(const detection::vectorPointCloud input)
 {
     // input_ = vectorPointClouds;
@@ -82,6 +43,7 @@ void BoundingBoxes::clusters_cb(const detection::vectorPointCloud input)
             calcCenters();
             // Construye la boundingBox
             constructBoundingBoxes(centerX, centerY, centerZ, maxDistX, maxDistY, maxDistZ, true);
+            ROS_WARN("xMax: %f | yMax: %f | zMax: %f", maxDistX, maxDistY, maxDistZ);
         }
         // Publica todas las boxes de una vez y limpia el vector de boxes
         pub_boxArray.publish(boxes);
@@ -180,17 +142,20 @@ void BoundingBoxes::constructBoundingBoxes(float x, float y, float z, float dimX
     box.pose.position.x = x;
     box.pose.position.y = y;
     box.pose.position.z = z;
-    box.dimensions.x = dimX;
-    box.dimensions.y = dimY;
-    box.dimensions.z = dimZ;
     if (label == true)
     {
+        box.dimensions.x = dimX;
+        box.dimensions.y = dimY;
+        box.dimensions.z = dimZ;
         box.label = label_box;
         boxes.boxes.push_back(box);
         label_box++;
     }
     if (label == false)
     {
+        box.dimensions.x = dimX*2;
+        box.dimensions.y = dimY*2;
+        box.dimensions.z = dimZ*2;
         mergeBoxes.boxes.push_back(box);
     }
 }
@@ -208,23 +173,23 @@ void BoundingBoxes::calcVecPolygons()
 
             dist = dist2Points(centroid_clusterI[0], centroid_clusterI[1], centroid_clusterI[2],
                                centroid_clusterJ[0], centroid_clusterJ[1], centroid_clusterJ[2]);
-            if (0.5 < dist && dist < 6.0)
+            if (0.1 < dist && dist < 3.0)
             {
-                if (labels.empty())
+                if (polygon_labels.empty())
                 {
-                    labels.push_back(boxes.boxes[i].label);
+                    polygon_labels.push_back(boxes.boxes[i].label);
                 }
-                if (!labels.empty())
+                if (!polygon_labels.empty())
                 {
-                    labels.push_back(boxes.boxes[j].label);
+                    polygon_labels.push_back(boxes.boxes[j].label);
                 }
             }
         }
-        if (!labels.empty() /*&& i == boxes.boxes.size() - 1*/)
+        if (!polygon_labels.empty() /*&& i == boxes.boxes.size() - 1*/)
         {
-            vec_labels.push_back(labels);
+            vec_polygon_labels.push_back(polygon_labels);
         }
-        labels.clear();
+        polygon_labels.clear();
     }
 }
 
@@ -249,27 +214,28 @@ float BoundingBoxes::dist2Points(float x1, float y1, float z1, float x2, float y
 void BoundingBoxes::mergeBoundingBoxes()
 {
     // Para cada poligono, crea una boundingBox
-    ROS_WARN("vec_labels %i", vec_labels.size());
-    for (int i = 0; i < vec_labels.size(); i++)
+    ROS_INFO("Vec polygon_labels size: %i", vec_polygon_labels.size());
+    for (int i = 0; i < vec_polygon_labels.size(); i++)
     {
         pcl::PointCloud<pcl::PointXYZ> polygon_cloud_temp;
-        labels.clear();
-        labels = vec_labels[i];
-        ROS_WARN("labels size: %i", labels.size());
+        polygon_labels.clear();
+        polygon_labels = vec_polygon_labels[i];
+        ROS_INFO("Labels size: %i", polygon_labels.size());
         // Agrupo las nubes de puntos de los clusters que forman un poligono en una unica nube de puntos
-        for (int j = 0; j < labels.size(); j++)
+        for (int j = 0; j < polygon_labels.size(); j++)
         {
-            ROS_WARN("label[%i]: %i", j, labels[j]);
-            // Cluster PC2 a temp_cluster PCL_PointXYZ
-            pcl::PCLPointCloud2 pcl_pc2;
-            /* FALLO DE EJECUCIÓN */
-            //std::cout << clusters.clouds[labels[j]] << std::endl;
-            pcl_conversions::toPCL(clusters.clouds[labels[j]], pcl_pc2);
-            /* FALLO DE EJECUCIÓN */
+            //ROS_INFO("Label[%i]: %i", j, polygon_labels[j]);
+            // El centroide de una boundingBox se transforma en punto de PC2
+            pcl::PointXYZ point;
+            point.x = boxes.boxes[polygon_labels[j]].pose.position.x;
+            point.y = boxes.boxes[polygon_labels[j]].pose.position.y;
+            point.z = boxes.boxes[polygon_labels[j]].pose.position.z;
+            // Crea una nube de puntos con todos los centroides de las boundingBoxes cercanas
             pcl::PointCloud<pcl::PointXYZ>::Ptr temp_cluster(new pcl::PointCloud<pcl::PointXYZ>);
-            pcl::fromPCLPointCloud2(pcl_pc2, *temp_cluster);
+            temp_cluster->points.push_back(point);
             polygon_cloud_temp += *temp_cluster;
         }
+        ROS_WARN("temp cloud size: %i", polygon_cloud_temp.size());
         // Calcular centroide de esta nube de puntos unica
         Eigen::Vector4f centroid_polygon_cloud;
         pcl::compute3DCentroid(polygon_cloud_temp, centroid_polygon_cloud);
@@ -277,33 +243,25 @@ void BoundingBoxes::mergeBoundingBoxes()
         maxDistXpol = maxDistYpol = maxDistZpol = 0;
         for (int i = 0; i < polygon_cloud_temp.size(); i++)
         {
-            for (int j = 0; j < polygon_cloud_temp.size(); j++)
+            if (fabs(centroid_polygon_cloud[0] - boxes.boxes[polygon_labels[i]].pose.position.x) + boxes.boxes[polygon_labels[i]].dimensions.x > maxDistXpol)
             {
-                if (fabs(polygon_cloud_temp.points[i].x - polygon_cloud_temp.points[j].x) > maxDistXpol)
-                {
-                    maxDistXpol = fabs(polygon_cloud_temp.points[i].x - polygon_cloud_temp.points[j].x);
-                }
-                if (fabs(polygon_cloud_temp.points[i].y - polygon_cloud_temp.points[j].y) > maxDistYpol)
-                {
-                    maxDistYpol = fabs(polygon_cloud_temp.points[i].y - polygon_cloud_temp.points[j].y);
-                }
-                if (fabs(polygon_cloud_temp.points[i].z - polygon_cloud_temp.points[j].z) > maxDistZpol)
-                {
-                    maxDistZpol = fabs(polygon_cloud_temp.points[i].z - polygon_cloud_temp.points[j].z);
-                }
+                maxDistXpol = fabs(centroid_polygon_cloud[0] - boxes.boxes[polygon_labels[i]].pose.position.x) + boxes.boxes[polygon_labels[i]].dimensions.x;
+            }
+            if (fabs(centroid_polygon_cloud[1] - boxes.boxes[polygon_labels[i]].pose.position.y) + boxes.boxes[polygon_labels[i]].dimensions.y > maxDistYpol)
+            {
+                maxDistYpol = fabs(centroid_polygon_cloud[1] - boxes.boxes[polygon_labels[i]].pose.position.y) + boxes.boxes[polygon_labels[i]].dimensions.y;
+            }
+            if (fabs(centroid_polygon_cloud[2] - boxes.boxes[polygon_labels[i]].pose.position.z) + boxes.boxes[polygon_labels[i]].dimensions.z > maxDistZpol)
+            {
+                maxDistZpol = fabs(centroid_polygon_cloud[2] - boxes.boxes[polygon_labels[i]].pose.position.z) + boxes.boxes[polygon_labels[i]].dimensions.z;
             }
         }
         // Crea la boundingBox que engloba
         constructBoundingBoxes(centroid_polygon_cloud[0], centroid_polygon_cloud[1], centroid_polygon_cloud[2], maxDistXpol, maxDistYpol, maxDistZpol, false);
     }
     pub_mergeBoxesArray.publish(mergeBoxes);
-    ROS_WARN("x");
     mergeBoxes.boxes.clear();
-    for (int i = 0; i < vec_labels.size(); i++)
-    {
-        vec_labels[i].clear();
-    }
-    vec_labels.clear();
+    vec_polygon_labels.clear();
 }
 
 void BoundingBoxes::loop()
@@ -311,7 +269,6 @@ void BoundingBoxes::loop()
     while (ros::ok())
     {
         //ROS_INFO("xxx");
-        loopx();
         sleep(0.1);
         ros::spinOnce();
     }
