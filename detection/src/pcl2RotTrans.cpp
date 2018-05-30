@@ -77,6 +77,7 @@ void Pcl2RotTrans::loop()
 {
     while (ros::ok())
     {
+        sleep(0.1);
         ros::spinOnce();
     }
 }

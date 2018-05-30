@@ -21,18 +21,19 @@ public:
 
 private:
   // Callbacks
-  void test_cb(const detection::vectorPointCloud input);
+  void clusters_cb(const detection::vectorPointCloud input);
   
   // 
   void resetVariables();
-  void calculateCenters();
+  void calcCenters();
   void constructBoundingBoxes(float x, float y, float z, float dimX, float dimY, float dimZ, bool label);
   void postProcess();
-  void calcVecPolygons(const detection::vectorPointCloud clusters);
-  void mergeBoundingBoxes(const detection::vectorPointCloud clusters);
+  void calcVecPolygons();
+  void mergeBoundingBoxes();
   void calcMaxDistancesCluster(const pcl::PointCloud<pcl::PointXYZ> cluster);
   float dist2Points(float x1, float y1, float z1, float x2, float y2, float z2);
   Eigen::Vector4f pc2_centroid(const sensor_msgs::PointCloud2 pc2);
+  void loopx();
 
   // Node handlers
   ros::NodeHandle n;
@@ -49,7 +50,9 @@ private:
   Eigen::Vector4f centroid;
   jsk_recognition_msgs::BoundingBox box;
   jsk_recognition_msgs::BoundingBoxArray boxes, mergeBoxes;
-  geometry_msgs::PoseStamped pose;
-  std::vector<std::map<int, geometry_msgs::PoseStamped>> vec_polygons;
-  std::map<int, geometry_msgs::PoseStamped> poligono;
+  std::vector<int> labels;
+  std::vector<std::vector<int>> vec_labels;
+  int cont_cb = 0;
+  bool finish = true;
+  detection::vectorPointCloud clusters;
 };

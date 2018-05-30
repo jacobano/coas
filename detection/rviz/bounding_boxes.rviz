@@ -7,6 +7,7 @@ Panels:
         - /Global Options1
         - /Status1
         - /Filtered1
+        - /BoundingBoxArray2
       Splitter Ratio: 0.616666675
     Tree Height: 775
   - Class: rviz/Selection
@@ -507,7 +508,7 @@ Visualization Manager:
       Value: true
       alpha: 0.800000012
       color: 25; 255; 0
-      coloring: Flat color
+      coloring: Value
       line width: 0.0199999996
       only edge: true
       show coords: false
@@ -536,16 +537,16 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/ThirdPersonFollower
-      Distance: 54.2817993
+      Distance: 78.1020737
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 3.89850473
-        Y: 2.40791416
-        Z: 1.56481001e-05
+        X: -4.30365419
+        Y: 10.7838364
+        Z: 1.28001429e-05
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.0500000007
       Invert Z Axis: false

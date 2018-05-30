@@ -56,6 +56,7 @@ void VolexFilter::loop()
 {
     while (ros::ok())
     {
+        sleep(0.1);
         ros::spinOnce();
     }
 }
