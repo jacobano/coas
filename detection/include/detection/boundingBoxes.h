@@ -25,6 +25,7 @@ private:
   
   // 
   void resetVariables();
+  void cleanVariables();
   void calcCenters();
   void constructBoundingBoxes(float x, float y, float z, float dimX, float dimY, float dimZ, bool label);
   void postProcess();
@@ -44,14 +45,16 @@ private:
   ros::Publisher pub_boxArray, pub_mergeBoxesArray;
 
   // Variables
-  int label_box;
-  float xMax, xMin, yMax, yMin, zMax, zMin, centerX, centerY, centerZ, maxDistX, maxDistY, maxDistZ, maxDistXpol, maxDistYpol, maxDistZpol;
+  int label_box = 0;
+  float xMax, xMin, yMax, yMin, zMax, zMin, centerX, centerY, centerZ;
+  float maxDistX, maxDistY, maxDistZ, maxDistXpol, maxDistYpol, maxDistZpol, maxBoxX, maxBoxY, maxBoxZ;
   Eigen::Vector4f centroid;
   jsk_recognition_msgs::BoundingBox box;
   jsk_recognition_msgs::BoundingBoxArray boxes, mergeBoxes;
   std::vector<int> polygon_labels;
   std::vector<std::vector<int>> vec_polygon_labels;
   int cont_cb = 0;
-  bool finish = true;
+  bool found = false;
+  bool repeat = false;
   detection::vectorPointCloud clusters;
 };
