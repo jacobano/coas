@@ -17,6 +17,9 @@ private:
   // Callbacks
   void cloud_cb(const sensor_msgs::PointCloud2ConstPtr &input);
 
+  //
+  void params();
+
   // Node handlers
   ros::NodeHandle n;
 
@@ -28,4 +31,7 @@ private:
   std::vector<ros::Publisher> pub_vec;
   
   // Variables
+
+  // Params
+  float distanceThreshold, clusterTolerance, minClusterSize, maxClusterSize;
 };

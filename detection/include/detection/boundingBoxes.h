@@ -24,6 +24,7 @@ private:
   void clusters_cb(const detection::vectorPointCloud input);
   
   // 
+  void params();
   void resetVariables();
   void cleanVariables();
   void calcCenters();
@@ -60,4 +61,5 @@ private:
   detection::vectorPointCloud clusters;
   // Params? 
   int phase;
+  float close_dist;
 };

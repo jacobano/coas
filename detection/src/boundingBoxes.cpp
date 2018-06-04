@@ -3,15 +3,8 @@
 BoundingBoxes::BoundingBoxes()
 {
     n = ros::NodeHandle();
-    ros::NodeHandle nparam("~");
-    if (nparam.getParam("phase", phase))
-    {
-        ROS_WARN("Got param phase: %i", phase);
-    }
-    else
-    {
-        ROS_WARN("Failed to get param phase");
-    }
+
+    params();
 
     // Subscriptions
     sub_vector_pointclouds = n.subscribe("/vector_pointclouds", 1, &BoundingBoxes::clusters_cb, this);
@@ -25,6 +18,20 @@ BoundingBoxes::BoundingBoxes()
 
 BoundingBoxes::~BoundingBoxes()
 {
+}
+
+void BoundingBoxes::params()
+{
+    ros::NodeHandle nparam("~");
+    if (nparam.getParam("close_dist", close_dist))
+    {
+        ROS_WARN("Got BoundingBoxes param close_dist: %f", close_dist);
+    }
+    else
+    {
+        close_dist = 5.0;
+        ROS_WARN("Failed to get BoundingBoxes param close_dist: %f", close_dist);
+    }
 }
 
 void BoundingBoxes::clusters_cb(const detection::vectorPointCloud input)
@@ -203,7 +210,7 @@ void BoundingBoxes::calcVecPolygons()
                 }
             }
             // Si están cerca
-            if (0.5 < dist && dist < 5.0 && repeat == false)
+            if (0.01 < dist && dist < close_dist && repeat == false)
             {
                 // Si el polígono está vacío introduce i en vez de j
                 if (polygon_labels.empty())

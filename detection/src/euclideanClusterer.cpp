@@ -12,6 +12,8 @@ EuclideanClusterer::EuclideanClusterer()
 {
     n = ros::NodeHandle();
 
+    params();
+
     // Subscriptions
     ros::Subscriber velodyne_sub = n.subscribe("/map_filtered2", 1, &EuclideanClusterer::cloud_cb, this);
 
@@ -22,6 +24,47 @@ EuclideanClusterer::EuclideanClusterer()
 
 EuclideanClusterer::~EuclideanClusterer()
 {
+}
+
+void EuclideanClusterer::params()
+{
+    ros::NodeHandle nparam("~");
+    if (nparam.getParam("distanceThreshold", distanceThreshold))
+    {
+        ROS_WARN("Got EuclideanClusterer param distanceThreshold: %f", distanceThreshold);
+    }
+    else
+    {
+        distanceThreshold = 0.02;
+        ROS_WARN("Failed to get EuclideanClusterer param distanceThreshold: %f", distanceThreshold);
+    }
+    if (nparam.getParam("clusterTolerance", clusterTolerance))
+    {
+        ROS_WARN("Got EuclideanClusterer param param clusterTolerance: %f", clusterTolerance);
+    }
+    else
+    {
+        clusterTolerance = 0.02;
+        ROS_WARN("Failed to get EuclideanClusterer param clusterTolerance: %f", clusterTolerance);
+    }
+    if (nparam.getParam("minClusterSize", minClusterSize))
+    {
+        ROS_WARN("Got EuclideanClusterer param minClusterSize: %f", minClusterSize);
+    }
+    else
+    {
+        minClusterSize = 100;
+        ROS_WARN("Failed to get EuclideanClusterer param minClusterSize: %f", minClusterSize);
+    }
+    if (nparam.getParam("maxClusterSize", maxClusterSize))
+    {
+        ROS_WARN("Got EuclideanClusterer param maxClusterSize: %f", maxClusterSize);
+    }
+    else
+    {
+        maxClusterSize = 25000;
+        ROS_WARN("Failed to get EuclideanClusterer param maxClusterSize: %f", maxClusterSize);
+    }
 }
 
 void EuclideanClusterer::cloud_cb(const boost::shared_ptr<const sensor_msgs::PointCloud2> &input)
@@ -85,7 +128,7 @@ void EuclideanClusterer::cloud_cb(const boost::shared_ptr<const sensor_msgs::Poi
     std::vector<pcl::PointIndices> cluster_indices;
     pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
     ec.setClusterTolerance(0.8); // default = 0.02 (2cm)
-    ec.setMinClusterSize(2);    // Mar = 2// Atraque = 30 // default = 100
+    ec.setMinClusterSize(2);     // Mar = 2// Atraque = 30 // default = 100
     ec.setMaxClusterSize(25000);
     ec.setSearchMethod(tree);
     ec.setInputCloud(downsampled_XYZ);
