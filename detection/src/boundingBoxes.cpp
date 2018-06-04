@@ -3,6 +3,15 @@
 BoundingBoxes::BoundingBoxes()
 {
     n = ros::NodeHandle();
+    ros::NodeHandle nparam("~");
+    if (nparam.getParam("phase", phase))
+    {
+        ROS_WARN("Got param phase: %i", phase);
+    }
+    else
+    {
+        ROS_WARN("Failed to get param phase");
+    }
 
     // Subscriptions
     sub_vector_pointclouds = n.subscribe("/vector_pointclouds", 1, &BoundingBoxes::clusters_cb, this);
@@ -20,7 +29,6 @@ BoundingBoxes::~BoundingBoxes()
 
 void BoundingBoxes::clusters_cb(const detection::vectorPointCloud input)
 {
-    // input_ = vectorPointClouds;
     ros::Time begin = ros::Time::now();
     clusters = input;
     if (!clusters.clouds.empty())
@@ -176,30 +184,31 @@ void BoundingBoxes::calcVecPolygons()
         {
             dist = dist2Points(boxes.boxes[i].pose.position.x, boxes.boxes[i].pose.position.y, boxes.boxes[i].pose.position.z,
                                boxes.boxes[j].pose.position.x, boxes.boxes[j].pose.position.y, boxes.boxes[j].pose.position.z);
-            // Si están cerca
-            if (0.5 < dist && dist < 5.0)
+
+            // Si el label ya está en otro polígono, no incluirlo en un nuevo polígono
+            repeat = false;
+            for (int k = 0; k < vec_polygon_labels.size(); k++)
             {
-                // Si el label ya está en otro polígono, no incluirlo en un nuevo polígono
-                repeat = false;
-                for (int k = 0; k < vec_polygon_labels.size(); k++)
+                // Comprueba label del iterador i
+                if (std::find(vec_polygon_labels[k].begin(), vec_polygon_labels[k].end(), boxes.boxes[i].label) != vec_polygon_labels[k].end())
                 {
-                    // Comprueba label del iterador i
-                    if (std::find(vec_polygon_labels[k].begin(), vec_polygon_labels[k].end(), boxes.boxes[i].label) != vec_polygon_labels[k].end())
-                    {
-                        repeat = true;
-                    }
-                    // Comprueba label del iterador j
-                    if (std::find(vec_polygon_labels[k].begin(), vec_polygon_labels[k].end(), boxes.boxes[j].label) != vec_polygon_labels[k].end())
-                    {
-                        repeat = true;
-                    }
+                    repeat = true;
                 }
+                // Comprueba label del iterador j
+                if (std::find(vec_polygon_labels[k].begin(), vec_polygon_labels[k].end(), boxes.boxes[j].label) != vec_polygon_labels[k].end())
+                {
+                    repeat = true;
+                }
+            }
+            // Si están cerca
+            if (0.5 < dist && dist < 5.0 && repeat == false)
+            {
                 // Si el polígono está vacío introduce i en vez de j
-                if (polygon_labels.empty() && repeat == false)
+                if (polygon_labels.empty())
                 {
                     polygon_labels.push_back(boxes.boxes[i].label);
                 }
-                if (!polygon_labels.empty() && repeat == false)
+                if (!polygon_labels.empty())
                 {
                     if (std::find(polygon_labels.begin(), polygon_labels.end(), boxes.boxes[j].label) != polygon_labels.end())
                     {
@@ -214,10 +223,31 @@ void BoundingBoxes::calcVecPolygons()
                 found = true;
             }
         }
-        // Si en esta iteración no se ha encontrado, se guarda el polígono generado en el vector de polígonos
-        if (found == false && !polygon_labels.empty())
+        if (found == false)
         {
-            vec_polygon_labels.push_back(polygon_labels);
+            // Si el polígono no está vacío, almacena el polígono generado en el vector de polígonos
+            if (!polygon_labels.empty())
+            {
+                vec_polygon_labels.push_back(polygon_labels);
+            }
+            else
+            {
+                // Comprueba que el label de i no está en ningún otro polígono
+                for (int k = 0; k < vec_polygon_labels.size(); k++)
+                {
+                    // Comprueba label del iterador i
+                    if (std::find(vec_polygon_labels[k].begin(), vec_polygon_labels[k].end(), boxes.boxes[i].label) != vec_polygon_labels[k].end())
+                    {
+                        repeat = true;
+                    }
+                }
+                // Si no está se almacena como polígono de un único label
+                if (repeat == false)
+                {
+                    polygon_labels.push_back(boxes.boxes[i].label);
+                    vec_polygon_labels.push_back(polygon_labels);
+                }
+            }
             polygon_labels.clear();
         }
     }
@@ -250,7 +280,7 @@ void BoundingBoxes::mergeBoundingBoxes()
         polygon_labels.clear();
         polygon_labels = vec_polygon_labels[i];
         // Agrupo las nubes de puntos de los clusters que forman un poligono en una unica nube de puntos
-        std::cout << "[ COAS] Label = [ ";
+        std::cout << "[ COAS] Poligono " << i << " = [ ";
         for (int j = 0; j < polygon_labels.size(); j++)
         {
             // El centroide de una boundingBox se transforma en punto de PC2
@@ -295,7 +325,6 @@ void BoundingBoxes::loop()
 {
     while (ros::ok())
     {
-        //ROS_INFO("xxx");
         sleep(0.1);
         ros::spinOnce();
     }

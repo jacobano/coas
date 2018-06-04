@@ -37,6 +37,7 @@ private:
 
   // Node handlers
   ros::NodeHandle n;
+  
 
   // Subscribers
   ros::Subscriber sub_vector_pointclouds;
@@ -57,4 +58,6 @@ private:
   bool found = false;
   bool repeat = false;
   detection::vectorPointCloud clusters;
+  // Params? 
+  int phase;
 };
