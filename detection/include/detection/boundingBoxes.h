@@ -27,7 +27,7 @@ private:
   void resetVariables();
   void cleanVariables();
   void calcCenters();
-  void constructBoundingBoxes(float x, float y, float z, float dimX, float dimY, float dimZ, bool label);
+  void constructBoundingBoxes(float x, float y, float z, float dimX, float dimY, float dimZ, bool merge);
   void postProcess();
   void calcVecPolygons();
   void mergeBoundingBoxes();
@@ -46,7 +46,7 @@ private:
   ros::Publisher pub_boxArray, pub_mergeBoxesArray;
 
   // Variables
-  int label_box = 0;
+  int label_box, label_mergeBox;
   float xMax, xMin, yMax, yMin, zMax, zMin, centerX, centerY, centerZ;
   float maxDistX, maxDistY, maxDistZ, maxDistXpol, maxDistYpol, maxDistZpol, maxBoxX, maxBoxY, maxBoxZ;
   Eigen::Vector4f centroid;

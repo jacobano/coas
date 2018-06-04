@@ -33,7 +33,7 @@ void BoundingBoxes::clusters_cb(const detection::vectorPointCloud input)
     clusters = input;
     if (!clusters.clouds.empty())
     {
-        label_box = 0;
+        label_box = label_mergeBox = 0;
         // Trabaja con cada uno de los clusters
         for (int i = 0; i < clusters.clouds.size(); i++)
         {
@@ -50,7 +50,7 @@ void BoundingBoxes::clusters_cb(const detection::vectorPointCloud input)
             // Calcula el centro del cluster
             calcCenters();
             // Construye la boundingBox
-            constructBoundingBoxes(centerX, centerY, centerZ, maxDistX, maxDistY, maxDistZ, true);
+            constructBoundingBoxes(centerX, centerY, centerZ, maxDistX, maxDistY, maxDistZ, false);
         }
         // Publica todas las boxes de una vez y limpia el vector de boxes
         pub_boxArray.publish(boxes);
@@ -150,12 +150,12 @@ void BoundingBoxes::calcCenters()
     centerZ = zMin + (maxDistZ / 2);
 }
 
-void BoundingBoxes::constructBoundingBoxes(float x, float y, float z, float dimX, float dimY, float dimZ, bool label)
+void BoundingBoxes::constructBoundingBoxes(float x, float y, float z, float dimX, float dimY, float dimZ, bool merge)
 {
     box.pose.position.x = x;
     box.pose.position.y = y;
     box.pose.position.z = z;
-    if (label == true)
+    if (merge == false)
     {
         box.dimensions.x = dimX;
         box.dimensions.y = dimY;
@@ -164,12 +164,14 @@ void BoundingBoxes::constructBoundingBoxes(float x, float y, float z, float dimX
         boxes.boxes.push_back(box);
         label_box++;
     }
-    if (label == false)
+    if (merge == true)
     {
         box.dimensions.x = dimX * 2;
         box.dimensions.y = dimY * 2;
         box.dimensions.z = dimZ * 2;
+        box.label = label_mergeBox;
         mergeBoxes.boxes.push_back(box);
+        label_mergeBox++;
     }
 }
 
@@ -223,6 +225,7 @@ void BoundingBoxes::calcVecPolygons()
                 found = true;
             }
         }
+        // Si no se ha encontrado ningún label[j] cerca del label[i]
         if (found == false)
         {
             // Si el polígono no está vacío, almacena el polígono generado en el vector de polígonos
@@ -316,7 +319,7 @@ void BoundingBoxes::mergeBoundingBoxes()
             }
         }
         // Crea la boundingBox que engloba
-        constructBoundingBoxes(centroid_polygon_cloud[0], centroid_polygon_cloud[1], centroid_polygon_cloud[2], maxDistXpol, maxDistYpol, maxDistZpol, false);
+        constructBoundingBoxes(centroid_polygon_cloud[0], centroid_polygon_cloud[1], centroid_polygon_cloud[2], maxDistXpol, maxDistYpol, maxDistZpol, true);
     }
     pub_mergeBoxesArray.publish(mergeBoxes);
 }
