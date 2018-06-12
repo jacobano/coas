@@ -104,7 +104,7 @@ void receiveSensor(const sensor_msgs::PointCloud2 &cloud)
 {
 	//ROS_INFO("Recibido \n");
 	//sensor_msgs::PointCloud2 data_cloud = cloud;  // Se puede prescindir de data_cloud cuando funcione bien con pcl.
-
+	ros::Time begin = ros::Time::now();
 	float runningTime;
 
 	// Variables to detect obstacle
@@ -312,9 +312,11 @@ void receiveSensor(const sensor_msgs::PointCloud2 &cloud)
 		clock_gettime(CLOCK_MONOTONIC, &t0_2);
 		time_patron = ((float)t0_2.tv_sec + t0_2.tv_nsec / 1000000000.0) - ((float)t0_1.tv_sec + t0_1.tv_nsec / 1000000000.0);
 		//printf ( "\nTiempo en transformar: %f\n", ( ( float ) t0_2.tv_sec+t0_2.tv_nsec/1000000000.0 )- ( ( float ) t0_1.tv_sec+t0_1.tv_nsec/1000000000.0 ) );
-		printf("\nTiempo en transformar: %f\n", time_patron);
+		//printf("\nTiempo en transformar: %f\n", time_patron);
 
 	} // if patron_vacio
+
+	std::cout << "[ MAPP] Time: " << ros::Time::now() - begin << std::endl;
 }
 
 int main(int argc, char **argv)
@@ -414,7 +416,7 @@ void exploration(const sensor_msgs::PointCloud2 &nube3d_uav)
 	tam_filter = (int)fil_cloud_XYZ->points.size();
 
 	//ROS_INFO("tam= %d \n", tam);
-	ROS_INFO("tam_filter= %d \n", tam_filter);
+	//ROS_INFO("tam_filter= %d \n", tam_filter);
 
 	// Build the matrix
 	for (i = 0; i < tam; i++) // nlements --> tamano
@@ -503,7 +505,7 @@ void exploration(const sensor_msgs::PointCloud2 &nube3d_uav)
 	tam_filter = (int)fil_data_cloud->points.size();
 
 	//ROS_INFO("tam= %d \n", tam);
-	ROS_INFO("tam_fil_data_cloud= %d \n", tam_filter);
+	//ROS_INFO("tam_fil_data_cloud= %d \n", tam_filter);
 
 	//sensor_msgs::convertPointCloudToPointCloud2(filtered_cloud_3D, filtered_cloud_3D2);
 

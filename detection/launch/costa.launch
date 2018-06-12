@@ -3,10 +3,11 @@
     <!-- /home/hector/bags/Na/20180425_Pruebas/2018-04-25-12-29-19.bag 
          /home/hector/bags/Na/20180425_Pruebas/2018-04-25-12-57-04.bag -->
     <node pkg="mapping" type="mapping" name="filterer_map" output="screen" required="true">
+        <!-- Costa: 0 | Atraque: 1 -->
         <param name="phase" value="0" />
     </node>
     <node pkg="rviz" type="rviz" name="rviz" args="-d /home/hector/coas_ws/src/coas/detection/rviz/costa.rviz" required="true"/>
-    <node pkg="detection" type="euclideanClusterer_node" name="euclideanClusterer_node" required="true">
+    <node pkg="detection" type="euclideanClusterer_node" name="euclideanClusterer_node" output="screen" required="true">
         <!-- Costa: 0.5 | Atraque: 0.5 | Default: 0.02 -->
         <param name="distanceThreshold" value="0.5"/>
         <!-- Costa: 0.8 | Atraque: 0.8 | Default: 0.02 -->
@@ -19,7 +20,7 @@
         <param name="phase" value="0"/>
     </node>
     <node pkg="detection" type="volexFilter_node" name="volexFilter_node" required="true"/>
-    <node pkg="detection" type="boundingBoxes_node" name="boundingBoxes_node" required="true">
+    <node pkg="detection" type="boundingBoxes_node" name="boundingBoxes_node" output="screen" required="true">
         <!-- Distancia para asumir que dos boundingBoxes son una (Default: 5.0) -->
         <param name="close_dist" value="5"/>
     </node>
@@ -33,5 +34,8 @@
         <!-- Whether topics are published latched or only once per change. For maximum performance when building a map (with frequent updates), set to false. When set to true, on every map change  			     all topics and visualizations will be created.  -->
         <remap from="latch" to="true" />
     </node>
-    <node pkg="tracking" type="tracking_node" name="tracking_node" required="true"/>
+    <node pkg="tracking" type="tracking_node" name="tracking_node" required="true">
+        <!-- Costa: 0 | Atraque: 1 -->
+        <param name="phase" value="0"/>
+    </node>
 </launch>

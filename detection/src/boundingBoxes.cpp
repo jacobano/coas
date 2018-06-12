@@ -68,6 +68,8 @@ void BoundingBoxes::clusters_cb(const detection::vectorPointCloud input)
         mergeBoundingBoxes();
     }
     // std::cout << "[ COAS] " << boxes.boxes.size() << " boxes to " << mergeBoxes.boxes.size() << " in " << ros::Time::now() - begin << " seconds." << std::endl;
+    std::cout << "[ BBXS] Time: " << ros::Time::now() - begin << std::endl;
+    std::cout << " - - - - - - - - - - - - - - - - -" << std::endl;
     cleanVariables();
 }
 
