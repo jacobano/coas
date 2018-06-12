@@ -33,5 +33,5 @@ private:
   // Variables
 
   // Params
-  float distanceThreshold, clusterTolerance, minClusterSize, maxClusterSize;
+  float distanceThreshold, clusterTolerance, minClusterSize, maxClusterSize, phase;
 };

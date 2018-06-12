@@ -65,6 +65,14 @@ void EuclideanClusterer::params()
         maxClusterSize = 25000;
         ROS_WARN("Failed to get EuclideanClusterer param maxClusterSize: %f", maxClusterSize);
     }
+    if (nparam.getParam("phase", phase))
+    {
+        ROS_WARN("Got EuclideanClusterer param phase: %f", phase);
+    }
+    else
+    {
+        ROS_WARN("Failed to get EuclideanClusterer param phase: %f", phase);
+    }
 }
 
 void EuclideanClusterer::cloud_cb(const boost::shared_ptr<const sensor_msgs::PointCloud2> &input)
@@ -92,34 +100,37 @@ void EuclideanClusterer::cloud_cb(const boost::shared_ptr<const sensor_msgs::Poi
 
     //Contains the plane point cloud
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_plane(new pcl::PointCloud<pcl::PointXYZ>());
-    // While 30% [90%] of the original cloud is still there
-    /*while (downsampled_XYZ->points.size() > 1 * nr_points) // atraque = 0.9 // default = 0.3
+    if (phase == 1)
     {
-        // Segment the largest planar component from the remaining cloud
-        seg.setInputCloud(downsampled_XYZ);
-        seg.segment(*inliers, *coefficients);
-
-        if (inliers->indices.size() == 0)
+        // While 30% [90%] of the original cloud is still there
+        while (downsampled_XYZ->points.size() > 0.9 * nr_points) // atraque = 0.9 // default = 0.3
         {
-            std::cerr << "Could not estimate a planar model for the given dataset." << std::endl;
-            break;
+            // Segment the largest planar component from the remaining cloud
+            seg.setInputCloud(downsampled_XYZ);
+            seg.segment(*inliers, *coefficients);
+
+            if (inliers->indices.size() == 0)
+            {
+                std::cerr << "Could not estimate a planar model for the given dataset." << std::endl;
+                break;
+            }
+
+            // Extract the planar inliers from the input cloud
+            pcl::ExtractIndices<pcl::PointXYZ> extract;
+            extract.setInputCloud(downsampled_XYZ);
+            extract.setIndices(inliers);
+            extract.setNegative(false);
+
+            // Get the points associated with the planar surface
+            extract.filter(*cloud_plane);
+
+            // Remove the planar inliers, extract the rest
+            extract.setNegative(true);
+            extract.filter(*cloud_f);
+            downsampled_XYZ.swap(cloud_f);
+            i++;
         }
-
-        // Extract the planar inliers from the input cloud
-        pcl::ExtractIndices<pcl::PointXYZ> extract;
-        extract.setInputCloud(downsampled_XYZ);
-        extract.setIndices(inliers);
-        extract.setNegative(false);
-
-        // Get the points associated with the planar surface
-        extract.filter(*cloud_plane);
-
-        // Remove the planar inliers, extract the rest
-        extract.setNegative(true);
-        extract.filter(*cloud_f);
-        downsampled_XYZ.swap(cloud_f);
-        i++;
-    }*/
+    }
 
     // Creating the KdTree object for the search method of the extraction
     pcl::search::KdTree<pcl::PointXYZ>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZ>);

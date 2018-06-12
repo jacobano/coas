@@ -38,13 +38,12 @@ private:
 
   // Node handlers
   ros::NodeHandle n;
-  
 
   // Subscribers
   ros::Subscriber sub_vector_pointclouds;
 
   // Publishers
-  ros::Publisher pub_boxArray, pub_mergeBoxesArray;
+  ros::Publisher pub_boxArray, pub_mergeBoxesArray, pub_boxRef;
 
   // Variables
   int label_box, label_mergeBox;

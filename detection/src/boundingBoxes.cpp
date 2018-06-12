@@ -11,6 +11,7 @@ BoundingBoxes::BoundingBoxes()
 
     // Publishers
     pub_boxArray = n.advertise<jsk_recognition_msgs::BoundingBoxArray>("/boundingBoxes", 1);
+    pub_boxRef = n.advertise<jsk_recognition_msgs::BoundingBox>("/box", 1);
     pub_mergeBoxesArray = n.advertise<jsk_recognition_msgs::BoundingBoxArray>("/mergeBoundingBoxes", 1);
 
     loop();
@@ -66,7 +67,7 @@ void BoundingBoxes::clusters_cb(const detection::vectorPointCloud input)
         // Unifica las boundingBoxes que forman el poligono en una boundingBox
         mergeBoundingBoxes();
     }
-    std::cout << "[ COAS] " << boxes.boxes.size() << " boxes to " << mergeBoxes.boxes.size() << " in " << ros::Time::now() - begin << " seconds." << std::endl;
+    // std::cout << "[ COAS] " << boxes.boxes.size() << " boxes to " << mergeBoxes.boxes.size() << " in " << ros::Time::now() - begin << " seconds." << std::endl;
     cleanVariables();
 }
 
@@ -168,6 +169,11 @@ void BoundingBoxes::constructBoundingBoxes(float x, float y, float z, float dimX
         box.dimensions.y = dimY;
         box.dimensions.z = dimZ;
         box.label = label_box;
+        if (0.2 < dimX && dimX < 0.8 && 0.2 < dimY && dimY < 0.8 && 0.5 < dimZ && dimZ < 1.5)
+        {
+            pub_boxRef.publish(box);
+            // ROS_WARN("label [%i] xDim: %f - yDim: %f - zDim: %f", label_box, dimX, dimY, dimZ);
+        }
         boxes.boxes.push_back(box);
         label_box++;
     }
@@ -290,7 +296,7 @@ void BoundingBoxes::mergeBoundingBoxes()
         polygon_labels.clear();
         polygon_labels = vec_polygon_labels[i];
         // Agrupo las nubes de puntos de los clusters que forman un poligono en una unica nube de puntos
-        std::cout << "[ COAS] Poligono " << i << " = [ ";
+        // std::cout << "[ COAS] Poligono " << i << " = [ ";
         for (int j = 0; j < polygon_labels.size(); j++)
         {
             // El centroide de una boundingBox se transforma en punto de PC2
@@ -302,9 +308,9 @@ void BoundingBoxes::mergeBoundingBoxes()
             pcl::PointCloud<pcl::PointXYZ>::Ptr temp_cluster(new pcl::PointCloud<pcl::PointXYZ>);
             temp_cluster->points.push_back(point);
             polygon_cloud_temp += *temp_cluster;
-            std::cout << polygon_labels[j] << " ";
+            // std::cout << polygon_labels[j] << " ";
         }
-        std::cout << "]" << std::endl;
+        // std::cout << "]" << std::endl;
         // Calcular centroide de esta nube de puntos unica
         Eigen::Vector4f centroid_polygon_cloud;
         pcl::compute3DCentroid(polygon_cloud_temp, centroid_polygon_cloud);

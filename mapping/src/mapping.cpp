@@ -74,16 +74,16 @@ int tamano, tamano1;
 
 // Variables related to the Map
 //int range_sea=100;
-int range_dock = 100;
+int range_dock;
 int range_sea = 100;
 float cell_div = 2; //número de celdas por 1 metro
 
-const int rang = range_dock * cell_div;
-const int rows = 2 * rang + 1;
-const int columns = 2 * rang + 1;
+int rang;
+int rows;
+int columns;
 double cloud_thres_distance = 0.5; //Meters
 
-int phase = 0;
+int phase;
 //phase=0 --> mar abierto
 //phase=1 --> atraque
 
@@ -91,9 +91,9 @@ int phase = 0;
 int rows_obs = 20;
 int columns_obs = 2;
 
-VVI V(rows, VI(columns));
-VVI V_map(rows, VI(columns));
-VVI cont_V(rows, VI(columns));
+// VVI V(rows, VI(columns));
+// VVI V_map(rows, VI(columns));
+// VVI cont_V(rows, VI(columns));
 
 //--------------------------------------------
 //sensor_msgs::PointCloud cloud_2D;
@@ -321,25 +321,27 @@ int main(int argc, char **argv)
 {
 	ros::init(argc, argv, "ICP3D");
 	ros::NodeHandle n;
-	// ros::NodeHandle nparam("~"); 					Testeo de obtener parámetros del .launch
 
-	// //n.getParam("phase", phase);
-	// if (nparam.getParam("phase", phase))
-	// {
-	// 	ROS_WARN("Got param phase: %i", phase);
-	// }
-	// else
-	// {
-	// 	ROS_WARN("Failed to get param phase");
-	// }
-	// if (nparam.getParam("range_dock", range_dock))
-	// {
-	// 	ROS_WARN("Got param phase: %i", range_dock);
-	// }
-	// else
-	// {
-	// 	ROS_WARN("Failed to get param range_dock");
-	// }
+	ros::NodeHandle nparam("~");
+	if (nparam.getParam("phase", phase))
+	{
+		ROS_WARN("Got param phase: %i", phase);
+		if (phase == 0)
+		{
+			range_dock = 100;
+		}
+		if (phase == 1)
+		{
+			range_dock = 10;
+		}
+		rang = range_dock * cell_div;
+		rows = 2 * rang + 1;
+		columns = 2 * rang + 1;
+	}
+	else
+	{
+		ROS_WARN("Failed to get param phase");
+	}
 
 	log_pos = fopen("log_pos.txt", "w");
 	log_icp = fopen("log_icp.txt", "w");
@@ -372,6 +374,10 @@ void exploration(const sensor_msgs::PointCloud2 &nube3d_uav)
 	int max = 0;
 
 	sensor_msgs::PointCloud2 filtered_cloud_3D;
+
+	VVI V(rows, VI(columns));
+	VVI V_map(rows, VI(columns));
+	VVI cont_V(rows, VI(columns));
 
 	// Initialize the matrix
 	for (i = 0; i < rows; i++)
