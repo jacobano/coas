@@ -6,6 +6,9 @@
         <!-- Costa: 0 | Atraque: 1 -->
         <param name="phase" value="0" />
     </node>
+    <node pkg="mapping" type="thinMapping_node" name="thinMapping_node" output="screen" required="true">
+        <param name="phase" value="0"/>
+    </node>
     <node pkg="rviz" type="rviz" name="rviz" args="-d /home/hector/coas_ws/src/coas/detection/rviz/costa.rviz" required="true"/>
     <node pkg="detection" type="euclideanClusterer_node" name="euclideanClusterer_node" output="screen" required="true">
         <!-- Costa: 0.5 | Atraque: 0.5 | Default: 0.02 -->

@@ -7,7 +7,6 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   tf
-  mrpt_bridge
   nodelet
   sensor_msgs
   pcl_ros

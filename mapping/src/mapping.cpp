@@ -46,6 +46,23 @@
 #include <pcl/conversions.h>
 #include <pcl_ros/transforms.h>
 
+#include "mapping/vectorInt.h"
+#include "mapping/vectorVector.h"
+#include <std_msgs/Int32.h>
+
+// TEST
+// C/C++ includes
+#include <cfloat>
+#include <vector>
+#include <iostream>
+
+//Eigen includes
+#include <Eigen/Core>
+
+double _bin_size = 1;
+std::vector<Eigen::Vector3i> voxel_traversal(Eigen::Vector3d ray_start, Eigen::Vector3d ray_end);
+// TEST
+
 using namespace std; //Prueba
 
 typedef vector<int> VI;
@@ -56,9 +73,10 @@ void exploration(const sensor_msgs::PointCloud2 &nube3d_uav);
 int is_in_map(int i, int j);
 int readV(const VVI &V, int i, int j);
 void save_matrix(char *filename, const VVI &M);
+void params();
 
 // Publisher
-ros::Publisher pub_filtered_map, pub_filtered_map2;
+ros::Publisher pub_filtered_map, pub_filtered_map2, pub_matrix;
 
 //-------Variables globales------------------
 bool patron_vacio = true;
@@ -99,6 +117,9 @@ int columns_obs = 2;
 //sensor_msgs::PointCloud cloud_2D;
 sensor_msgs::PointCloud2 filtered_cloud_3D2;
 const std_msgs::Header msg_header;
+
+mapping::vectorInt columns_mat;
+mapping::vectorVector rows_mat;
 
 void receiveSensor(const sensor_msgs::PointCloud2 &cloud)
 {
@@ -315,7 +336,6 @@ void receiveSensor(const sensor_msgs::PointCloud2 &cloud)
 		//printf("\nTiempo en transformar: %f\n", time_patron);
 
 	} // if patron_vacio
-
 	std::cout << "[ MAPP] Time: " << ros::Time::now() - begin << std::endl;
 }
 
@@ -324,6 +344,24 @@ int main(int argc, char **argv)
 	ros::init(argc, argv, "ICP3D");
 	ros::NodeHandle n;
 
+	params();
+
+	log_pos = fopen("log_pos.txt", "w");
+	log_icp = fopen("log_icp.txt", "w");
+	log_times = fopen("log_times.txt", "w");
+
+	ros::Subscriber sub = n.subscribe("/velodyne_points", 1, receiveSensor);
+	//pub_filtered_map = n.advertise<sensor_msgs::PointCloud>("/map_filtered", 1);
+	pub_filtered_map2 = n.advertise<sensor_msgs::PointCloud2>("/map_filtered2", 1);
+	pub_matrix = n.advertise<mapping::vectorVector>("/v_map", 1);
+
+	ros::spin();
+
+	return 0;
+}
+
+void params()
+{
 	ros::NodeHandle nparam("~");
 	if (nparam.getParam("phase", phase))
 	{
@@ -344,17 +382,6 @@ int main(int argc, char **argv)
 	{
 		ROS_WARN("Failed to get param phase");
 	}
-
-	log_pos = fopen("log_pos.txt", "w");
-	log_icp = fopen("log_icp.txt", "w");
-	log_times = fopen("log_times.txt", "w");
-
-	ros::Subscriber sub = n.subscribe("/velodyne_points", 1, receiveSensor);
-	//pub_filtered_map = n.advertise<sensor_msgs::PointCloud>("/map_filtered", 1);
-	pub_filtered_map2 = n.advertise<sensor_msgs::PointCloud2>("/map_filtered2", 1);
-	ros::spin();
-
-	return 0;
 }
 
 //BUILD THE MAP
@@ -470,6 +497,17 @@ void exploration(const sensor_msgs::PointCloud2 &nube3d_uav)
 		}
 	}
 
+	for (int i = 0; i < rows; i++)
+	{
+		for (int j = 0; j < columns; j++)
+		{
+			columns_mat.columns.push_back(V[i][j]);
+		}
+		rows_mat.rows.push_back(columns_mat);
+		columns_mat.columns.clear();
+	}
+	pub_matrix.publish(rows_mat);
+	rows_mat.rows.clear();
 	// Esto es para confirmar con Rviz que se van filtrando las olas. Se publica un topic con los datos de la nube filtrados.
 	// map1_
 
