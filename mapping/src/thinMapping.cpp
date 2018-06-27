@@ -29,21 +29,18 @@ void ThinMapping::params()
         ROS_WARN("Got ThinMapping param phase: %i", phase);
         if (phase == 0)
         {
-            rang = 100 * 2;
+            range_dock = 100;
         }
         if (phase == 1)
         {
-            rang = 10 * 2;
+            range_dock = 10;
         }
+        rang = range_dock * cell_div;
         rr = 2 * rang + 1;
         cc = 2 * rang + 1;
     }
     else
     {
-        phase = 0;
-        rang = 100 * 2;
-        rr = 2 * rang + 1;
-        cc = 2 * rang + 1;
         ROS_WARN("Failed to get ThinMapping param phase: %i", phase);
     }
 }
@@ -63,43 +60,54 @@ void ThinMapping::matrix_cb(const mapping::vectorVector input)
             matrix[i][j] = col.columns[j];
         }
     }
+    save_matrix("/home/hector/Matlab_ws/matrix2.txt", matrix);
+    // ROS_WARN("debug! rr: %i | cc: %i | rang: %i", rr, cc, rang);
 
-    for (int i = 0; i < rows.rows.size(); i++)
+    for (int i = 0; i < rr; i++)
     {
-        mapping::vectorInt col = rows.rows[i];
-        for (int j = 0; j < col.columns.size(); j++)
+        for (int j = 0; j < cc; j++)
         {
-            if (i == 0 || j == 0 || i == rows.rows.size() - 1 || j == col.columns.size() - 1)
+            if (phase == 1)
             {
-                Eigen::Vector3d ray_start(rang, rang, 0);
-                Eigen::Vector3d ray_end(i, j, 0);
-
-                std::vector<Eigen::Vector3i> ids = voxel_traversal(ray_start, ray_end);
-                // std::cout << "Voxel size: " << _bin_size << std::endl;
-                // std::cout << "Starting position: " << ray_start.transpose() << std::endl;
-                // std::cout << "Ending position: " << ray_end.transpose() << std::endl;
-                // std::cout << "Voxel ID's from start to end:" << std::endl;
-
-                for (int k = 0; k < ids.size(); k++)
+                //   Arriba       Derecha o Izquierda                 Abajo
+                if ((i == 0) || ((j == 39 || j == 2) && i < 29) || ((i == 39) && 1 < j))
                 {
-                    Eigen::Vector3i pointer = ids[k];
-                    if (matrix[pointer[0]][pointer[1]] == 1)
-                    {
-                        thinMatrix[pointer[0]][pointer[1]] = 1;
-                        break;
-                    }
+                    thinMatrix = doVoxelTraversal(i, j, matrix, thinMatrix);
                 }
-
-                // for (auto &i : ids)
-                // {
-                //     std::cout << "> " << i.transpose() << std::endl;
-                // }
+            }
+            else if (phase == 0)
+            {
+                //  Arriba izquierda        Arriba izquierda       Arriba derecha           Abajo derecha
+                if ((i < 242 && j == 0) || (i == 0 && j < 252) || (i == 390 && 199 < j) || (199 < i && j == 390))
+                {
+                    thinMatrix = doVoxelTraversal(i, j, matrix, thinMatrix);
+                }
             }
         }
     }
-    save_matrix("thinMatrix.txt", thinMatrix);
-
+    thinMatrix[rang][rang] = 1;
+    save_matrix("/home/hector/Matlab_ws/thinMatrix.txt", thinMatrix);
     std::cout << "[ THMP] Time: " << ros::Time::now() - begin << std::endl;
+}
+
+std::vector<std::vector<int>> ThinMapping::doVoxelTraversal(int i, int j, std::vector<std::vector<int>> matrix, std::vector<std::vector<int>> thinMatrix)
+{
+    Eigen::Vector3d ray_start(rang, rang, 0);
+    Eigen::Vector3d ray_end(i, j, 0);
+    // ROS_WARN("DEBUG1 - i: %i - j: %i", i, j);
+    std::vector<Eigen::Vector3i> ids = voxel_traversal(ray_start, ray_end);
+
+    for (int k = 0; k < ids.size(); k++)
+    {
+        Eigen::Vector3i pointer = ids[k];
+        if (matrix[pointer[0]][pointer[1]] == 1)
+        {
+            ROS_WARN("Pointer0: %i Pointer1: %i | i: %i | j: %i | rang: %i", pointer[0], pointer[1], i, j, rang);
+            thinMatrix[pointer[0]][pointer[1]] = 1;
+            break;
+        }
+    }
+    return thinMatrix;
 }
 
 void ThinMapping::save_matrix(char *fileName, const std::vector<std::vector<int>> &M)
@@ -205,8 +213,10 @@ std::vector<Eigen::Vector3i> ThinMapping::voxel_traversal(Eigen::Vector3d ray_st
         visited_voxels.push_back(current_voxel);
     }
 
+    // ROS_WARN("DEBUG2");
     while (last_voxel != current_voxel)
     {
+        // std::cout << last_voxel << " != " << current_voxel << std::endl;
         if (tMaxX < tMaxY)
         {
             if (tMaxX < tMaxZ)
@@ -235,6 +245,7 @@ std::vector<Eigen::Vector3i> ThinMapping::voxel_traversal(Eigen::Vector3d ray_st
         }
         visited_voxels.push_back(current_voxel);
     }
+    // ROS_WARN("DEBUG3");
     return visited_voxels;
 }
 

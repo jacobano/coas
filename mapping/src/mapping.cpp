@@ -561,6 +561,7 @@ void exploration(const sensor_msgs::PointCloud2 &nube3d_uav)
 	save_matrix("matrix.txt", V);
 	save_matrix("contador.txt", cont_V);
 	save_matrix("mapa.txt", V_map);
+	// ROS_WARN("matrix size: %i", V.size());
 }
 
 int is_in_map(int i, int j)
