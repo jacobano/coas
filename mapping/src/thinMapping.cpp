@@ -72,15 +72,41 @@ void ThinMapping::matrix_cb(const mapping::vectorVector input)
                 //   Arriba       Derecha o Izquierda                 Abajo
                 if ((i == 0) || ((j == 39 || j == 2) && i < 29) || ((i == 39) && 1 < j))
                 {
-                    thinMatrix = doVoxelTraversal(i, j, matrix, thinMatrix);
+                    Eigen::Vector3d ray_start(rang, rang, 0);
+                    Eigen::Vector3d ray_end(i, j, 0);
+                    std::vector<Eigen::Vector3i> ids = voxel_traversal(ray_start, ray_end);
+
+                    for (int k = 0; k < ids.size(); k++)
+                    {
+                        Eigen::Vector3i pointer = ids[k];
+                        if (matrix[pointer[0]][pointer[1]] == 1)
+                        {
+                            ROS_WARN("Pointer0: %i Pointer1: %i | i: %i | j: %i | rang: %i", pointer[0], pointer[1], i, j, rang);
+                            thinMatrix[pointer[0]][pointer[1]] = 1;
+                            break;
+                        }
+                    }
                 }
             }
             else if (phase == 0)
             {
-                //  Arriba izquierda        Arriba izquierda       Arriba derecha           Abajo derecha
-                if ((i < 242 && j == 0) || (i == 0 && j < 252) || (i == 390 && 199 < j) || (199 < i && j == 390))
+                //  Arriba izquierda        Arriba izquierda       Abajo izquierda          Arriba derecha           Abajo derecha
+                if ((i < 242 && j == 0) || (i == 0 && j < 252) || (i == 390 && 199 < j) || (199 < i && j == 390) || (252 < i && 252 < j))
                 {
-                    thinMatrix = doVoxelTraversal(i, j, matrix, thinMatrix);
+                    Eigen::Vector3d ray_start(rang, rang, 0);
+                    Eigen::Vector3d ray_end(i, j, 0);
+                    std::vector<Eigen::Vector3i> ids = voxel_traversal(ray_start, ray_end);
+
+                    for (int k = 0; k < ids.size(); k++)
+                    {
+                        Eigen::Vector3i pointer = ids[k];
+                        if (matrix[pointer[0]][pointer[1]] == 1)
+                        {
+                            ROS_WARN("Pointer0: %i Pointer1: %i | i: %i | j: %i | rang: %i", pointer[0], pointer[1], i, j, rang);
+                            thinMatrix[pointer[0]][pointer[1]] = 1;
+                            break;
+                        }
+                    }
                 }
             }
         }
@@ -88,26 +114,6 @@ void ThinMapping::matrix_cb(const mapping::vectorVector input)
     thinMatrix[rang][rang] = 1;
     save_matrix("/home/hector/Matlab_ws/thinMatrix.txt", thinMatrix);
     std::cout << "[ THMP] Time: " << ros::Time::now() - begin << std::endl;
-}
-
-std::vector<std::vector<int>> ThinMapping::doVoxelTraversal(int i, int j, std::vector<std::vector<int>> matrix, std::vector<std::vector<int>> thinMatrix)
-{
-    Eigen::Vector3d ray_start(rang, rang, 0);
-    Eigen::Vector3d ray_end(i, j, 0);
-    // ROS_WARN("DEBUG1 - i: %i - j: %i", i, j);
-    std::vector<Eigen::Vector3i> ids = voxel_traversal(ray_start, ray_end);
-
-    for (int k = 0; k < ids.size(); k++)
-    {
-        Eigen::Vector3i pointer = ids[k];
-        if (matrix[pointer[0]][pointer[1]] == 1)
-        {
-            ROS_WARN("Pointer0: %i Pointer1: %i | i: %i | j: %i | rang: %i", pointer[0], pointer[1], i, j, rang);
-            thinMatrix[pointer[0]][pointer[1]] = 1;
-            break;
-        }
-    }
-    return thinMatrix;
 }
 
 void ThinMapping::save_matrix(char *fileName, const std::vector<std::vector<int>> &M)

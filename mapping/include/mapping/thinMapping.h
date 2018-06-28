@@ -24,7 +24,6 @@ private:
   //
   void params();
   void save_matrix(char *fileName, const std::vector<std::vector<int>> &M);
-  std::vector<std::vector<int>> doVoxelTraversal(int i, int j, std::vector<std::vector<int>> matrix, std::vector<std::vector<int>> thinMatrix);
   std::vector<Eigen::Vector3i> voxel_traversal(Eigen::Vector3d ray_start, Eigen::Vector3d ray_end);
   float dist2Points(float x1, float y1, float z1, float x2, float y2, float z2);
 
