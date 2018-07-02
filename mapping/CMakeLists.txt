@@ -169,7 +169,6 @@ add_dependencies(mapping    ${catkin_EXPORTED_TARGETS})
 target_link_libraries(mapping ${MRPT_LIBS} ${catkin_LIBRARIES})
 
 ## --
-
 add_library(thinMapping src/thinMapping.cpp)
 add_dependencies(thinMapping ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
