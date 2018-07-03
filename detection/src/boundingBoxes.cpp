@@ -33,6 +33,42 @@ void BoundingBoxes::params()
         close_dist = 5.0;
         ROS_WARN("Failed to get BoundingBoxes param close_dist: %f", close_dist);
     }
+    if (nparam.getParam("xyMinPoste", xyMinPoste))
+    {
+        ROS_WARN("Got BoundingBoxes param xyMinPoste: %f", xyMinPoste);
+    }
+    else
+    {
+        xyMinPoste = 0.2;
+        ROS_WARN("Failed to get BoundingBoxes param xyMinPoste: %f", xyMinPoste);
+    }
+    if (nparam.getParam("xyMaxPoste", xyMaxPoste))
+    {
+        ROS_WARN("Got BoundingBoxes param xyMaxPoste: %f", xyMaxPoste);
+    }
+    else
+    {
+        xyMaxPoste = 0.8;
+        ROS_WARN("Failed to get BoundingBoxes param xyMaxPoste: %f", xyMaxPoste);
+    }
+    if (nparam.getParam("zMinPoste", zMinPoste))
+    {
+        ROS_WARN("Got BoundingBoxes param zMinPoste: %f", zMinPoste);
+    }
+    else
+    {
+        zMinPoste = 0.5;
+        ROS_WARN("Failed to get BoundingBoxes param zMinPoste: %f", zMinPoste);
+    }
+    if (nparam.getParam("zMaxPoste", zMaxPoste))
+    {
+        ROS_WARN("Got BoundingBoxes param zMaxPoste: %f", zMaxPoste);
+    }
+    else
+    {
+        zMaxPoste = 1.5;
+        ROS_WARN("Failed to get BoundingBoxes param zMaxPoste: %f", zMaxPoste);
+    }
 }
 
 void BoundingBoxes::clusters_cb(const detection::vectorPointCloud input)
@@ -68,7 +104,7 @@ void BoundingBoxes::clusters_cb(const detection::vectorPointCloud input)
         mergeBoundingBoxes();
     }
     // std::cout << "[ COAS] " << boxes.boxes.size() << " boxes to " << mergeBoxes.boxes.size() << " in " << ros::Time::now() - begin << " seconds." << std::endl;
-    std::cout << "[ BBXS] Time: " << ros::Time::now() - begin << std::endl;
+    std::cerr << "[ BBXS] Time: " << ros::Time::now() - begin << std::endl;
     std::cout << " - - - - - - - - - - - - - - - - -" << std::endl;
     cleanVariables();
 }
@@ -171,10 +207,10 @@ void BoundingBoxes::constructBoundingBoxes(float x, float y, float z, float dimX
         box.dimensions.y = dimY;
         box.dimensions.z = dimZ;
         box.label = label_box;
-        if (0.2 < dimX && dimX < 0.8 && 0.2 < dimY && dimY < 0.8 && 0.5 < dimZ && dimZ < 1.5)
+        if (xyMinPoste < dimX && dimX < xyMaxPoste && xyMinPoste < dimY && dimY < xyMaxPoste && zMinPoste < dimZ && dimZ < zMaxPoste)
         {
             pub_boxRef.publish(box);
-            // ROS_WARN("label [%i] xDim: %f - yDim: %f - zDim: %f", label_box, dimX, dimY, dimZ);
+            ROS_WARN("label [%i] xDim: %f - yDim: %f - zDim: %f", label_box, dimX, dimY, dimZ);
         }
         boxes.boxes.push_back(box);
         label_box++;

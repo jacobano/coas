@@ -58,7 +58,7 @@ private:
   bool found = false;
   bool repeat = false;
   detection::vectorPointCloud clusters;
-  // Params? 
+  // Params 
   int phase;
-  float close_dist;
+  float close_dist, xyMinPoste, xyMaxPoste, zMinPoste, zMaxPoste;
 };

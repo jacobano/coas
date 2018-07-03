@@ -108,6 +108,18 @@ Visualization Manager:
       Use Fixed Frame: true
       Use rainbow: true
       Value: true
+    - Class: jsk_rviz_plugin/BoundingBox
+      Enabled: true
+      Name: Persona
+      Topic: /box
+      Unreliable: false
+      Value: true
+      alpha: 1
+      color: 255; 255; 0
+      coloring: Flat color
+      line width: 0.00499999989
+      only edge: false
+      show coords: false
     - Class: jsk_rviz_plugin/BoundingBoxArray
       Enabled: true
       Name: BoundingBoxArray
@@ -547,7 +559,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/ThirdPersonFollower
-      Distance: 25.1951408
+      Distance: 20.9219551
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
         Stereo Focal Distance: 1
