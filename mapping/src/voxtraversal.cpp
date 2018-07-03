@@ -13,14 +13,14 @@ int main(int _argc, char **_argv)
 {
     ros::init(_argc, _argv, "voxtraversal_node");
 
-    param = 0;
+    param = 1;
     if (param == 1)
     {
         rang = 20;
     }
     else
     {
-        rang = 30;
+        rang = 200;
     }
 
     rr = rang * 2 + 1;
@@ -62,7 +62,7 @@ int main(int _argc, char **_argv)
                         Eigen::Vector3i pointer = ids[k];
                         if (matrix[pointer[0]][pointer[1]] == 1)
                         {
-                            ROS_WARN("Pointer0: %i Pointer1: %i | i: %i | j: %i ", pointer[0], pointer[1], i, j);
+                            // ROS_WARN("Pointer0: %i Pointer1: %i | i: %i | j: %i ", pointer[0], pointer[1], i, j);
                             thinMatrix[pointer[0]][pointer[1]] = 1;
                             break;
                         }
@@ -71,9 +71,7 @@ int main(int _argc, char **_argv)
             }
             else
             {
-                // if ((i == 1 && j < 332) || (i == 390 && 199 < j))
-                // if ((i < 242 && j == 0) || (i == 0 && j < 242) || (i == 390 && 199 < j) || (199 < i && j == 390) || (252 < i && 252 < j))
-                if ((i == 0 && j < rang) || (i < rang + 1 && j == 0) || (i == rang * 2 - 1 && j > rang) || (i > rang && j == rang * 2 - 1))
+                if ((i < 242 && j == 0) || (i == 0 && j < 242) || (i == 390 && 199 < j) || (199 < i && j == 390) || (252 < i && 252 < j))
                 {
                     Eigen::Vector3d ray_start(rang, rang, 0);
                     Eigen::Vector3d ray_end(i, j, 0);
@@ -84,7 +82,7 @@ int main(int _argc, char **_argv)
                         Eigen::Vector3i pointer = ids[k];
                         if (matrix[pointer[0]][pointer[1]] == 1)
                         {
-                            ROS_WARN("Pointer0: %i Pointer1: %i | i: %i | j: %i ", pointer[0], pointer[1], i, j);
+                            // ROS_WARN("Pointer0: %i Pointer1: %i | i: %i | j: %i ", pointer[0], pointer[1], i, j);
                             thinMatrix[pointer[0]][pointer[1]] = 1;
                             break;
                         }

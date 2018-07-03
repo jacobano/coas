@@ -82,79 +82,73 @@ void EuclideanClusterer::cloud_cb(const boost::shared_ptr<const sensor_msgs::Poi
     sensor_msgs::PointCloud2 input_cloud = *input;
     pcl::PointCloud<pcl::PointXYZ>::Ptr downsampled_XYZ(new pcl::PointCloud<pcl::PointXYZ>);
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_f(new pcl::PointCloud<pcl::PointXYZ>);
-    // Change from type sensor_msgs::PointCloud2 to pcl::PointXYZ
+    // Cambio de tipo de variable de sensor_msgs::PointCloud2 a pcl::PointXYZ
     pcl::fromROSMsg(input_cloud, *downsampled_XYZ);
-
-    //Create the SACSegmentation object and set the model and method type
+    // Crea el objeto SACSegmentation y define el model y el tipo de metodo
     pcl::ModelCoefficients::Ptr coefficients(new pcl::ModelCoefficients());
     pcl::PointIndices::Ptr inliers(new pcl::PointIndices());
-    // Create the segmentation object
+    // Crea el objeto SACSegmentation
     pcl::SACSegmentation<pcl::PointXYZ> seg;
-    // Optional
+    // Opcional
     seg.setOptimizeCoefficients(true);
-    // Mandatory
+    // Necesario
     seg.setModelType(pcl::SACMODEL_PLANE);
-    seg.setMethodType(pcl::SAC_RANSAC); //For more info: wikipedia.org/wiki/RANSAC
+    // Más info: wikipedia.org/wiki/RANSAC
+    seg.setMethodType(pcl::SAC_RANSAC);
     seg.setMaxIterations(100);
-    seg.setDistanceThreshold(0.5); //How close a point must be to the model to considered an inlier (default 0.02)
+    // Como de cerca tiene que estar un punto del modelo para considerarlo en línea
+    seg.setDistanceThreshold(distanceThreshold); // (default 0.02)
 
     int i = 0, nr_points = (int)downsampled_XYZ->points.size();
 
-    //Contains the plane point cloud
+    // Contiene la nube de puntos del plano
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_plane(new pcl::PointCloud<pcl::PointXYZ>());
     if (phase == 1)
     {
-        // While 30% [90%] of the original cloud is still there
+        // Mientras el 30% [90%] de la nube original siga aqui
         while (downsampled_XYZ->points.size() > 0.9 * nr_points) // atraque = 0.9 // default = 0.3
         {
-            // Segment the largest planar component from the remaining cloud
+            // Segmenta la mayor componente playa de la nube de puntos restante
             seg.setInputCloud(downsampled_XYZ);
             seg.segment(*inliers, *coefficients);
 
             if (inliers->indices.size() == 0)
             {
-                std::cerr << "Could not estimate a planar model for the given dataset." << std::endl;
+                std::cerr << "No se puede estimar el modelo plano del dataset dado" << std::endl; 
                 break;
             }
-
-            // Extract the planar inliers from the input cloud
+            // Extrae el plano de la nube de puntos de entrada
             pcl::ExtractIndices<pcl::PointXYZ> extract;
             extract.setInputCloud(downsampled_XYZ);
             extract.setIndices(inliers);
             extract.setNegative(false);
-
-            // Get the points associated with the planar surface
+            // Obtiene los puntos asociados con la superficie plana
             extract.filter(*cloud_plane);
-
-            // Remove the planar inliers, extract the rest
+            // Elimina el plano, extrae el resto
             extract.setNegative(true);
             extract.filter(*cloud_f);
             downsampled_XYZ.swap(cloud_f);
             i++;
         }
     }
-
-    // Creating the KdTree object for the search method of the extraction
+    // Crea el objeto KdTree para el método de búsqueda de extracción
     pcl::search::KdTree<pcl::PointXYZ>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZ>);
     tree->setInputCloud(downsampled_XYZ);
 
     std::vector<pcl::PointIndices> cluster_indices;
     pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
-    ec.setClusterTolerance(0.8); // default = 0.02 (2cm)
-    ec.setMinClusterSize(2);     // Mar = 2// Atraque = 30 // default = 100
-    ec.setMaxClusterSize(25000);
+    ec.setClusterTolerance(clusterTolerance); // default = 0.02 (2cm)
+    ec.setMinClusterSize(minClusterSize);     // Mar = 2 // Atraque = 30 // default = 100
+    ec.setMaxClusterSize(maxClusterSize);
     ec.setSearchMethod(tree);
     ec.setInputCloud(downsampled_XYZ);
     ec.extract(cluster_indices);
 
-    ros::NodeHandle nh;
-    //Create a publisher for each cluster
+    // Crea un publicador para cada cluster
     for (int i = 0; i < cluster_indices.size(); ++i)
     {
         std::string topicName = "/cluster" + boost::lexical_cast<std::string>(i);
-
         ros::Publisher pub = n.advertise<sensor_msgs::PointCloud2>(topicName, 1);
-
         pub_vec.push_back(pub);
     }
     int j = 0;
@@ -167,14 +161,11 @@ void EuclideanClusterer::cloud_cb(const boost::shared_ptr<const sensor_msgs::Poi
         cloud_cluster->width = cloud_cluster->points.size();
         cloud_cluster->height = 1;
         cloud_cluster->is_dense = true;
-
-        //Convert the pointcloud to be used in ROS
+        // Convierte la nube de puntos en el tipo de mensaje para ser usado en ROS
         sensor_msgs::PointCloud2::Ptr output(new sensor_msgs::PointCloud2);
         pcl::toROSMsg(*cloud_cluster, *output);
         output->header.frame_id = input_cloud.header.frame_id;
-
         vector_pointclouds.clouds.push_back(*output);
-        // Publish the data
         pub_vec[j].publish(output);
         ++j;
     }

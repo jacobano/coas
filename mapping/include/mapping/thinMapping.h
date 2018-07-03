@@ -1,11 +1,10 @@
 #include <ros/ros.h>
 #include <Eigen/Dense>
-// fast
 #include <Eigen/Core>
 #include <cfloat>
 #include <vector>
 #include <iostream>
-// fast
+
 #include "mapping/vectorVector.h"
 
 class ThinMapping

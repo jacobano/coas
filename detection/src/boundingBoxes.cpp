@@ -53,7 +53,7 @@ void BoundingBoxes::clusters_cb(const detection::vectorPointCloud input)
             resetVariables();
             // Calcula el centroide del cluster
             pcl::compute3DCentroid(*temp_cloud, centroid);
-            // Calcula distancias mácimas del cluster
+            // Calcula distancias máximas del cluster
             calcMaxDistancesCluster(*temp_cloud);
             // Calcula el centro del cluster
             calcCenters();
