@@ -1,7 +1,7 @@
 <launch>
     <!-- Costa: 0 | Atraque: 1 -->
     <arg name="phase" default="0"/>
-
+    
     <node pkg="rosbag" type="play" name="rosbag" args=" --loop --start=40 -r 1 --duration=15 /home/hector/bags/Na/20180425_Pruebas/2018-04-25-12-57-04.bag" required="true"/>
     <!-- /home/hector/bags/Na/20180425_Pruebas/2018-04-25-12-29-19.bag 
          /home/hector/bags/Na/20180425_Pruebas/2018-04-25-12-57-04.bag -->

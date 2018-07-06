@@ -11,8 +11,14 @@ BoundingBoxes::BoundingBoxes()
 
     // Publishers
     pub_boxArray = n.advertise<jsk_recognition_msgs::BoundingBoxArray>("/boundingBoxes", 1);
-    pub_boxRef = n.advertise<jsk_recognition_msgs::BoundingBox>("/box", 1);
     pub_mergeBoxesArray = n.advertise<jsk_recognition_msgs::BoundingBoxArray>("/mergeBoundingBoxes", 1);
+    pub_boxesRef = n.advertise<jsk_recognition_msgs::BoundingBoxArray>("/boxesRef", 1);
+    pub_pathPoste1 = n.advertise<nav_msgs::Path>("/pathPoste1", 1);
+    pub_pathPoste2 = n.advertise<nav_msgs::Path>("/pathPoste2", 1);
+    pub_pathPoste3 = n.advertise<nav_msgs::Path>("/pathPoste3", 1);
+    pub_pathPoste12 = n.advertise<nav_msgs::Path>("/pathPoste12", 1);
+    pub_pathPoste13 = n.advertise<nav_msgs::Path>("/pathPoste13", 1);
+    pub_pathPoste23 = n.advertise<nav_msgs::Path>("/pathPoste23", 1);
 
     loop();
 }
@@ -69,12 +75,48 @@ void BoundingBoxes::params()
         zMaxPoste = 1.5;
         ROS_WARN("Failed to get BoundingBoxes param zMaxPoste: %f", zMaxPoste);
     }
+    if (nparam.getParam("minDistPoste12", minDistPoste12))
+    {
+        ROS_WARN("Got BoundingBoxes param minDistPoste12: %f", minDistPoste12);
+    }
+    else
+    {
+        minDistPoste12 = 4.5;
+        ROS_WARN("Failed to get BoundingBoxes param minDistPoste12: %f", minDistPoste12);
+    }
+    if (nparam.getParam("maxDistPoste12", maxDistPoste12))
+    {
+        ROS_WARN("Got BoundingBoxes param maxDistPoste12: %f", maxDistPoste12);
+    }
+    else
+    {
+        maxDistPoste12 = 5.0;
+        ROS_WARN("Failed to get BoundingBoxes param maxDistPoste12: %f", maxDistPoste12);
+    }
+    if (nparam.getParam("minDistPoste13", minDistPoste13))
+    {
+        ROS_WARN("Got BoundingBoxes param minDistPoste13: %f", minDistPoste13);
+    }
+    else
+    {
+        minDistPoste13 = 12.5;
+        ROS_WARN("Failed to get BoundingBoxes param minDistPoste13: %f", minDistPoste13);
+    }
+    if (nparam.getParam("maxDistPoste13", maxDistPoste13))
+    {
+        ROS_WARN("Got BoundingBoxes param maxDistPoste13: %f", maxDistPoste13);
+    }
+    else
+    {
+        maxDistPoste13 = 13.5;
+        ROS_WARN("Failed to get BoundingBoxes param maxDistPoste13: %f", maxDistPoste13);
+    }
 }
 
 void BoundingBoxes::clusters_cb(const detection::vectorPointCloud input)
 {
     ros::Time begin = ros::Time::now();
-    clusters = input;
+    detection::vectorPointCloud clusters = input;
     if (!clusters.clouds.empty())
     {
         label_box = label_mergeBox = 0;
@@ -103,8 +145,7 @@ void BoundingBoxes::clusters_cb(const detection::vectorPointCloud input)
         // Unifica las boundingBoxes que forman el poligono en una boundingBox
         mergeBoundingBoxes();
     }
-    // std::cout << "[ COAS] " << boxes.boxes.size() << " boxes to " << mergeBoxes.boxes.size() << " in " << ros::Time::now() - begin << " seconds." << std::endl;
-    std::cerr << "[ BBXS] Time: " << ros::Time::now() - begin << std::endl;
+    std::cout << "[ BBXS] Time: " << ros::Time::now() - begin << std::endl;
     std::cout << " - - - - - - - - - - - - - - - - -" << std::endl;
     cleanVariables();
 }
@@ -112,7 +153,7 @@ void BoundingBoxes::clusters_cb(const detection::vectorPointCloud input)
 void BoundingBoxes::resetVariables()
 {
     maxDistX = maxDistY = maxDistZ = xMax = xMin = yMax = yMin = zMax = zMin = centerX = centerY = centerZ = 0;
-    box.header.frame_id = boxes.header.frame_id = mergeBoxes.header.frame_id = "velodyne";
+    box.header.frame_id = boxes.header.frame_id = boxesRef.header.frame_id = mergeBoxes.header.frame_id = "velodyne";
     centroid[0] = centroid[1] = centroid[2] = centroid[3] = 0.0;
 }
 
@@ -121,8 +162,16 @@ void BoundingBoxes::cleanVariables()
     vec_polygon_labels.clear();
     polygon_labels.clear();
     boxes.boxes.clear();
+    boxesRef.boxes.clear();
     mergeBoxes.boxes.clear();
     vec_polygon_labels.clear();
+    pathPoste1.poses.clear();
+    pathPoste2.poses.clear();
+    pathPoste3.poses.clear();
+    pathPoste12.poses.clear();
+    pathPoste13.poses.clear();
+    pathPoste23.poses.clear();
+    cont_postes = 0;
 }
 
 void BoundingBoxes::calcMaxDistancesCluster(const pcl::PointCloud<pcl::PointXYZ> cluster)
@@ -207,11 +256,7 @@ void BoundingBoxes::constructBoundingBoxes(float x, float y, float z, float dimX
         box.dimensions.y = dimY;
         box.dimensions.z = dimZ;
         box.label = label_box;
-        if (xyMinPoste < dimX && dimX < xyMaxPoste && xyMinPoste < dimY && dimY < xyMaxPoste && zMinPoste < dimZ && dimZ < zMaxPoste)
-        {
-            pub_boxRef.publish(box);
-            ROS_WARN("label [%i] xDim: %f - yDim: %f - zDim: %f", label_box, dimX, dimY, dimZ);
-        }
+        checkPostes(dimX, dimY, dimZ);
         boxes.boxes.push_back(box);
         label_box++;
     }
@@ -226,9 +271,105 @@ void BoundingBoxes::constructBoundingBoxes(float x, float y, float z, float dimX
     }
 }
 
+void BoundingBoxes::checkPostes(float xDim, float yDim, float zDim)
+{
+    // Revisa si la boundingBox actual es un poste
+    if (xyMinPoste < xDim && xDim < xyMaxPoste && xyMinPoste < yDim && yDim < xyMaxPoste && zMinPoste < zDim && zDim < zMaxPoste)
+    {
+        // Distancia al poste
+        float dist = dist2Points(0, 0, 0, box.pose.position.x, box.pose.position.y, box.pose.position.z);
+        // ROS_WARN("label [%i] xDim: %f - yDim: %f - zDim: %f - dist: %f - cont_postes: %i", label_box, xDim, yDim, zDim, dist, cont_postes);
+        // Prepara el path
+        std::vector<float> x1, y1, z1;
+        x1.push_back(0.0);
+        y1.push_back(0.0);
+        z1.push_back(0.0);
+        x1.push_back(box.pose.position.x);
+        y1.push_back(box.pose.position.y);
+        z1.push_back(box.pose.position.z);
+        // Construye el path y mete la box de referencia en el array
+        switch (cont_postes)
+        {
+        case 0:
+            pathPoste1 = constructPath(x1, y1, z1, 2);
+            boxesRef.boxes.push_back(box);
+            break;
+        case 1:
+            pathPoste2 = constructPath(x1, y1, z1, 2);
+            boxesRef.boxes.push_back(box);
+            break;
+        case 2:
+            pathPoste3 = constructPath(x1, y1, z1, 2);
+            boxesRef.boxes.push_back(box);
+            break;
+        }
+        // Si hay más de un poste detectado
+        if (boxesRef.boxes.size() > 1)
+        {
+            int cont_entrePostes = 0;
+            // Calcula la distancia entre todos los postes
+            for (int i = 0; i < boxesRef.boxes.size(); i++)
+            {
+                for (int j = i + 1; j < boxesRef.boxes.size(); j++)
+                {
+                    float dist = dist2Points(boxesRef.boxes.at(i).pose.position.x, boxesRef.boxes.at(i).pose.position.y, boxesRef.boxes.at(i).pose.position.z,
+                                             boxesRef.boxes.at(j).pose.position.x, boxesRef.boxes.at(j).pose.position.y, boxesRef.boxes.at(j).pose.position.z);
+                    std::vector<float> x1, y1, z1;
+                    x1.push_back(boxesRef.boxes.at(i).pose.position.x);
+                    y1.push_back(boxesRef.boxes.at(i).pose.position.y);
+                    z1.push_back(boxesRef.boxes.at(i).pose.position.z);
+                    x1.push_back(boxesRef.boxes.at(j).pose.position.x);
+                    y1.push_back(boxesRef.boxes.at(j).pose.position.y);
+                    z1.push_back(boxesRef.boxes.at(j).pose.position.z);
+                    // Si las distancias corresponden a las distancias buscadas
+                    if ((minDistPoste12 < dist && dist < maxDistPoste12) || (minDistPoste13 < dist && dist < maxDistPoste13))
+                    {
+                        // Construye el path para representar distancias entre postes
+                        switch (cont_entrePostes)
+                        {
+                        case 0:
+                            pathPoste12 = constructPath(x1, y1, z1, 2);
+                        case 1:
+                            pathPoste13 = constructPath(x1, y1, z1, 2);
+                        case 2:
+                            pathPoste23 = constructPath(x1, y1, z1, 2);
+                        }
+                    }
+                    cont_entrePostes++;
+                }
+            }
+        }
+        cont_postes++;
+        // Publicaciones
+        pub_boxesRef.publish(boxesRef);
+        pub_pathPoste1.publish(pathPoste1);
+        pub_pathPoste2.publish(pathPoste2);
+        pub_pathPoste3.publish(pathPoste3);
+        pub_pathPoste12.publish(pathPoste12);
+        pub_pathPoste13.publish(pathPoste13);
+        pub_pathPoste23.publish(pathPoste23);
+    }
+}
+
+nav_msgs::Path BoundingBoxes::constructPath(std::vector<float> x, std::vector<float> y, std::vector<float> z, int length)
+{
+    nav_msgs::Path msg;
+    std::vector<geometry_msgs::PoseStamped> poses(length);
+    msg.header.frame_id = "velodyne";
+    for (int i = 0; i < length; i++)
+    {
+        poses.at(i).pose.position.x = x[i];
+        poses.at(i).pose.position.y = y[i];
+        poses.at(i).pose.position.z = z[i];
+    }
+    msg.poses = poses;
+    return msg;
+}
+
 void BoundingBoxes::calcVecPolygons()
 {
     float dist;
+    bool repeat, found;
     // Compara todas las distancias entre boxes
     for (int i = 0; i < boxes.boxes.size(); i++)
     {
@@ -352,7 +493,7 @@ void BoundingBoxes::mergeBoundingBoxes()
         // Calcular centroide de esta nube de puntos unica
         Eigen::Vector4f centroid_polygon_cloud;
         pcl::compute3DCentroid(polygon_cloud_temp, centroid_polygon_cloud);
-        // Caluclar dimensiones para la nueba boundingBox con las distancias maximas.
+        // Caluclar dimensiones para la nueva boundingBox con las distancias maximas.
         maxDistXpol = maxDistYpol = maxDistZpol = 0;
         for (int k = 0; k < polygon_cloud_temp.size(); k++)
         {
@@ -369,7 +510,7 @@ void BoundingBoxes::mergeBoundingBoxes()
                 maxDistZpol = fabs(centroid_polygon_cloud[2] - boxes.boxes[polygon_labels[k]].pose.position.z) + boxes.boxes[polygon_labels[k]].dimensions.z;
             }
         }
-        // Crea la boundingBox que engloba
+        // Crea la boundingBox que engloba las demás
         constructBoundingBoxes(centroid_polygon_cloud[0], centroid_polygon_cloud[1], centroid_polygon_cloud[2], maxDistXpol, maxDistYpol, maxDistZpol, true);
     }
     pub_mergeBoxesArray.publish(mergeBoxes);
