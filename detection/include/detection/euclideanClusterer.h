@@ -24,7 +24,7 @@ private:
   ros::NodeHandle n;
 
   // Subscribers
-  ros::Subscriber cloud_sub;
+  ros::Subscriber velodyne_sub;
 
   // Publishers
   ros::Publisher pub_pointclouds;

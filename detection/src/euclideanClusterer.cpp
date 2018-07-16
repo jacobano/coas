@@ -1,5 +1,4 @@
 #include <detection/euclideanClusterer.h>
-#include <detection/boundingBoxes.h>
 #include "detection/vectorPointCloud.h"
 
 #include <pcl_conversions/pcl_conversions.h>
@@ -15,7 +14,7 @@ EuclideanClusterer::EuclideanClusterer()
     params();
 
     // Subscriptions
-    ros::Subscriber velodyne_sub = n.subscribe("/map_filtered2", 1, &EuclideanClusterer::cloud_cb, this);
+    velodyne_sub = n.subscribe("/map_filtered2", 1, &EuclideanClusterer::cloud_cb, this);
 
     // Publishers
     pub_pointclouds = n.advertise<detection::vectorPointCloud>("/vector_pointclouds", 1);
