@@ -49,6 +49,7 @@
 #include "mapping/vectorInt.h"
 #include "mapping/vectorVector.h"
 #include <std_msgs/Int32.h>
+#include <std_msgs/Int8.h>
 
 // TEST
 // C/C++ includes
@@ -70,10 +71,11 @@ typedef vector<VI> VVI;
 typedef vector<VVI> VVVI;
 
 void exploration(const sensor_msgs::PointCloud2 &nube3d_uav);
+void receiveSensor(const sensor_msgs::PointCloud2 &cloud);
 int is_in_map(int i, int j);
 int readV(const VVI &V, int i, int j);
 void save_matrix(char *filename, const VVI &M);
-void params();
+void phase_cb(const std_msgs::Int8 phaseMode);
 
 // Publisher
 ros::Publisher pub_filtered_map, pub_filtered_map2, pub_matrix;
@@ -92,18 +94,17 @@ int tamano, tamano1;
 
 // Variables related to the Map
 //int range_sea=100;
-int range_dock;
+int range_dock = 10;
 int range_sea = 100;
 float cell_div = 2; //número de celdas por 1 metro
 
-int rang;
-int rows;
-int columns;
+int rang = range_dock * cell_div;;
+int rows = 2 * rang + 1;;
+int columns = 2 * rang + 1;;
 double cloud_thres_distance = 0.5; //Meters
 
-int phase;
-//phase=0 --> mar abierto
-//phase=1 --> atraque
+// Atraque: 1 | Puerto: 2 | Costa: 3
+int phase = 1;
 
 // Obstacles
 int rows_obs = 20;
@@ -121,9 +122,53 @@ const std_msgs::Header msg_header;
 mapping::vectorInt columns_mat;
 mapping::vectorVector rows_mat;
 
+int main(int argc, char **argv)
+{
+	ros::init(argc, argv, "ICP3D");
+	ros::NodeHandle n;
+
+	log_pos = fopen("log_pos.txt", "w");
+	log_icp = fopen("log_icp.txt", "w");
+	log_times = fopen("log_times.txt", "w");
+	ros::Subscriber sub_phase = n.subscribe("/phase", 1, phase_cb);
+	ros::Subscriber sub = n.subscribe("/velodyne_points", 1, receiveSensor);
+	//pub_filtered_map = n.advertise<sensor_msgs::PointCloud>("/map_filtered", 1);
+	pub_filtered_map2 = n.advertise<sensor_msgs::PointCloud2>("/map_filtered2", 1);
+	pub_matrix = n.advertise<mapping::vectorVector>("/v_map", 1);
+
+	ros::spin();
+
+	return 0;
+}
+
+void phase_cb(const std_msgs::Int8 phaseMode)
+{
+	ROS_WARN("phase: %i", phase);
+	phase = phaseMode.data;
+	ROS_WARN("phase: %i", phase);
+	switch (phase)
+	{
+	// Atraque
+	case 1:
+		range_dock = 10;
+		break;
+	// Puerto
+	case 2:
+		range_dock = 10;
+		break;
+	// Mar abierto
+	case 3:
+		range_dock = 100;
+		break;
+	}
+	rang = range_dock * cell_div;
+	rows = 2 * rang + 1;
+	columns = 2 * rang + 1;
+}
+
 void receiveSensor(const sensor_msgs::PointCloud2 &cloud)
 {
-	//ROS_INFO("Recibido \n");
+	// ROS_INFO("Recibido \n");
 	//sensor_msgs::PointCloud2 data_cloud = cloud;  // Se puede prescindir de data_cloud cuando funcione bien con pcl.
 	ros::Time begin = ros::Time::now();
 	float runningTime;
@@ -165,7 +210,7 @@ void receiveSensor(const sensor_msgs::PointCloud2 &cloud)
 		clock_gettime(CLOCK_MONOTONIC, &t0_1);
 
 		//JAC: Mar abierto.
-		if (phase == 0)
+		if (phase == 3)
 		{
 			for (i = 0; i < tamano - 1; i++)
 			{
@@ -187,8 +232,8 @@ void receiveSensor(const sensor_msgs::PointCloud2 &cloud)
 				}
 			}
 		}
-		//JAC: Atraque.
-		if (phase == 1)
+		//JAC: Atraque y puerto. ----------------------------------------------
+		if (phase == 2 || phase == 1)
 		{
 			for (i = 0; i < tamano - 1; i++)
 			{
@@ -337,51 +382,6 @@ void receiveSensor(const sensor_msgs::PointCloud2 &cloud)
 
 	} // if patron_vacio
 	std::cout << "[ MAPP] Time: " << ros::Time::now() - begin << std::endl;
-}
-
-int main(int argc, char **argv)
-{
-	ros::init(argc, argv, "ICP3D");
-	ros::NodeHandle n;
-
-	params();
-
-	log_pos = fopen("log_pos.txt", "w");
-	log_icp = fopen("log_icp.txt", "w");
-	log_times = fopen("log_times.txt", "w");
-
-	ros::Subscriber sub = n.subscribe("/velodyne_points", 1, receiveSensor);
-	//pub_filtered_map = n.advertise<sensor_msgs::PointCloud>("/map_filtered", 1);
-	pub_filtered_map2 = n.advertise<sensor_msgs::PointCloud2>("/map_filtered2", 1);
-	pub_matrix = n.advertise<mapping::vectorVector>("/v_map", 1);
-
-	ros::spin();
-
-	return 0;
-}
-
-void params()
-{
-	ros::NodeHandle nparam("~");
-	if (nparam.getParam("phase", phase))
-	{
-		ROS_WARN("Got param phase: %i", phase);
-		if (phase == 0)
-		{
-			range_dock = 100;
-		}
-		if (phase == 1)
-		{
-			range_dock = 10;
-		}
-		rang = range_dock * cell_div;
-		rows = 2 * rang + 1;
-		columns = 2 * rang + 1;
-	}
-	else
-	{
-		ROS_WARN("Failed to get param phase");
-	}
 }
 
 //BUILD THE MAP

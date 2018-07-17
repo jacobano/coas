@@ -22,6 +22,7 @@ public:
 private:
   // Callbacks
   void clusters_cb(const detection::vectorPointCloud input);
+  void phase_cb(const std_msgs::Int8 phaseMode);
   
   // 
   void params();
@@ -42,7 +43,7 @@ private:
   ros::NodeHandle n;
 
   // Subscribers
-  ros::Subscriber sub_vector_pointclouds;
+  ros::Subscriber sub_vector_pointclouds, sub_phase;
 
   // Publishers
   ros::Publisher pub_boxArray, pub_mergeBoxesArray, pub_boxesRef, pub_pathPoste1, pub_pathPoste2, pub_pathPoste3, pub_pathPoste12, pub_pathPoste13, pub_pathPoste23;
@@ -59,6 +60,6 @@ private:
   std::vector<int> polygon_labels;
   std::vector<std::vector<int>> vec_polygon_labels;
   // Params 
-  int phase;
+  int phase; // 1 Atraque - 2 Puerto - 3 Mar abierto
   float close_dist, xyMinPoste, xyMaxPoste, zMinPoste, zMaxPoste, minDistPoste12, maxDistPoste12, minDistPoste13, maxDistPoste13;
 };

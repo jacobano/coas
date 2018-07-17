@@ -1,40 +1,11 @@
 <launch>
-    <!-- Costa: 0 | Atraque: 1 -->
-    <arg name="phase" default="1"/>
-
-    <node pkg="rosbag" type="play" name="rosbag" args="-l /home/hector/bags/Bags_Velodyne/2017-02-03-11-42-21.bag" required="true"/>
-    <node pkg="mapping" type="mapping" name="filterer_map" output="screen" required="true">
-        <param name="phase" value="$(arg phase)" />
-    </node>
-    <!-- <node pkg="mapping" type="thinMapping_node" name="thinMapping_node" output="screen" required="true">
-        <param name="phase" value="$(arg phase)"/>
-    </node> -->
+    <!-- Atraque: 1 | Puerto: 2 | Costa: 3 -->
+    <node pkg="rostopic" type="rostopic" name="phase" args="pub /phase std_msgs/Int8 1"/>
+    
+    <node pkg="rosbag" type="play" name="rosbag" args="-l -r 0.5 -s 80 -u 10 /home/hector/bags/testpatio/2018-07-11-10-29-33.bag" required="true"/>
     <node pkg="rviz" type="rviz" name="rviz" args="-d /home/hector/coas_ws/src/coas/detection/rviz/atraque.rviz" required="true"/>
-    <node pkg="detection" type="euclideanClusterer_node" name="euclideanClusterer_node" output="screen" required="true">
-        <!-- Costa: 0.5 | Atraque: 0.5 | Default: 0.02 -->
-        <param name="distanceThreshold" value="0.5"/>
-        <!-- Costa: 0.8 | Atraque: 0.8 | Default: 0.02 -->
-        <param name="clusterTolerance" value="0.8"/>
-        <!-- Costa: 2 | Atraque: 30 | Default: 100 -->
-        <param name="minClusterSize" value="30"/>
-        <!-- Costa: 25000 | Atraque: 25000 | Default: 25000 -->
-        <param name="maxClusterSize" value="25000"/>
-        <param name="phase" value="$(arg phase)"/>
-    </node>
-    <node pkg="detection" type="boundingBoxes_node" name="boundingBoxes_node" output="screen" required="true">
-        <!-- Distancia para asumir que dos boundingBoxes son una (Default: 5.0) -->
-        <param name="close_dist" value="1.0"/>
-        <!-- Para afinar los postes -->
-        <param name="xyMinPoste" value="0.3"/>
-        <param name="xyMaxPoste" value="1.6"/>
-        <param name="zMinPoste" value="0.5"/>
-        <param name="zMaxPoste" value="2.0"/>
-        <param name="minDistPoste12" value="0.0"/>
-        <param name="maxDistPoste12" value="20.0"/>
-        <param name="minDistPoste13" value="15.0"/>
-        <param name="maxDistPoste13" value="17.0"/>
-    </node>
-    <node pkg="tracking" type="tracking_node" name="tracking_node" required="true">
-        <param name="phase" value="$(arg phase)"/>
-    </node>
+    
+    <node pkg="mapping" type="mapping" name="filterer_map" output="screen" required="true"/>
+    <node pkg="detection" type="euclideanClusterer_node" name="euclideanClusterer_node" output="screen" required="true"/>
+    <node pkg="detection" type="boundingBoxes_node" name="boundingBoxes_node" output="screen" required="true"/>
 </launch>

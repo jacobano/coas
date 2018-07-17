@@ -1,12 +1,6 @@
 #include <detection/euclideanClusterer.h>
 #include "detection/vectorPointCloud.h"
 
-#include <pcl_conversions/pcl_conversions.h>
-#include <pcl/filters/extract_indices.h>
-#include <pcl/segmentation/sac_segmentation.h>
-#include <pcl/segmentation/extract_clusters.h>
-#include <pcl/common/centroid.h>
-
 EuclideanClusterer::EuclideanClusterer()
 {
     n = ros::NodeHandle();
@@ -15,6 +9,8 @@ EuclideanClusterer::EuclideanClusterer()
 
     // Subscriptions
     velodyne_sub = n.subscribe("/map_filtered2", 1, &EuclideanClusterer::cloud_cb, this);
+    // phase = 1;
+    sub_phase = n.subscribe("/phase", 1, &EuclideanClusterer::phase_cb, this);
 
     // Publishers
     pub_pointclouds = n.advertise<detection::vectorPointCloud>("/vector_pointclouds", 1);
@@ -25,53 +21,82 @@ EuclideanClusterer::~EuclideanClusterer()
 {
 }
 
+void EuclideanClusterer::phase_cb(const std_msgs::Int8 phaseMode)
+{
+    phase = phaseMode.data;
+    switch (phase)
+    {
+    // Atraque
+    case 1:
+        distanceThreshold = 0.3;
+        clusterTolerance = 0.4;
+        minClusterSize = 30;
+        maxClusterSize = 500;
+        break;
+    // Puerto
+    case 2:
+        distanceThreshold = 0.5;
+        clusterTolerance = 0.8;
+        minClusterSize = 30;
+        maxClusterSize = 25000;
+        break;
+    // Mar abierto
+    case 3:
+        distanceThreshold = 0.5;
+        clusterTolerance = 0.8;
+        minClusterSize = 2;
+        maxClusterSize = 25000;
+        break;
+    }
+}
+
 void EuclideanClusterer::params()
 {
     ros::NodeHandle nparam("~");
-    if (nparam.getParam("distanceThreshold", distanceThreshold))
-    {
-        ROS_WARN("Got EuclideanClusterer param distanceThreshold: %f", distanceThreshold);
-    }
-    else
-    {
-        distanceThreshold = 0.02;
-        ROS_WARN("Failed to get EuclideanClusterer param distanceThreshold: %f", distanceThreshold);
-    }
-    if (nparam.getParam("clusterTolerance", clusterTolerance))
-    {
-        ROS_WARN("Got EuclideanClusterer param param clusterTolerance: %f", clusterTolerance);
-    }
-    else
-    {
-        clusterTolerance = 0.02;
-        ROS_WARN("Failed to get EuclideanClusterer param clusterTolerance: %f", clusterTolerance);
-    }
-    if (nparam.getParam("minClusterSize", minClusterSize))
-    {
-        ROS_WARN("Got EuclideanClusterer param minClusterSize: %f", minClusterSize);
-    }
-    else
-    {
-        minClusterSize = 100;
-        ROS_WARN("Failed to get EuclideanClusterer param minClusterSize: %f", minClusterSize);
-    }
-    if (nparam.getParam("maxClusterSize", maxClusterSize))
-    {
-        ROS_WARN("Got EuclideanClusterer param maxClusterSize: %f", maxClusterSize);
-    }
-    else
-    {
-        maxClusterSize = 25000;
-        ROS_WARN("Failed to get EuclideanClusterer param maxClusterSize: %f", maxClusterSize);
-    }
-    if (nparam.getParam("phase", phase))
-    {
-        ROS_WARN("Got EuclideanClusterer param phase: %f", phase);
-    }
-    else
-    {
-        ROS_WARN("Failed to get EuclideanClusterer param phase: %f", phase);
-    }
+    // if (nparam.getParam("distanceThreshold", distanceThreshold))
+    // {
+    //     ROS_WARN("Got EuclideanClusterer param distanceThreshold: %f", distanceThreshold);
+    // }
+    // else
+    // {
+    //     distanceThreshold = 0.02;
+    //     ROS_WARN("Failed to get EuclideanClusterer param distanceThreshold: %f", distanceThreshold);
+    // }
+    // if (nparam.getParam("clusterTolerance", clusterTolerance))
+    // {
+    //     ROS_WARN("Got EuclideanClusterer param param clusterTolerance: %f", clusterTolerance);
+    // }
+    // else
+    // {
+    //     clusterTolerance = 0.02;
+    //     ROS_WARN("Failed to get EuclideanClusterer param clusterTolerance: %f", clusterTolerance);
+    // }
+    // if (nparam.getParam("minClusterSize", minClusterSize))
+    // {
+    //     ROS_WARN("Got EuclideanClusterer param minClusterSize: %f", minClusterSize);
+    // }
+    // else
+    // {
+    //     minClusterSize = 100;
+    //     ROS_WARN("Failed to get EuclideanClusterer param minClusterSize: %f", minClusterSize);
+    // }
+    // if (nparam.getParam("maxClusterSize", maxClusterSize))
+    // {
+    //     ROS_WARN("Got EuclideanClusterer param maxClusterSize: %f", maxClusterSize);
+    // }
+    // else
+    // {
+    //     maxClusterSize = 25000;
+    //     ROS_WARN("Failed to get EuclideanClusterer param maxClusterSize: %f", maxClusterSize);
+    // }
+    // if (nparam.getParam("phase", phase))
+    // {
+    //     ROS_WARN("Got EuclideanClusterer param phase: %f", phase);
+    // }
+    // else
+    // {
+    //     ROS_WARN("Failed to get EuclideanClusterer param phase: %f", phase);
+    // }
 }
 
 void EuclideanClusterer::cloud_cb(const boost::shared_ptr<const sensor_msgs::PointCloud2> &input)
@@ -102,10 +127,16 @@ void EuclideanClusterer::cloud_cb(const boost::shared_ptr<const sensor_msgs::Poi
 
     // Contiene la nube de puntos del plano
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_plane(new pcl::PointCloud<pcl::PointXYZ>());
-    if (phase == 1)
+    if (phase == 1 || phase == 2)
     {
+        float percentage;
+        if (phase == 1)
+            percentage = 0.3;
+        if (phase == 2)
+            percentage = 0.9;
+            
         // Mientras el 30% [90%] de la nube original siga aqui
-        while (downsampled_XYZ->points.size() > 0.9 * nr_points) // atraque = 0.9 // default = 0.3
+        while (downsampled_XYZ->points.size() > percentage * nr_points) // atraque = 0.9 // default = 0.3
         {
             // Segmenta la mayor componente playa de la nube de puntos restante
             seg.setInputCloud(downsampled_XYZ);
@@ -113,7 +144,7 @@ void EuclideanClusterer::cloud_cb(const boost::shared_ptr<const sensor_msgs::Poi
 
             if (inliers->indices.size() == 0)
             {
-                std::cerr << "No se puede estimar el modelo plano del dataset dado" << std::endl; 
+                std::cerr << "No se puede estimar el modelo plano del dataset dado" << std::endl;
                 break;
             }
             // Extrae el plano de la nube de puntos de entrada

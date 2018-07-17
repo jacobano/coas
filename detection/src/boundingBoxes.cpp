@@ -4,10 +4,11 @@ BoundingBoxes::BoundingBoxes()
 {
     n = ros::NodeHandle();
 
-    params();
+    // params();
 
     // Subscriptions
     sub_vector_pointclouds = n.subscribe("/vector_pointclouds", 1, &BoundingBoxes::clusters_cb, this);
+    sub_phase = n.subscribe("/phase", 1, &BoundingBoxes::phase_cb, this);
 
     // Publishers
     pub_boxArray = n.advertise<jsk_recognition_msgs::BoundingBoxArray>("/boundingBoxes", 1);
@@ -27,6 +28,50 @@ BoundingBoxes::~BoundingBoxes()
 {
 }
 
+void BoundingBoxes::phase_cb(const std_msgs::Int8 phaseMode)
+{
+    phase = phaseMode.data;
+    switch (phase)
+    {
+    // Atraque
+    case 1:
+        close_dist = 1.0;
+        xyMinPoste = 0.3;
+        xyMaxPoste = 0.7;
+        zMinPoste = 1.0;
+        zMaxPoste = 2.0;
+        minDistPoste12 = 3.5;
+        maxDistPoste12 = 4.5;
+        minDistPoste13 = 9.0;
+        maxDistPoste13 = 10.0;
+        break;
+    // Puerto
+    case 2:
+        close_dist = 1.0;
+        xyMinPoste = 0.3;
+        xyMaxPoste = 1.6;
+        zMinPoste = 0.5;
+        zMaxPoste = 2.0;
+        minDistPoste12 = 0.0;
+        maxDistPoste12 = 20.0;
+        minDistPoste13 = 15.0;
+        maxDistPoste13 = 17.0;
+        break;
+    // Mar abierto
+    case 3:
+        close_dist = 5.0;
+        xyMinPoste = 0.0;
+        xyMaxPoste = 0.0;
+        zMinPoste = 0.0;
+        zMaxPoste = 0.0;
+        minDistPoste12 = 0.0;
+        maxDistPoste12 = 0.0;
+        minDistPoste13 = 0.0;
+        maxDistPoste13 = 0.0;
+        break;
+    }
+}
+
 void BoundingBoxes::clusters_cb(const detection::vectorPointCloud input)
 {
     ros::Time begin = ros::Time::now();
@@ -34,7 +79,7 @@ void BoundingBoxes::clusters_cb(const detection::vectorPointCloud input)
     if (!clusters.clouds.empty())
     {
         label_box = label_mergeBox = 0;
-        ROS_WARN("clusters: %i", clusters.clouds.size());
+        // ROS_WARN("clusters: %i", clusters.clouds.size());
         // Trabaja con cada uno de los clusters
         for (int i = 0; i < clusters.clouds.size(); i++)
         {
@@ -433,88 +478,88 @@ void BoundingBoxes::mergeBoundingBoxes()
 
 void BoundingBoxes::params()
 {
-    ros::NodeHandle nparam("~");
-    if (nparam.getParam("close_dist", close_dist))
-    {
-        ROS_WARN("Got BoundingBoxes param close_dist: %f", close_dist);
-    }
-    else
-    {
-        close_dist = 5.0;
-        ROS_WARN("Failed to get BoundingBoxes param close_dist: %f", close_dist);
-    }
-    if (nparam.getParam("xyMinPoste", xyMinPoste))
-    {
-        ROS_WARN("Got BoundingBoxes param xyMinPoste: %f", xyMinPoste);
-    }
-    else
-    {
-        xyMinPoste = 0.2;
-        ROS_WARN("Failed to get BoundingBoxes param xyMinPoste: %f", xyMinPoste);
-    }
-    if (nparam.getParam("xyMaxPoste", xyMaxPoste))
-    {
-        ROS_WARN("Got BoundingBoxes param xyMaxPoste: %f", xyMaxPoste);
-    }
-    else
-    {
-        xyMaxPoste = 0.8;
-        ROS_WARN("Failed to get BoundingBoxes param xyMaxPoste: %f", xyMaxPoste);
-    }
-    if (nparam.getParam("zMinPoste", zMinPoste))
-    {
-        ROS_WARN("Got BoundingBoxes param zMinPoste: %f", zMinPoste);
-    }
-    else
-    {
-        zMinPoste = 0.5;
-        ROS_WARN("Failed to get BoundingBoxes param zMinPoste: %f", zMinPoste);
-    }
-    if (nparam.getParam("zMaxPoste", zMaxPoste))
-    {
-        ROS_WARN("Got BoundingBoxes param zMaxPoste: %f", zMaxPoste);
-    }
-    else
-    {
-        zMaxPoste = 1.5;
-        ROS_WARN("Failed to get BoundingBoxes param zMaxPoste: %f", zMaxPoste);
-    }
-    if (nparam.getParam("minDistPoste12", minDistPoste12))
-    {
-        ROS_WARN("Got BoundingBoxes param minDistPoste12: %f", minDistPoste12);
-    }
-    else
-    {
-        minDistPoste12 = 4.5;
-        ROS_WARN("Failed to get BoundingBoxes param minDistPoste12: %f", minDistPoste12);
-    }
-    if (nparam.getParam("maxDistPoste12", maxDistPoste12))
-    {
-        ROS_WARN("Got BoundingBoxes param maxDistPoste12: %f", maxDistPoste12);
-    }
-    else
-    {
-        maxDistPoste12 = 5.0;
-        ROS_WARN("Failed to get BoundingBoxes param maxDistPoste12: %f", maxDistPoste12);
-    }
-    if (nparam.getParam("minDistPoste13", minDistPoste13))
-    {
-        ROS_WARN("Got BoundingBoxes param minDistPoste13: %f", minDistPoste13);
-    }
-    else
-    {
-        minDistPoste13 = 12.5;
-        ROS_WARN("Failed to get BoundingBoxes param minDistPoste13: %f", minDistPoste13);
-    }
-    if (nparam.getParam("maxDistPoste13", maxDistPoste13))
-    {
-        ROS_WARN("Got BoundingBoxes param maxDistPoste13: %f", maxDistPoste13);
-    }
-    else
-    {
-        maxDistPoste13 = 13.5;
-        ROS_WARN("Failed to get BoundingBoxes param maxDistPoste13: %f", maxDistPoste13);
-    }
+    // ros::NodeHandle nparam("~");
+    // if (nparam.getParam("close_dist", close_dist))
+    // {
+    //     ROS_WARN("Got BoundingBoxes param close_dist: %f", close_dist);
+    // }
+    // else
+    // {
+    //     close_dist = 5.0;
+    //     ROS_WARN("Failed to get BoundingBoxes param close_dist: %f", close_dist);
+    // }
+    // if (nparam.getParam("xyMinPoste", xyMinPoste))
+    // {
+    //     ROS_WARN("Got BoundingBoxes param xyMinPoste: %f", xyMinPoste);
+    // }
+    // else
+    // {
+    //     xyMinPoste = 0.2;
+    //     ROS_WARN("Failed to get BoundingBoxes param xyMinPoste: %f", xyMinPoste);
+    // }
+    // if (nparam.getParam("xyMaxPoste", xyMaxPoste))
+    // {
+    //     ROS_WARN("Got BoundingBoxes param xyMaxPoste: %f", xyMaxPoste);
+    // }
+    // else
+    // {
+    //     xyMaxPoste = 0.8;
+    //     ROS_WARN("Failed to get BoundingBoxes param xyMaxPoste: %f", xyMaxPoste);
+    // }
+    // if (nparam.getParam("zMinPoste", zMinPoste))
+    // {
+    //     ROS_WARN("Got BoundingBoxes param zMinPoste: %f", zMinPoste);
+    // }
+    // else
+    // {
+    //     zMinPoste = 0.5;
+    //     ROS_WARN("Failed to get BoundingBoxes param zMinPoste: %f", zMinPoste);
+    // }
+    // if (nparam.getParam("zMaxPoste", zMaxPoste))
+    // {
+    //     ROS_WARN("Got BoundingBoxes param zMaxPoste: %f", zMaxPoste);
+    // }
+    // else
+    // {
+    //     zMaxPoste = 1.5;
+    //     ROS_WARN("Failed to get BoundingBoxes param zMaxPoste: %f", zMaxPoste);
+    // }
+    // if (nparam.getParam("minDistPoste12", minDistPoste12))
+    // {
+    //     ROS_WARN("Got BoundingBoxes param minDistPoste12: %f", minDistPoste12);
+    // }
+    // else
+    // {
+    //     minDistPoste12 = 4.5;
+    //     ROS_WARN("Failed to get BoundingBoxes param minDistPoste12: %f", minDistPoste12);
+    // }
+    // if (nparam.getParam("maxDistPoste12", maxDistPoste12))
+    // {
+    //     ROS_WARN("Got BoundingBoxes param maxDistPoste12: %f", maxDistPoste12);
+    // }
+    // else
+    // {
+    //     maxDistPoste12 = 5.0;
+    //     ROS_WARN("Failed to get BoundingBoxes param maxDistPoste12: %f", maxDistPoste12);
+    // }
+    // if (nparam.getParam("minDistPoste13", minDistPoste13))
+    // {
+    //     ROS_WARN("Got BoundingBoxes param minDistPoste13: %f", minDistPoste13);
+    // }
+    // else
+    // {
+    //     minDistPoste13 = 12.5;
+    //     ROS_WARN("Failed to get BoundingBoxes param minDistPoste13: %f", minDistPoste13);
+    // }
+    // if (nparam.getParam("maxDistPoste13", maxDistPoste13))
+    // {
+    //     ROS_WARN("Got BoundingBoxes param maxDistPoste13: %f", maxDistPoste13);
+    // }
+    // else
+    // {
+    //     maxDistPoste13 = 13.5;
+    //     ROS_WARN("Failed to get BoundingBoxes param maxDistPoste13: %f", maxDistPoste13);
+    // }
 }
 
 void BoundingBoxes::loop()

@@ -1,0 +1,34 @@
+<launch>
+    <!-- Atraque: 1 | Puerto: 2 | Costa: 3 -->
+    <node pkg="rostopic" type="rostopic" name="phase" args="pub /phase std_msgs/Int8 3"/>
+    
+    <node pkg="rviz" type="rviz" name="rviz" args="-d /home/hector/coas_ws/src/coas/detection/rviz/mar.rviz" required="true"/>
+    <node pkg="rosbag" type="play" name="rosbag" args=" --loop --start=40 -r 1 --duration=15 /home/hector/bags/Na/20180425_Pruebas/2018-04-25-12-57-04.bag" required="true"/>
+    
+
+    <node pkg="mapping" type="mapping" name="filterer_map" output="screen" required="true"/>
+    <node pkg="detection" type="euclideanClusterer_node" name="euclideanClusterer_node" output="screen" required="true"/>
+    <node pkg="detection" type="boundingBoxes_node" name="boundingBoxes_node" output="screen" required="true"/>
+    <node pkg="detection" type="volexFilter_node" name="volexFilter_node" required="true"/>
+    
+    <!-- <arg name="phase" default="0"/> -->
+    
+    <!-- <node pkg="mapping" type="thinMapping_node" name="thinMapping_node" output="screen" required="true">
+        <param name="phase" value="$(arg phase)"/>
+    </node> -->
+    
+    <!-- <node pkg="tracking" type="tracking_node" name="tracking_node" required="true">
+        <param name="phase" value="$(arg phase)"/>
+    </node> -->
+
+    <node pkg="octomap_server" type="octomap_server_node" name="octomap_server">
+        <param name="resolution" value="0.1" />
+        <param name="frame_id" type="string" value="velodyne" />
+        <!-- maximum range to integrate (speedup!) -->
+        <param name="sensor_model/max_range" value="100.0" />
+        <!-- data source to integrate (PointCloud2) -->
+        <remap from="cloud_in" to="/volexFilterPoints" />
+        <!-- Whether topics are published latched or only once per change. For maximum performance when building a map (with frequent updates), set to false. When set to true, on every map change  			     all topics and visualizations will be created.  -->
+        <remap from="latch" to="true" />
+    </node>
+</launch>
