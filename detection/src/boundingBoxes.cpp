@@ -79,7 +79,6 @@ void BoundingBoxes::clusters_cb(const detection::vectorPointCloud input)
     if (!clusters.clouds.empty())
     {
         label_box = label_mergeBox = 0;
-        // ROS_WARN("clusters: %i", clusters.clouds.size());
         // Trabaja con cada uno de los clusters
         for (int i = 0; i < clusters.clouds.size(); i++)
         {

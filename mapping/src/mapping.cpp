@@ -51,38 +51,18 @@
 #include <std_msgs/Int32.h>
 #include <std_msgs/Int8.h>
 
-// TEST
-// C/C++ includes
-#include <cfloat>
-#include <vector>
-#include <iostream>
-
-//Eigen includes
-#include <Eigen/Core>
-
-double _bin_size = 1;
-std::vector<Eigen::Vector3i> voxel_traversal(Eigen::Vector3d ray_start, Eigen::Vector3d ray_end);
-// TEST
-
 using namespace std; //Prueba
 
-typedef vector<int> VI;
+typedef vector<float> VI;
 typedef vector<VI> VVI;
 typedef vector<VVI> VVVI;
-
-typedef vector<float> Vnew;
-typedef vector<Vnew> VVnew;
-typedef vector<VVnew> VVVnew;
-
-typedef vector<vector<vector<float>>> VVV;
 
 void exploration(const sensor_msgs::PointCloud2 &nube3d_uav);
 void receiveSensor(const sensor_msgs::PointCloud2 &cloud);
 int is_in_map(int i, int j);
-//¡ int readV(const VVI &V, int i, int j);
-int readV(const VVV &V, int i, int j);
-void save_matrix(char *filename, const VVVnew &M);
-void save_matrix3d(char *fileName, const vector<vector<vector<float>>> &m, bool vel);
+int readV(const VVVI &V, int i, int j);
+void save_matrix(char *filename, const VVVI &M);
+void save_matrix3d(char *fileName, const VVVI &m, bool vel);
 void phase_cb(const std_msgs::Int8 phaseMode);
 
 // Publisher
@@ -174,10 +154,10 @@ void receiveSensor(const sensor_msgs::PointCloud2 &cloud)
 	float runningTime;
 
 	// Variables to detect obstacle
-	VVVnew obstacles_left(rows_obs, VVnew(columns_obs, Vnew(2)));
-	VVVnew obstacles_right(rows_obs, VVnew(columns_obs, Vnew(2)));
-	VVVnew obstacles_front(rows_obs, VVnew(columns_obs, Vnew(2)));
-	VVVnew obstacles_back(rows_obs, VVnew(columns_obs, Vnew(2)));
+	VVVI obstacles_left(rows_obs, VVI(columns_obs, VI(2)));
+	VVVI obstacles_right(rows_obs, VVI(columns_obs, VI(2)));
+	VVVI obstacles_front(rows_obs, VVI(columns_obs, VI(2)));
+	VVVI obstacles_back(rows_obs, VVI(columns_obs, VI(2)));
 
 	float min_lat_left, min_lat_right, min_front, min_back;
 	float pos_min_lat_left[3], pos_min_lat_right[3], pos_min_front[3], pos_min_back[3];
@@ -284,9 +264,9 @@ void exploration(const sensor_msgs::PointCloud2 &nube3d_uav)
 
 	sensor_msgs::PointCloud2 filtered_cloud_3D;
 
-	VVVnew V(rows, VVnew(columns, Vnew(2)));
-	VVVnew V_map(rows, VVnew(columns, Vnew(2)));
-	VVVnew cont_V(rows, VVnew(columns, Vnew(2)));
+	VVVI V(rows, VVI(columns, VI(2)));
+	VVVI V_map(rows, VVI(columns, VI(2)));
+	VVVI cont_V(rows, VVI(columns, VI(2)));
 
 	// Initialize the matrix
 	for (i = 0; i < rows; i++)
@@ -436,7 +416,7 @@ int is_in_map(int i, int j)
 	return 1;
 }
 
-int readV(const VVV &V, int i, int j)
+int readV(const VVVI &V, int i, int j)
 {
 	if (i < rows && j < columns && i >= 0 && j >= 0)
 		return V[i][j][0];
@@ -445,7 +425,7 @@ int readV(const VVV &V, int i, int j)
 }
 
 // FILE TO SAVE A MATRIX
-void save_matrix3d(char *fileName, const std::vector<std::vector<std::vector<float>>> &m, bool vel)
+void save_matrix3d(char *fileName, const VVVI &m, bool vel)
 {
 	std::ofstream file;
 	file.open(fileName);
