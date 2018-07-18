@@ -5,11 +5,10 @@ EuclideanClusterer::EuclideanClusterer()
 {
     n = ros::NodeHandle();
 
-    params();
+    // params();
 
     // Subscriptions
     velodyne_sub = n.subscribe("/map_filtered2", 1, &EuclideanClusterer::cloud_cb, this);
-    // phase = 1;
     sub_phase = n.subscribe("/phase", 1, &EuclideanClusterer::phase_cb, this);
 
     // Publishers
@@ -52,7 +51,7 @@ void EuclideanClusterer::phase_cb(const std_msgs::Int8 phaseMode)
 
 void EuclideanClusterer::params()
 {
-    ros::NodeHandle nparam("~");
+    // ros::NodeHandle nparam("~");
     // if (nparam.getParam("distanceThreshold", distanceThreshold))
     // {
     //     ROS_WARN("Got EuclideanClusterer param distanceThreshold: %f", distanceThreshold);

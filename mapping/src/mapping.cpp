@@ -70,11 +70,19 @@ typedef vector<int> VI;
 typedef vector<VI> VVI;
 typedef vector<VVI> VVVI;
 
+typedef vector<float> Vnew;
+typedef vector<Vnew> VVnew;
+typedef vector<VVnew> VVVnew;
+
+typedef vector<vector<vector<float>>> VVV;
+
 void exploration(const sensor_msgs::PointCloud2 &nube3d_uav);
 void receiveSensor(const sensor_msgs::PointCloud2 &cloud);
 int is_in_map(int i, int j);
-int readV(const VVI &V, int i, int j);
-void save_matrix(char *filename, const VVI &M);
+//¡ int readV(const VVI &V, int i, int j);
+int readV(const VVV &V, int i, int j);
+void save_matrix(char *filename, const VVVnew &M);
+void save_matrix3d(char *fileName, const vector<vector<vector<float>>> &m, bool vel);
 void phase_cb(const std_msgs::Int8 phaseMode);
 
 // Publisher
@@ -98,24 +106,18 @@ int range_dock = 10;
 int range_sea = 100;
 float cell_div = 2; //número de celdas por 1 metro
 
-int rang = range_dock * cell_div;;
-int rows = 2 * rang + 1;;
-int columns = 2 * rang + 1;;
+int rang = range_dock * cell_div;
+int rows = 2 * rang + 1;
+int columns = 2 * rang + 1;
 double cloud_thres_distance = 0.5; //Meters
 
-// Atraque: 1 | Puerto: 2 | Costa: 3
+// Atraque: 1 | Puerto: 2 | Costa: 3 (Init)
 int phase = 1;
 
 // Obstacles
 int rows_obs = 20;
 int columns_obs = 2;
 
-// VVI V(rows, VI(columns));
-// VVI V_map(rows, VI(columns));
-// VVI cont_V(rows, VI(columns));
-
-//--------------------------------------------
-//sensor_msgs::PointCloud cloud_2D;
 sensor_msgs::PointCloud2 filtered_cloud_3D2;
 const std_msgs::Header msg_header;
 
@@ -132,7 +134,7 @@ int main(int argc, char **argv)
 	log_times = fopen("log_times.txt", "w");
 	ros::Subscriber sub_phase = n.subscribe("/phase", 1, phase_cb);
 	ros::Subscriber sub = n.subscribe("/velodyne_points", 1, receiveSensor);
-	//pub_filtered_map = n.advertise<sensor_msgs::PointCloud>("/map_filtered", 1);
+
 	pub_filtered_map2 = n.advertise<sensor_msgs::PointCloud2>("/map_filtered2", 1);
 	pub_matrix = n.advertise<mapping::vectorVector>("/v_map", 1);
 
@@ -168,16 +170,15 @@ void phase_cb(const std_msgs::Int8 phaseMode)
 
 void receiveSensor(const sensor_msgs::PointCloud2 &cloud)
 {
-	// ROS_INFO("Recibido \n");
-	//sensor_msgs::PointCloud2 data_cloud = cloud;  // Se puede prescindir de data_cloud cuando funcione bien con pcl.
 	ros::Time begin = ros::Time::now();
 	float runningTime;
 
 	// Variables to detect obstacle
-	VVI obstacles_left(rows_obs, VI(columns_obs));
-	VVI obstacles_right(rows_obs, VI(columns_obs));
-	VVI obstacles_front(rows_obs, VI(columns_obs));
-	VVI obstacles_back(rows_obs, VI(columns_obs));
+	VVVnew obstacles_left(rows_obs, VVnew(columns_obs, Vnew(2)));
+	VVVnew obstacles_right(rows_obs, VVnew(columns_obs, Vnew(2)));
+	VVVnew obstacles_front(rows_obs, VVnew(columns_obs, Vnew(2)));
+	VVVnew obstacles_back(rows_obs, VVnew(columns_obs, Vnew(2)));
+
 	float min_lat_left, min_lat_right, min_front, min_back;
 	float pos_min_lat_left[3], pos_min_lat_right[3], pos_min_front[3], pos_min_back[3];
 	int first_lat_left = 1;
@@ -193,13 +194,7 @@ void receiveSensor(const sensor_msgs::PointCloud2 &cloud)
 	// Change from type sensor_msgs::PointCloud2 to pcl::PointXYZ
 	pcl::fromROSMsg(cloud, *cloud_XYZ);
 
-	//tamano = cloud.width * cloud.height;
-
 	tamano = (int)cloud_XYZ->points.size();
-	//ROS_INFO("tam= %d \n", tamano);
-
-	//tamano1 = (int)cloud_cluster->points.size();
-	//ROS_INFO("tam1= %d \n", tamano1);
 
 	if (patron_vacio == true)
 	{
@@ -214,21 +209,16 @@ void receiveSensor(const sensor_msgs::PointCloud2 &cloud)
 		{
 			for (i = 0; i < tamano - 1; i++)
 			{
-				//fprintf(log_pos, "%lf %lf %lf\n", x, y, z);
 				x = cloud_XYZ->points[i].x;
 				y = cloud_XYZ->points[i].y;
 				z = cloud_XYZ->points[i].z;
-				//data_cloud->points.push_back(cloud_XYZ->points[i]);
 
 				//if (abs(y) < range_sea && abs(x) < range_sea )
 				//if (abs(y) < range_open && abs(x) < range_open )
 				//if ((y < 100 || y > -100) && (x < 100 || x > -100))
 				if ((y > 50) && (x < 100 || x > -100))
 				{
-					//data_cloud->points.push_back(cloud_cluster->points[i]);
 					data_cloud->points.push_back(cloud_XYZ->points[i]);
-
-					//fprintf(log_pos, "%lf %lf %lf\n", x, y, z);
 				}
 			}
 		}
@@ -245,131 +235,26 @@ void receiveSensor(const sensor_msgs::PointCloud2 &cloud)
 				if (x > -3.6 && x < 2.4 && abs(y) < range_dock && abs(y) > 1.2)
 				{
 					data_cloud->points.push_back(cloud_XYZ->points[i]);
-					/*
-					// Left side
-					if (y > 0)
-					{
-						if (first_lat_left == 1)
-						{
-							min_lat_left = data_cloud->points[i].y;
-							pos_min_lat_left[0] = data_cloud->points[i].x;
-							pos_min_lat_left[1] = data_cloud->points[i].y;
-							pos_min_lat_left[2] = data_cloud->points[i].z;
-							first_lat_left = 0;
-						}
-						else
-						{
-							if (y < min_lat_left)
-							{
-								min_lat_left = data_cloud->points[i].y;
-								pos_min_lat_left[0] = data_cloud->points[i].x;
-								pos_min_lat_left[1] = data_cloud->points[i].y;
-								pos_min_lat_left[2] = data_cloud->points[i].z;
-							}
-						}
-					}
-					// Right side
-					if (y < 0)
-					{
-						if (first_lat_right == 1)
-						{
-							min_lat_right = data_cloud->points[i].y;
-							pos_min_lat_right[0] = data_cloud->points[i].x;
-							pos_min_lat_right[1] = data_cloud->points[i].y;
-							pos_min_lat_right[2] = data_cloud->points[i].z;
-							first_lat_right = 0;
-						}
-						else
-						{
-							if (y < min_lat_right)
-							{
-								min_lat_right = data_cloud->points[i].y;
-								pos_min_lat_right[0] = data_cloud->points[i].x;
-								pos_min_lat_right[1] = data_cloud->points[i].y;
-								pos_min_lat_right[2] = data_cloud->points[i].z;
-							}
-						}
-					}
-					*/
 				}
 
 				// Front
 				if (x > 2.4 && x < range_dock && abs(y) < range_dock)
 				{
 					data_cloud->points.push_back(cloud_XYZ->points[i]);
-					/*
-					// Front
-					if (x > 0)
-					{
-						if (first_front == 1)
-						{
-							min_front = data_cloud->points[i].x;
-							pos_min_front[0] = data_cloud->points[i].x;
-							pos_min_front[1] = data_cloud->points[i].y;
-							pos_min_front[2] = data_cloud->points[i].z;
-							first_front = 0;
-						}
-						else
-						{
-							if (x < min_front)
-							{
-								min_front = data_cloud->points[i].x;
-								pos_min_front[0] = data_cloud->points[i].x;
-								pos_min_front[1] = data_cloud->points[i].y;
-								pos_min_front[2] = data_cloud->points[i].z;
-							}
-						}
-					}
-					*/
 				}
 
 				// Back
 				if (x > -range_dock && x < -3.6 && abs(y) < range_dock)
 				{
 					data_cloud->points.push_back(cloud_XYZ->points[i]);
-					/*
-					// Front
-					if (x < 0)
-					{
-						if (first_back == 1)
-						{
-							min_back = data_cloud->points[i].x;
-							pos_min_back[0] = data_cloud->points[i].x;
-							pos_min_back[1] = data_cloud->points[i].y;
-							pos_min_back[2] = data_cloud->points[i].z;
-							first_back = 0;
-						}
-						else
-						{
-							if (x > min_back)
-							{
-								min_back = data_cloud->points[i].x;
-								pos_min_back[0] = data_cloud->points[i].x;
-								pos_min_back[1] = data_cloud->points[i].y;
-								pos_min_back[2] = data_cloud->points[i].z;
-							}
-						} //x<0
-					}
-					*/
 				}
 			}
 		}
 
-		//Convert the pointcloud to be used in ROS, usin variable sensor_msgs::PointCloud2::Ptr output(new sensor_msgs::PointCloud2);
-		//sensor_msgs::PointCloud2::Ptr output(new sensor_msgs::PointCloud2);
-		//pcl::toROSMsg(*data_cloud, *output);
-		//output->header.frame_id = cloud.header.frame_id;
-
 		//Convert the pointcloud to be used in ROS, usin variable sensor_msgs::PointCloud2 output;
 		sensor_msgs::PointCloud2 cloud_filtered;
-		//pcl::toROSMsg(*data_cloud, cloud_filtered);
 		pcl::toROSMsg(*data_cloud, cloud_filtered);
 		cloud_filtered.header.frame_id = cloud.header.frame_id;
-
-		//tamano1 = (int)data_cloud->points.size();
-		//ROS_INFO("data_cloud= %d \n", tamano1);
-		//tamano1 = cloud_filtered.width * cloud_filtered.height;
-		//ROS_INFO("cloud_filtered= %d \n", tamano1);
 
 		// BUILD THE MAP (PointCloud2D)
 		exploration(cloud_filtered);
@@ -377,8 +262,6 @@ void receiveSensor(const sensor_msgs::PointCloud2 &cloud)
 		timespec t0_2;
 		clock_gettime(CLOCK_MONOTONIC, &t0_2);
 		time_patron = ((float)t0_2.tv_sec + t0_2.tv_nsec / 1000000000.0) - ((float)t0_1.tv_sec + t0_1.tv_nsec / 1000000000.0);
-		//printf ( "\nTiempo en transformar: %f\n", ( ( float ) t0_2.tv_sec+t0_2.tv_nsec/1000000000.0 )- ( ( float ) t0_1.tv_sec+t0_1.tv_nsec/1000000000.0 ) );
-		//printf("\nTiempo en transformar: %f\n", time_patron);
 
 	} // if patron_vacio
 	std::cout << "[ MAPP] Time: " << ros::Time::now() - begin << std::endl;
@@ -396,30 +279,33 @@ void exploration(const sensor_msgs::PointCloud2 &nube3d_uav)
 	//5 goal
 	//>=10 if the cell surrounds an obstacle. 11 and 12 are safer than 10.
 
-	//timespec t_ini_exp;
-	//clock_gettime ( CLOCK_MONOTONIC, &t_ini_exp ); // I have to add this function
-
 	int i, j, k_i, k_j;
 	int max = 0;
 
 	sensor_msgs::PointCloud2 filtered_cloud_3D;
 
-	VVI V(rows, VI(columns));
-	VVI V_map(rows, VI(columns));
-	VVI cont_V(rows, VI(columns));
+	VVVnew V(rows, VVnew(columns, Vnew(2)));
+	VVVnew V_map(rows, VVnew(columns, Vnew(2)));
+	VVVnew cont_V(rows, VVnew(columns, Vnew(2)));
 
 	// Initialize the matrix
 	for (i = 0; i < rows; i++)
 	{
 		for (j = 0; j < columns; j++)
 		{
-			V[i][j] = 0;
-			cont_V[i][j] = 0;
+			for (int k = 0; k < 2; k++)
+			{
+				if (k == 0)
+				{
+					V[i][j][k] = 0;
+					cont_V[i][j][k] = 0;
+				}
+			}
 		}
 	}
 
 	// Indicate the cell where the vessel is.
-	V[rang][rang] = 4; //Position of the sensor (it is always the same because the map is local)
+	V[rang][rang][0] = 4; //Position of the sensor (it is always the same because the map is local)
 
 	float cloud_dist, cloud_range = rang;
 	int iM, jM, kM, tam, tam_filter;
@@ -427,13 +313,7 @@ void exploration(const sensor_msgs::PointCloud2 &nube3d_uav)
 	int count_close = 0;
 	geometry_msgs::Point puntonube;
 
-	//filtered_cloud_3D = nube3d_uav;
-
-	//tam = (int) nube3d_uav.size();
 	tam = nube3d_uav.width * nube3d_uav.height;
-
-	//tam_filter = filtered_cloud_3D.points.size();
-	//tam_filter = filtered_cloud_3D.width * filtered_cloud_3D.height;
 
 	pcl::PointCloud<pcl::PointXYZ>::Ptr fil_cloud_XYZ(new pcl::PointCloud<pcl::PointXYZ>);  //Data to use in the map.
 	pcl::PointCloud<pcl::PointXYZ>::Ptr fil_data_cloud(new pcl::PointCloud<pcl::PointXYZ>); //Filtered point cloud to publish
@@ -442,14 +322,9 @@ void exploration(const sensor_msgs::PointCloud2 &nube3d_uav)
 
 	tam_filter = (int)fil_cloud_XYZ->points.size();
 
-	//ROS_INFO("tam= %d \n", tam);
-	//ROS_INFO("tam_filter= %d \n", tam_filter);
-
 	// Build the matrix
 	for (i = 0; i < tam; i++) // nlements --> tamano
 	{
-		//fprintf(log_icp, "%lf %lf %lf\n", nube3d_uav.points[i].x, nube3d_uav.points[i].y, nube3d_uav.points[i].z);  //JAC
-		//cloud_dist = hypot(nube3d_uav.points[i].x, nube3d_uav.points[i].y);
 		cloud_dist = hypot(fil_cloud_XYZ->points[i].x, fil_cloud_XYZ->points[i].y);
 
 		if (cloud_dist >= cloud_thres_distance)
@@ -461,27 +336,25 @@ void exploration(const sensor_msgs::PointCloud2 &nube3d_uav)
 			if (cloud_dist < cloud_range && is_in_map(iM, jM) == 1 && readV(V, iM, jM) != 4)
 			{
 
-				if (V[iM][jM] != 1)
+				if (V[iM][jM][0] != 1)
 				{
 
-					V[iM][jM] = 1; //JAC
-					cont_V[iM][jM] = cont_V[iM][jM] + 1;
+					V[iM][jM][0] = 1; //JAC
+					cont_V[iM][jM][0] = cont_V[iM][jM][0] + 1;
 				}
-				if (V[iM][jM] == 1 && cont_V[iM][jM] >= 1)
+				if (V[iM][jM][0] == 1 && cont_V[iM][jM][0] >= 1)
 				{
-					cont_V[iM][jM] = cont_V[iM][jM] + 1;
+					cont_V[iM][jM][0] = cont_V[iM][jM][0] + 1;
 				}
-				if (cont_V[iM][jM] > max)
+				if (cont_V[iM][jM][0] > max)
 				{
-					max = cont_V[iM][jM];
+					max = cont_V[iM][jM][0];
 				}
 			}
 
 		} //if
 
 	} //for
-
-	//ROS_INFO("Max=%d\n", max);
 
 	// Filtered map to send to the collision avoidance module --> V_map
 
@@ -490,9 +363,12 @@ void exploration(const sensor_msgs::PointCloud2 &nube3d_uav)
 	{
 		for (j = 0; j < columns; j++)
 		{
-			if (cont_V[i][j] < 1 && V[i][j] == 1) //5
+			for (int k = 0; k < 2; k++)
 			{
-				V_map[i][j] = 0;
+				if (cont_V[i][j][0] < 1 && V[i][j][0] == 1) //5
+				{
+					V_map[i][j][0] = 0;
+				}
 			}
 		}
 	}
@@ -501,7 +377,7 @@ void exploration(const sensor_msgs::PointCloud2 &nube3d_uav)
 	{
 		for (int j = 0; j < columns; j++)
 		{
-			columns_mat.columns.push_back(V[i][j]);
+			columns_mat.columns.push_back(V[i][j][0]);
 		}
 		rows_mat.rows.push_back(columns_mat);
 		columns_mat.columns.clear();
@@ -523,12 +399,8 @@ void exploration(const sensor_msgs::PointCloud2 &nube3d_uav)
 			if (cloud_dist < cloud_range && is_in_map(iM, jM) == 1 && readV(V, iM, jM) != 4)
 			{
 
-				if (V[iM][jM] == 1 && V_map[iM][jM] == 0)
+				if (V[iM][jM][0] == 1 && V_map[iM][jM][0] == 0)
 				{
-					//fil_cloud_XYZ->points[i].x=0;
-					//fil_cloud_XYZ->points[i].y=0;
-					//fil_cloud_XYZ->points[i].z=0;
-					//fil_cloud_XYZ->erase(fil_cloud_XYZ->points[i]);
 				}
 				else
 				{
@@ -542,26 +414,17 @@ void exploration(const sensor_msgs::PointCloud2 &nube3d_uav)
 
 	tam_filter = (int)fil_data_cloud->points.size();
 
-	//ROS_INFO("tam= %d \n", tam);
-	//ROS_INFO("tam_fil_data_cloud= %d \n", tam_filter);
-
-	//sensor_msgs::convertPointCloudToPointCloud2(filtered_cloud_3D, filtered_cloud_3D2);
-
 	//Convert the pointcloud to be used in ROS, usin variable sensor_msgs::PointCloud2 output;
 	pcl::toROSMsg(*fil_data_cloud, filtered_cloud_3D);
-	//pcl::toROSMsg(*fil_cloud_XYZ, filtered_cloud_3D);    //CAMBIO
 	filtered_cloud_3D.header.frame_id = "velodyne";
 	filtered_cloud_3D.header.stamp = ros::Time();
 
-	//pub_filtered_map.publish(filtered_cloud_3D);
-	//pub_filtered_map2.publish(filtered_cloud_3D2);
 	pub_filtered_map2.publish(filtered_cloud_3D);
 
 	// GENERATE FILES TO CHECK THE OUTPUTS AND THE GENERATION OF THE MATRIX.
-	save_matrix("matrix.txt", V);
-	save_matrix("contador.txt", cont_V);
-	save_matrix("mapa.txt", V_map);
-	// ROS_WARN("matrix size: %i", V.size());
+	save_matrix3d("/home/hector/Matlab_ws/matrix.txt", V, false);
+	save_matrix3d("/home/hector/Matlab_ws/contador.txt", cont_V, false);
+	save_matrix3d("/home/hector/Matlab_ws/mapa.txt", V_map, false);
 }
 
 int is_in_map(int i, int j)
@@ -573,36 +436,31 @@ int is_in_map(int i, int j)
 	return 1;
 }
 
-int readV(const VVI &V, int i, int j)
+int readV(const VVV &V, int i, int j)
 {
 	if (i < rows && j < columns && i >= 0 && j >= 0)
-		return V[i][j];
+		return V[i][j][0];
 	else
 		return -1;
 }
 
 // FILE TO SAVE A MATRIX
-void save_matrix(char *fileName, const VVI &M)
+void save_matrix3d(char *fileName, const std::vector<std::vector<std::vector<float>>> &m, bool vel)
 {
-	FILE *fp = fopen(fileName, "w");
-	if (fp == NULL)
-	{
-		exit(EXIT_FAILURE);
-	}
-	char linea[100001];
+	std::ofstream file;
+	file.open(fileName);
+
 	for (int i = 0; i < rows; i++)
 	{
-		linea[0] = '\0';
 		for (int j = 0; j < columns; j++)
 		{
-			char buffer[10];
-			sprintf(buffer, "%d \t ", M[i][j]);
-			strcat(linea, buffer);
+			if (vel == false)
+				file << m[i][j][0] << " ";
+			if (vel == true)
+				file << m[i][j][1] << " ";
 		}
-		int len = strlen(linea);
-		linea[len - 1] = '\n';
-		fputs(linea, fp);
+		file << std::endl;
 	}
 
-	fclose(fp);
+	file.close();
 }

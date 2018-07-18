@@ -4,7 +4,10 @@
 #include <vector>
 #include <iostream>
 
+#include <fstream>
+
 void save_matrix(char *fileName, const std::vector<std::vector<int>> &M);
+void save_matrix3d(char *fileName, const std::vector<std::vector<std::vector<float>>> &m, bool vel);
 std::vector<Eigen::Vector3i> voxel_traversal(Eigen::Vector3d ray_start, Eigen::Vector3d ray_end);
 int _bin_size = 1;
 int rang, param, rr, cc;
@@ -25,6 +28,49 @@ int main(int _argc, char **_argv)
 
     rr = rang * 2 + 1;
     cc = rang * 2 + 1;
+
+    std::vector<std::vector<std::vector<float>>> test(rr, std::vector<std::vector<float>>(cc, std::vector<float>(2)));
+    float vel;
+
+    for (int i = 0; i < rr; i++)
+    {
+        for (int j = 0; j < cc; j++)
+        {
+            for (int k = 0; k < 2; k++)
+            {
+                switch (k)
+                {
+                case 0:
+                    if ((j % 2 == 0 && i % 2 == 0) && (i < (rr - rr * 0.8) || i > (rr - rr * 0.2) || j < (rr - rr * 0.8) || j > (rr - rr * 0.2)))
+                    {
+                        test[i][j][k] = 1;
+                    }
+                    else
+                    {
+                        test[i][j][k] = 0;
+                    }
+                    break;
+                case 1:
+                    vel = (i + j) / 2.5;
+                    test[i][j][k] = vel;
+                    break;
+                }
+            }
+        }
+    }
+
+    // for (int i = 0; i < rr; i++)
+    // {
+    //     for (int j = 0; j < cc; j++)
+    //     {
+    //         std::cout << test[i][j][0] << " ";
+    //     }
+    //     std::cout << std::endl;
+    // }
+    // std::cout << std::endl;
+
+    save_matrix3d("/home/hector/Matlab_ws/3DnoVel.txt", test, false);
+    save_matrix3d("/home/hector/Matlab_ws/3DsiVel.txt", test, true);
 
     std::vector<std::vector<int>> matrix(rr, std::vector<int>(cc));
     std::vector<std::vector<int>> thinMatrix(rr, std::vector<int>(cc));
@@ -124,6 +170,26 @@ void save_matrix(char *fileName, const std::vector<std::vector<int>> &M)
     }
 
     fclose(fp);
+}
+
+void save_matrix3d(char *fileName, const std::vector<std::vector<std::vector<float>>> &m, bool vel)
+{
+    std::ofstream file;
+    file.open(fileName);
+
+    for (int i = 0; i < rr; i++)
+    {
+        for (int j = 0; j < cc; j++)
+        {
+            if (vel == false)
+                file << m[i][j][0] << " ";
+            if (vel == true)
+                file << m[i][j][1] << " ";
+        }
+        file << std::endl;
+    }
+
+    file.close();
 }
 
 std::vector<Eigen::Vector3i> voxel_traversal(Eigen::Vector3d ray_start, Eigen::Vector3d ray_end)
