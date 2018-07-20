@@ -65,7 +65,7 @@ void save_matrix3d(char *fileName, const VVVI &m, bool vel);
 void phase_cb(const std_msgs::Int8 phaseMode);
 
 // Publisher
-ros::Publisher pub_time, pub_filtered_map2, pub_matrix;
+ros::Publisher pub_filtered_map2, pub_matrix;
 
 //-------Variables globales------------------
 bool patron_vacio = true;
@@ -97,7 +97,6 @@ int main(int argc, char **argv)
 	ros::Subscriber sub_phase = n.subscribe("/phase", 1, phase_cb);
 	ros::Subscriber sub = n.subscribe("/velodyne_points", 1, receiveSensor);
 
-	pub_time = n.advertise<mapping::timeNode>("/time_mapp", 1);
 	pub_filtered_map2 = n.advertise<sensor_msgs::PointCloud2>("/map_filtered2", 1);
 	pub_matrix = n.advertise<mapping::vectorVector>("/v_map", 1);
 
@@ -221,9 +220,6 @@ void receiveSensor(const sensor_msgs::PointCloud2 &cloud)
 	}
 	std::cout << "[ MAPP] Time: " << ros::Time::now() - begin << std::endl;
 
-	mapping::timeNode time_mapp;
-	time_mapp.time_node = ros::Time::now() - begin;
-	pub_time.publish(time_mapp);
 }
 
 //BUILD THE MAP

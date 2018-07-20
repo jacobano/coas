@@ -47,7 +47,7 @@ private:
   ros::Subscriber sub_vector_pointclouds, sub_phase;
 
   // Publishers
-  ros::Publisher pub_time, pub_boxArray, pub_mergeBoxesArray, pub_boxesRef, pub_pathPoste1, pub_pathPoste2, pub_pathPoste3, pub_pathPoste12, pub_pathPoste13, pub_pathPoste23;
+  ros::Publisher pub_boxArray, pub_mergeBoxesArray, pub_boxesRef, pub_pathPoste1, pub_pathPoste2, pub_pathPoste3, pub_pathPoste12, pub_pathPoste13, pub_pathPoste23;
 
   // Variables
   int cont_postes = 0;

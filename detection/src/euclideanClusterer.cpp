@@ -13,7 +13,6 @@ EuclideanClusterer::EuclideanClusterer()
     sub_phase = n.subscribe("/phase", 1, &EuclideanClusterer::phase_cb, this);
 
     // Publishers
-    pub_time = n.advertise<detection::timeNode>("/time_eucl", 1);
     pub_pointclouds = n.advertise<detection::vectorPointCloud>("/vector_pointclouds", 1);
     loop();
 }
@@ -203,10 +202,6 @@ void EuclideanClusterer::cloud_cb(const boost::shared_ptr<const sensor_msgs::Poi
 
     pub_pointclouds.publish(vector_pointclouds);
     std::cout << "[ EUCL] Time: " << ros::Time::now() - begin << std::endl;
-
-    detection::timeNode time_eucl;
-    time_eucl.time_node = ros::Time::now() - begin;
-    pub_time.publish(time_eucl);
 }
 
 void EuclideanClusterer::loop()

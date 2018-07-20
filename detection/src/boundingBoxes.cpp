@@ -12,7 +12,6 @@ BoundingBoxes::BoundingBoxes()
     sub_phase = n.subscribe("/phase", 1, &BoundingBoxes::phase_cb, this);
 
     // Publishers
-    pub_time = n.advertise<detection::timeNode>("/time_bbxs", 1);
     pub_boxArray = n.advertise<jsk_recognition_msgs::BoundingBoxArray>("/boundingBoxes", 1);
     pub_mergeBoxesArray = n.advertise<jsk_recognition_msgs::BoundingBoxArray>("/mergeBoundingBoxes", 1);
     pub_boxesRef = n.advertise<jsk_recognition_msgs::BoundingBoxArray>("/boxesRef", 1);
@@ -108,10 +107,6 @@ void BoundingBoxes::clusters_cb(const detection::vectorPointCloud input)
     }
     std::cout << "[ BBXS] Time: " << ros::Time::now() - begin << std::endl;
     std::cout << " - - - - - - - - - - - - - - - - -" << std::endl;
-
-    detection::timeNode time_bbxs;
-    time_bbxs.time_node = ros::Time::now() - begin;
-    pub_time.publish(time_bbxs);
 
     cleanVariables();
 }

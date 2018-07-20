@@ -35,7 +35,7 @@ private:
   ros::Subscriber velodyne_sub, sub_phase;
 
   // Publishers
-  ros::Publisher pub_pointclouds, pub_time;
+  ros::Publisher pub_pointclouds;
   std::vector<ros::Publisher> pub_vec;
 
   // Variables
