@@ -28,6 +28,7 @@ FIND_PACKAGE(MRPT REQUIRED graphs;slam;vision;gui;topography)
 add_message_files(
   FILES
   vectorPointCloud.msg
+  timeNode.msg
 )
 
 generate_messages(
@@ -70,6 +71,13 @@ add_dependencies(boundingBoxes ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPO
 add_executable(boundingBoxes_node src/boundingBoxes_node.cpp)
 target_link_libraries(boundingBoxes_node boundingBoxes ${catkin_LIBRARIES})
 add_dependencies(boundingBoxes_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+add_library(timers src/timers.cpp)
+add_dependencies(timers ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+add_executable(timers_node src/timers_node.cpp)
+target_link_libraries(timers_node timers ${catkin_LIBRARIES})
+add_dependencies(timers_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 
 add_library(volexFilter src/volexFilter.cpp)

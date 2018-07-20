@@ -9,6 +9,7 @@
 #include <jsk_recognition_msgs/BoundingBoxArray.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl_ros/transforms.h>
+#include <std_msgs/Time.h>
 
 class BoundingBoxes
 {
@@ -46,7 +47,7 @@ private:
   ros::Subscriber sub_vector_pointclouds, sub_phase;
 
   // Publishers
-  ros::Publisher pub_boxArray, pub_mergeBoxesArray, pub_boxesRef, pub_pathPoste1, pub_pathPoste2, pub_pathPoste3, pub_pathPoste12, pub_pathPoste13, pub_pathPoste23;
+  ros::Publisher pub_time, pub_boxArray, pub_mergeBoxesArray, pub_boxesRef, pub_pathPoste1, pub_pathPoste2, pub_pathPoste3, pub_pathPoste12, pub_pathPoste13, pub_pathPoste23;
 
   // Variables
   int cont_postes = 0;
@@ -59,6 +60,7 @@ private:
   jsk_recognition_msgs::BoundingBoxArray boxes, boxesRef, mergeBoxes;
   std::vector<int> polygon_labels;
   std::vector<std::vector<int>> vec_polygon_labels;
+  
   // Params 
   int phase; // 1 Atraque - 2 Puerto - 3 Mar abierto
   float close_dist, xyMinPoste, xyMaxPoste, zMinPoste, zMaxPoste, minDistPoste12, maxDistPoste12, minDistPoste13, maxDistPoste13;

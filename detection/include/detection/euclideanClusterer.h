@@ -9,6 +9,7 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <Eigen/Dense>
 #include <std_msgs/Int8.h>
+#include <std_msgs/Float32.h>
 
 class EuclideanClusterer
 {
@@ -34,9 +35,9 @@ private:
   ros::Subscriber velodyne_sub, sub_phase;
 
   // Publishers
-  ros::Publisher pub_pointclouds;
+  ros::Publisher pub_pointclouds, pub_time;
   std::vector<ros::Publisher> pub_vec;
-  
+
   // Variables
 
   // Params

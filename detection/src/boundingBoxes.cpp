@@ -1,4 +1,5 @@
 #include <detection/boundingBoxes.h>
+#include "detection/timeNode.h"
 
 BoundingBoxes::BoundingBoxes()
 {
@@ -11,6 +12,7 @@ BoundingBoxes::BoundingBoxes()
     sub_phase = n.subscribe("/phase", 1, &BoundingBoxes::phase_cb, this);
 
     // Publishers
+    pub_time = n.advertise<detection::timeNode>("/time_bbxs", 1);
     pub_boxArray = n.advertise<jsk_recognition_msgs::BoundingBoxArray>("/boundingBoxes", 1);
     pub_mergeBoxesArray = n.advertise<jsk_recognition_msgs::BoundingBoxArray>("/mergeBoundingBoxes", 1);
     pub_boxesRef = n.advertise<jsk_recognition_msgs::BoundingBoxArray>("/boxesRef", 1);
@@ -106,6 +108,11 @@ void BoundingBoxes::clusters_cb(const detection::vectorPointCloud input)
     }
     std::cout << "[ BBXS] Time: " << ros::Time::now() - begin << std::endl;
     std::cout << " - - - - - - - - - - - - - - - - -" << std::endl;
+
+    detection::timeNode time_bbxs;
+    time_bbxs.time_node = ros::Time::now() - begin;
+    pub_time.publish(time_bbxs);
+
     cleanVariables();
 }
 
@@ -215,7 +222,9 @@ void BoundingBoxes::constructBoundingBoxes(float x, float y, float z, float dimX
         box.dimensions.y = dimY;
         box.dimensions.z = dimZ;
         box.label = label_box;
-        checkPostes(dimX, dimY, dimZ);
+        // Si está en modo atraque, busca y valida los postes.
+        if (phase == 1)
+            checkPostes(dimX, dimY, dimZ);
         boxes.boxes.push_back(box);
         label_box++;
     }

@@ -1,5 +1,6 @@
 #include <detection/euclideanClusterer.h>
 #include "detection/vectorPointCloud.h"
+#include "detection/timeNode.h"
 
 EuclideanClusterer::EuclideanClusterer()
 {
@@ -12,6 +13,7 @@ EuclideanClusterer::EuclideanClusterer()
     sub_phase = n.subscribe("/phase", 1, &EuclideanClusterer::phase_cb, this);
 
     // Publishers
+    pub_time = n.advertise<detection::timeNode>("/time_eucl", 1);
     pub_pointclouds = n.advertise<detection::vectorPointCloud>("/vector_pointclouds", 1);
     loop();
 }
@@ -133,7 +135,7 @@ void EuclideanClusterer::cloud_cb(const boost::shared_ptr<const sensor_msgs::Poi
             percentage = 0.3;
         if (phase == 2)
             percentage = 0.9;
-            
+
         // Mientras el 30% [90%] de la nube original siga aqui
         while (downsampled_XYZ->points.size() > percentage * nr_points) // atraque = 0.9 // default = 0.3
         {
@@ -186,7 +188,7 @@ void EuclideanClusterer::cloud_cb(const boost::shared_ptr<const sensor_msgs::Poi
     {
         pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_cluster(new pcl::PointCloud<pcl::PointXYZ>);
         for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end(); pit++)
-            cloud_cluster->points.push_back(downsampled_XYZ->points[*pit]); //*
+            cloud_cluster->points.push_back(downsampled_XYZ->points[*pit]);
         cloud_cluster->width = cloud_cluster->points.size();
         cloud_cluster->height = 1;
         cloud_cluster->is_dense = true;
@@ -201,6 +203,10 @@ void EuclideanClusterer::cloud_cb(const boost::shared_ptr<const sensor_msgs::Poi
 
     pub_pointclouds.publish(vector_pointclouds);
     std::cout << "[ EUCL] Time: " << ros::Time::now() - begin << std::endl;
+
+    detection::timeNode time_eucl;
+    time_eucl.time_node = ros::Time::now() - begin;
+    pub_time.publish(time_eucl);
 }
 
 void EuclideanClusterer::loop()

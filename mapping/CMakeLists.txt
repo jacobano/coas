@@ -63,6 +63,7 @@ find_package(catkin REQUIRED COMPONENTS
    FILES
    vectorInt.msg
    vectorVector.msg
+   timeNode.msg
  )
 
 ## Generate services in the 'srv' folder

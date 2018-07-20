@@ -1,11 +1,12 @@
 <launch>
     <!-- Atraque: 1 | Puerto: 2 | Costa: 3 -->
     <node pkg="rostopic" type="rostopic" name="phase" args="pub /phase std_msgs/Int8 1"/>
-    
+
     <node pkg="rosbag" type="play" name="rosbag" args="-l -r 1 -s 80 -u 10 /home/hector/bags/testpatio/2018-07-11-10-29-33.bag" required="true"/>
     <node pkg="rviz" type="rviz" name="rviz" args="-d /home/hector/coas_ws/src/coas/detection/rviz/atraque.rviz" required="true"/>
-    
-    <node pkg="mapping" type="mapping" name="filterer_map" output="screen" required="true"/>
-    <node pkg="detection" type="euclideanClusterer_node" name="euclideanClusterer_node" output="screen" required="true"/>
-    <node pkg="detection" type="boundingBoxes_node" name="boundingBoxes_node" output="screen" required="true"/>
+
+    <node pkg="mapping" type="mapping" name="filterer_map" required="true"/>
+    <node pkg="detection" type="euclideanClusterer_node" name="euclideanClusterer_node" required="true"/>
+    <node pkg="detection" type="boundingBoxes_node" name="boundingBoxes_node" required="true"/>
+    <node pkg="detection" type="timers_node" name="timer_node" output="screen" required="true"/>
 </launch>
