@@ -1,3 +1,3 @@
 /tracking/
-/mapping/mapping-origin.cpp
-/mapping/voxtraversalOriginal.cpp
+/mapping/src/mapping-origin.cpp
+/mapping/src/voxtraversalOriginal.cpp
