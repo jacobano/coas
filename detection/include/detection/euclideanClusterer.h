@@ -1,15 +1,11 @@
 #include <ros/ros.h>
-#include <pcl_conversions/pcl_conversions.h>
+#include <std_msgs/Int8.h>
+#include <sensor_msgs/PointCloud2.h>
+#include "detection/vectorPointCloud.h"
 #include <pcl/filters/extract_indices.h>
+#include <pcl_conversions/pcl_conversions.h>
 #include <pcl/segmentation/sac_segmentation.h>
 #include <pcl/segmentation/extract_clusters.h>
-#include <pcl/common/centroid.h>
-#include <sensor_msgs/PointCloud2.h>
-#include <nav_msgs/Path.h>
-#include <geometry_msgs/PoseStamped.h>
-#include <Eigen/Dense>
-#include <std_msgs/Int8.h>
-#include <std_msgs/Float32.h>
 
 class EuclideanClusterer
 {
@@ -41,6 +37,6 @@ private:
   // Variables
 
   // Params
-  int phase; // 1 Atraque - 2 Puerto - 3 Mar abierto
+  int phase; // 1 Atraque - 2 Puerto - 3 Mar
   float distanceThreshold, clusterTolerance, minClusterSize, maxClusterSize;
 };

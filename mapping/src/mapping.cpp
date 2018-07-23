@@ -2,55 +2,14 @@
 // 16-05-2018
 // José Antonio Cobano
 
-//#include <Eigen/Dense>
-
 #include <ros/ros.h>
-#include <geometry_msgs/Twist.h>
-#include <tf/tf.h>
-#include <tf/transform_listener.h>
-#include <nav_msgs/Odometry.h>
-
-#include <geometry_msgs/PoseStamped.h>
-#include <geometry_msgs/PoseWithCovarianceStamped.h>
-#include <tf/transform_datatypes.h>
-
-#include <geometry_msgs/PointStamped.h>
-#include <geometry_msgs/PoseStamped.h>
-
-#include <sensor_msgs/PointCloud.h>
-#include <sensor_msgs/PointCloud2.h>
-#include "sensor_msgs/Imu.h"
-#include <sensor_msgs/point_cloud_conversion.h>
-
-#include <stdio.h>
-#include <time.h>
-//#include <sys/time.h>
-//#include <ctime>
-#include <math.h>
-#include <vector>
 #include <fstream>
-#include <sstream>
-#include <iostream>
-#include <string>
-#include <boost/concept_check.hpp>
-
-// Representation (RVIZ)
-#include <visualization_msgs/Marker.h>
-
-#include <geometry_msgs/Pose2D.h>
-#include "pcl_ros/point_cloud.h"
-
-#include <pcl_conversions/pcl_conversions.h>
+#include <std_msgs/Int8.h>
 #include <pcl/point_types.h>
-#include <pcl/PCLPointCloud2.h>
-#include <pcl/conversions.h>
-#include <pcl_ros/transforms.h>
-
 #include "mapping/vectorInt.h"
 #include "mapping/vectorVector.h"
-#include <std_msgs/Int32.h>
-#include <std_msgs/Int8.h>
-#include "mapping/timeNode.h"
+#include <sensor_msgs/PointCloud2.h>
+#include <pcl_conversions/pcl_conversions.h>
 
 typedef std::vector<float> VI;
 typedef std::vector<VI> VVI;
@@ -219,20 +178,18 @@ void receiveSensor(const sensor_msgs::PointCloud2 &cloud)
 		exploration(cloud_filtered);
 	}
 	std::cout << "[ MAPP] Time: " << ros::Time::now() - begin << std::endl;
-
 }
 
-//BUILD THE MAP
+// BUILD THE MAP
+//   V[i][j][k] is:
+//   0 if empty or unexplored
+//   1 if there is an obstacle
+//   2 virtual obstacle
+//   4 if it is the robot's cell
+//   5 goal
+//   >=10 if the cell surrounds an obstacle. 11 and 12 are safer than 10.
 void exploration(const sensor_msgs::PointCloud2 &nube3d_uav)
 {
-	//V[i][j][k] is:
-	//0 if empty or unexplored
-	//1 if there is an obstacle
-	//2 virtual obstacle
-	//4 if it is the robot's cell
-	//5 goal
-	//>=10 if the cell surrounds an obstacle. 11 and 12 are safer than 10.
-
 	sensor_msgs::PointCloud2 filtered_cloud_3D;
 
 	VVVI V(rows, VVI(columns, VI(2)));

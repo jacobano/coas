@@ -12,10 +12,7 @@ project(mapping)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
-  tf
-  nodelet
   sensor_msgs
-  tf
   pcl_ros
   pcl_conversions
   geometry_msgs
@@ -23,6 +20,7 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
   std_msgs
 )
+find_package(Eigen3 REQUIRED)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -117,8 +115,8 @@ generate_messages(
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES mapping
-  CATKIN_DEPENDS roscpp rospy std_msgs tf message_runtime
-  #DEPENDS system_lib
+  CATKIN_DEPENDS roscpp rospy std_msgs message_runtime
+  DEPENDS EIGEN3
 )
 
 ###########

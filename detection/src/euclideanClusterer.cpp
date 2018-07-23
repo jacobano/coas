@@ -1,6 +1,4 @@
 #include <detection/euclideanClusterer.h>
-#include "detection/vectorPointCloud.h"
-#include "detection/timeNode.h"
 
 EuclideanClusterer::EuclideanClusterer()
 {

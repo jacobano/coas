@@ -6,7 +6,6 @@ project(detection)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
-  tf
   nodelet
   sensor_msgs
   pcl_ros
@@ -19,11 +18,6 @@ find_package(catkin REQUIRED COMPONENTS
   jsk_recognition_msgs
 )
 find_package(Eigen3 REQUIRED)
-
-# matplotlib-cpp
-# find_package(PythonLibs 2.7) 
-
-FIND_PACKAGE(MRPT REQUIRED graphs;slam;vision;gui;topography)
 
 add_message_files(
   FILES
@@ -39,7 +33,7 @@ generate_messages(
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES detection
-  CATKIN_DEPENDS roscpp rospy tf message_runtime jsk_recognition_msgs
+  CATKIN_DEPENDS roscpp rospy message_runtime jsk_recognition_msgs
   DEPENDS EIGEN3 
 )
 
@@ -52,7 +46,6 @@ include_directories(
 #include_directories(${OCTOMAP_INCLUDE_DIRS})
 #link_directories(${OCTOMAP_LIBRARY_DIRS})
 #target_link_libraries(${OCTOMAP_LIBRARIES})
-
 
 include_directories(src ${EIGEN3_INCLUDE_DIR})
 

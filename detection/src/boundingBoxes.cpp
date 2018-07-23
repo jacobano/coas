@@ -1,5 +1,4 @@
 #include <detection/boundingBoxes.h>
-#include "detection/timeNode.h"
 
 BoundingBoxes::BoundingBoxes()
 {
