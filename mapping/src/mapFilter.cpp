@@ -1,0 +1,322 @@
+#include <mapping/mapFilter.h>
+
+MapFilter::MapFilter()
+{
+    n = ros::NodeHandle();
+
+    // // Subscriptions
+    // matrix_sub = n.subscribe("/v_map", 1, &MapFilter::matrix_cb, this);
+    sub_phase = n.subscribe("/phase", 1, &MapFilter::phase_cb, this);
+    sub = n.subscribe("/velodyne_points", 1, &MapFilter::receiveSensor, this);
+
+    // // Publishers
+    pub_filtered_map2 = n.advertise<sensor_msgs::PointCloud2>("/map_filtered2", 1);
+    pub_matrix = n.advertise<mapping::vectorVector>("/v_map", 1);
+
+    range_dock = 10;
+    range_sea = 100;
+    cell_div;
+    rang = range_dock * cell_div;
+    rows = 2 * rang + 1;
+    columns = 2 * rang + 1;
+
+    loop();
+}
+
+MapFilter::~MapFilter()
+{
+}
+
+void MapFilter::phase_cb(const std_msgs::Int8 phaseMode)
+{
+    phase = phaseMode.data;
+    switch (phase)
+    {
+    // Atraque
+    case 1:
+        range_dock = 10;
+        cell_div = 2;
+        break;
+    // Puerto
+    case 2:
+        range_dock = 10;
+        cell_div = 2;
+        break;
+    // Mar abierto
+    case 3:
+        range_dock = 100;
+        cell_div = 1; // Revisarlo, estaba puesto a 2 (lento)
+        break;
+    }
+    rang = range_dock * cell_div;
+    rows = 2 * rang + 1;
+    columns = 2 * rang + 1;
+}
+
+void MapFilter::receiveSensor(const sensor_msgs::PointCloud2 &cloud)
+{
+    ros::Time begin = ros::Time::now();
+
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_XYZ(new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr data_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+    // Change from type sensor_msgs::PointCloud2 to pcl::PointXYZ
+    pcl::fromROSMsg(cloud, *cloud_XYZ);
+
+    int tamano = cloud_XYZ->points.size();
+    bool patron_vacio = true;
+
+    if (patron_vacio == true)
+    {
+        switch (phase)
+        {
+        // Atraque
+        case 1:
+            for (int i = 0; i < tamano - 1; i++)
+            {
+                float x = cloud_XYZ->points[i].x;
+                float y = cloud_XYZ->points[i].y;
+                float z = cloud_XYZ->points[i].z;
+                // Lateral
+                if (x > -1 && x < 1 && abs(y) < range_dock && abs(y) > 1)
+                {
+                    data_cloud->points.push_back(cloud_XYZ->points[i]);
+                }
+                // Front
+                if (x > 1 && x < range_dock && abs(y) < range_dock)
+                {
+                    data_cloud->points.push_back(cloud_XYZ->points[i]);
+                }
+                // Back
+                if (x > -range_dock && x < -1 && abs(y) < range_dock)
+                {
+                    data_cloud->points.push_back(cloud_XYZ->points[i]);
+                }
+            }
+            break;
+        // Puerto
+        case 2:
+            for (int i = 0; i < tamano - 1; i++)
+            {
+                float x = cloud_XYZ->points[i].x;
+                float y = cloud_XYZ->points[i].y;
+                float z = cloud_XYZ->points[i].z;
+                // Lateral
+                if (x > -3.6 && x < 2.4 && abs(y) < range_dock && abs(y) > 1.2)
+                {
+                    data_cloud->points.push_back(cloud_XYZ->points[i]);
+                }
+                // Front
+                if (x > 2.4 && x < range_dock && abs(y) < range_dock)
+                {
+                    data_cloud->points.push_back(cloud_XYZ->points[i]);
+                }
+                // Back
+                if (x > -range_dock && x < -3.6 && abs(y) < range_dock)
+                {
+                    data_cloud->points.push_back(cloud_XYZ->points[i]);
+                }
+            }
+            break;
+        // Mar
+        case 3:
+            for (int i = 0; i < tamano - 1; i++)
+            {
+                float x = cloud_XYZ->points[i].x;
+                float y = cloud_XYZ->points[i].y;
+                float z = cloud_XYZ->points[i].z;
+                //if (abs(y) < range_sea && abs(x) < range_sea )
+                //if (abs(y) < range_open && abs(x) < range_open )
+                //if ((y < 100 || y > -100) && (x < 100 || x > -100))
+                if ((y > 50) && (x < 100 || x > -100))
+                {
+                    data_cloud->points.push_back(cloud_XYZ->points[i]);
+                }
+            }
+            break;
+        }
+        //Convert the pointcloud to be used in ROS, usin variable sensor_msgs::PointCloud2 output;
+        sensor_msgs::PointCloud2 cloud_filtered;
+        pcl::toROSMsg(*data_cloud, cloud_filtered);
+        cloud_filtered.header.frame_id = cloud.header.frame_id;
+        // BUILD THE MAP (PointCloud2D)
+        exploration(cloud_filtered);
+    }
+    std::cout << "[ MAPP] Time: " << ros::Time::now() - begin << std::endl;
+}
+
+// BUILD THE MAP
+//   V[i][j][k] is:
+//   0 if empty or unexplored
+//   1 if there is an obstacle
+//   2 virtual obstacle
+//   4 if it is the robot's cell
+//   5 goal
+//   >=10 if the cell surrounds an obstacle. 11 and 12 are safer than 10.
+void MapFilter::exploration(const sensor_msgs::PointCloud2 &nube3d_uav)
+{
+    sensor_msgs::PointCloud2 filtered_cloud_3D;
+
+    VVVI V(rows, VVI(columns, VI(2)));
+    VVVI V_map(rows, VVI(columns, VI(2)));
+    VVVI cont_V(rows, VVI(columns, VI(2)));
+    // Initialize the matrix
+    for (int i = 0; i < rows; i++)
+    {
+        for (int j = 0; j < columns; j++)
+        {
+            for (int k = 0; k < 2; k++)
+            {
+                if (k == 0)
+                {
+                    V[i][j][k] = 0;
+                    cont_V[i][j][k] = 0;
+                    V_map[i][j][k] = 0;
+                }
+            }
+        }
+    }
+    // Indicate the cell where the vessel is.
+    V[rang][rang][0] = 4; //Position of the sensor (it is always the same because the map is local)
+
+    int tam = nube3d_uav.width * nube3d_uav.height;
+
+    pcl::PointCloud<pcl::PointXYZ>::Ptr fil_cloud_XYZ(new pcl::PointCloud<pcl::PointXYZ>);  //Data to use in the map.
+    pcl::PointCloud<pcl::PointXYZ>::Ptr fil_data_cloud(new pcl::PointCloud<pcl::PointXYZ>); //Filtered point cloud to publish
+    // Change from type sensor_msgs::PointCloud2 to pcl::PointXYZ
+    pcl::fromROSMsg(nube3d_uav, *fil_cloud_XYZ);
+    // Build the matrix
+    int max = 0;
+    double cloud_thres_distance = 0.5; //Meters
+    for (int i = 0; i < tam; i++)      // nlements --> tamano
+    {
+        float cloud_dist = hypot(fil_cloud_XYZ->points[i].x, fil_cloud_XYZ->points[i].y);
+        if (cloud_dist >= cloud_thres_distance)
+        {
+            int iM = round(rang - cell_div * fil_cloud_XYZ->points[i].x);
+            int jM = round(rang - cell_div * fil_cloud_XYZ->points[i].y);
+            if (cloud_dist < rang && is_in_map(iM, jM) == 1 && readV(V, iM, jM) != 4)
+            {
+                if (V[iM][jM][0] != 1)
+                {
+                    V[iM][jM][0] = 1; //JAC
+                    cont_V[iM][jM][0] = cont_V[iM][jM][0] + 1;
+                }
+                if (V[iM][jM][0] == 1 && cont_V[iM][jM][0] >= 1)
+                {
+                    cont_V[iM][jM][0] = cont_V[iM][jM][0] + 1;
+                }
+                if (cont_V[iM][jM][0] > max)
+                {
+                    max = cont_V[iM][jM][0];
+                }
+            }
+        }
+    }
+    // Filtered map to send to the collision avoidance module --> V_map
+    V_map = V;
+    for (int i = 0; i < rows; i++)
+    {
+        for (int j = 0; j < columns; j++)
+        {
+            for (int k = 0; k < 2; k++)
+            {
+                if (cont_V[i][j][0] < 1 && V[i][j][0] == 1) //5
+                {
+                    V_map[i][j][0] = 0;
+                }
+            }
+        }
+    }
+    // Publish V
+    mapping::vectorInt columns_mat;
+    mapping::vectorVector rows_mat;
+    for (int i = 0; i < rows; i++)
+    {
+        for (int j = 0; j < columns; j++)
+        {
+            columns_mat.columns.push_back(V[i][j][0]);
+        }
+        rows_mat.rows.push_back(columns_mat);
+        columns_mat.columns.clear();
+    }
+    pub_matrix.publish(rows_mat);
+    rows_mat.rows.clear();
+    // Esto es para confirmar con Rviz que se van filtrando las olas. Se publica un topic con los datos de la nube filtrados.
+    // map1_
+    for (int i = 0; i < tam; i++) // nlements --> tamano
+    {
+        float cloud_dist = hypot(fil_cloud_XYZ->points[i].x, fil_cloud_XYZ->points[i].y);
+        if (cloud_dist >= cloud_thres_distance)
+        {
+            int iM = round(rang - cell_div * fil_cloud_XYZ->points[i].x);
+            int jM = round(rang - cell_div * fil_cloud_XYZ->points[i].y);
+            if (cloud_dist < rang && is_in_map(iM, jM) == 1 && readV(V, iM, jM) != 4)
+            {
+                if (V[iM][jM][0] == 1 && V_map[iM][jM][0] == 0)
+                {
+                }
+                else
+                {
+                    fil_data_cloud->points.push_back(fil_cloud_XYZ->points[i]);
+                }
+            }
+        }
+    }
+    //Convert the pointcloud to be used in ROS, usin variable sensor_msgs::PointCloud2 output;
+    pcl::toROSMsg(*fil_data_cloud, filtered_cloud_3D);
+    filtered_cloud_3D.header.frame_id = "velodyne";
+    filtered_cloud_3D.header.stamp = ros::Time();
+    pub_filtered_map2.publish(filtered_cloud_3D);
+
+    // GENERATE FILES TO CHECK THE OUTPUTS AND THE GENERATION OF THE MATRIX.
+    save_matrix3d("/home/hector/Matlab_ws/matrix.txt", V, false);
+    save_matrix3d("/home/hector/Matlab_ws/contador.txt", cont_V, false);
+    save_matrix3d("/home/hector/Matlab_ws/mapa.txt", V_map, false);
+}
+
+int MapFilter::is_in_map(int i, int j)
+{
+    if (i < 0 || i > rows - 1)
+        return 0;
+    if (j < 0 || j > columns - 1)
+        return 0;
+    return 1;
+}
+
+int MapFilter::readV(const VVVI &V, int i, int j)
+{
+    if (i < rows && j < columns && i >= 0 && j >= 0)
+        return V[i][j][0];
+    else
+        return -1;
+}
+
+// FILE TO SAVE A MATRIX
+void MapFilter::save_matrix3d(char *fileName, const VVVI &m, bool vel)
+{
+    std::ofstream file;
+    file.open(fileName);
+
+    for (int i = 0; i < rows; i++)
+    {
+        for (int j = 0; j < columns; j++)
+        {
+            if (vel == false)
+                file << m[i][j][0] << " ";
+            if (vel == true)
+                file << m[i][j][1] << " ";
+        }
+        file << std::endl;
+    }
+
+    file.close();
+}
+
+void MapFilter::loop()
+{
+    while (ros::ok())
+    {
+        sleep(0.1);
+        ros::spinOnce();
+    }
+}

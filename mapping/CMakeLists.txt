@@ -174,6 +174,13 @@ add_executable(thinMapping_node src/thinMapping_node.cpp)
 target_link_libraries(thinMapping_node thinMapping ${catkin_LIBRARIES})
 add_dependencies(thinMapping_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
+add_library(mapFilter src/mapFilter.cpp)
+add_dependencies(mapFilter ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+add_executable(mapFilter_node src/mapFilter_node.cpp)
+target_link_libraries(mapFilter_node mapFilter ${catkin_LIBRARIES})
+add_dependencies(mapFilter_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
 add_executable(voxtraversal src/voxtraversal.cpp)
 add_dependencies(voxtraversal    ${catkin_EXPORTED_TARGETS})
 target_link_libraries(voxtraversal ${MRPT_LIBS} ${catkin_LIBRARIES})

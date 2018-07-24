@@ -1,5 +1,5 @@
 // Code to generate a map and detect obstacles from velodyne measurements.
-// 16-05-2018
+// 24-07-2018
 // José Antonio Cobano
 
 #include <ros/ros.h>
@@ -26,11 +26,7 @@ void phase_cb(const std_msgs::Int8 phaseMode);
 // Publisher
 ros::Publisher pub_filtered_map2, pub_matrix;
 
-//-------Variables globales------------------
-bool patron_vacio = true;
-
-int tamano;
-
+//-------Variables globales-----------------
 // Variables related to the Map
 //int range_sea=100;
 int range_dock = 10;
@@ -40,13 +36,9 @@ float cell_div /* = 2 */; //número de celdas por 1 metro
 int rang = range_dock * cell_div;
 int rows = 2 * rang + 1;
 int columns = 2 * rang + 1;
-double cloud_thres_distance = 0.5; //Meters
 
 // Atraque: 1 | Puerto: 2 | Mar: 3
 int phase = 1;
-
-mapping::vectorInt columns_mat;
-mapping::vectorVector rows_mat;
 
 int main(int argc, char **argv)
 {
@@ -99,7 +91,8 @@ void receiveSensor(const sensor_msgs::PointCloud2 &cloud)
 	// Change from type sensor_msgs::PointCloud2 to pcl::PointXYZ
 	pcl::fromROSMsg(cloud, *cloud_XYZ);
 
-	tamano = (int)cloud_XYZ->points.size();
+	int tamano = cloud_XYZ->points.size();
+	bool patron_vacio = true;
 
 	if (patron_vacio == true)
 	{
@@ -222,7 +215,8 @@ void exploration(const sensor_msgs::PointCloud2 &nube3d_uav)
 	pcl::fromROSMsg(nube3d_uav, *fil_cloud_XYZ);
 	// Build the matrix
 	int max = 0;
-	for (int i = 0; i < tam; i++) // nlements --> tamano
+	double cloud_thres_distance = 0.5; //Meters
+	for (int i = 0; i < tam; i++)	  // nlements --> tamano
 	{
 		float cloud_dist = hypot(fil_cloud_XYZ->points[i].x, fil_cloud_XYZ->points[i].y);
 		if (cloud_dist >= cloud_thres_distance)
@@ -263,6 +257,8 @@ void exploration(const sensor_msgs::PointCloud2 &nube3d_uav)
 		}
 	}
 	// Publish V
+	mapping::vectorInt columns_mat;
+	mapping::vectorVector rows_mat;
 	for (int i = 0; i < rows; i++)
 	{
 		for (int j = 0; j < columns; j++)

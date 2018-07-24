@@ -218,7 +218,9 @@ void BoundingBoxes::constructBoundingBoxes(float x, float y, float z, float dimX
         box.label = label_box;
         // Si está en modo atraque, busca y valida los postes.
         if (phase == 1)
+        {
             checkPostes(dimX, dimY, dimZ);
+        }
         boxes.boxes.push_back(box);
         label_box++;
     }
