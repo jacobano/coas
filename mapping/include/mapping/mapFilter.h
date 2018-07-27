@@ -18,15 +18,14 @@ public:
 
 private:
   // Callbacks
-  // void matrix_cb(const mapping::vectorVector input);
+  void exploration(const sensor_msgs::PointCloud2 &nube3d_uav);
+  void receiveSensor(const sensor_msgs::PointCloud2 &cloud);
 
   typedef std::vector<float> VI;
   typedef std::vector<VI> VVI;
   typedef std::vector<VVI> VVVI;
 
   //
-  void exploration(const sensor_msgs::PointCloud2 &nube3d_uav);
-  void receiveSensor(const sensor_msgs::PointCloud2 &cloud);
   int is_in_map(int i, int j);
   int readV(const VVVI &V, int i, int j);
   void save_matrix(char *filename, const VVVI &M);
