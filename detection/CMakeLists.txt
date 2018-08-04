@@ -12,7 +12,6 @@ find_package(catkin REQUIRED COMPONENTS
   pcl_conversions
   geometry_msgs
   nav_msgs
-  geodesy
   std_msgs
   message_generation
   jsk_recognition_msgs
@@ -34,7 +33,7 @@ catkin_package(
   INCLUDE_DIRS include
   LIBRARIES detection
   CATKIN_DEPENDS roscpp rospy message_runtime jsk_recognition_msgs
-  DEPENDS EIGEN3 
+  DEPENDS EIGEN3
 )
 
 include_directories(
@@ -71,11 +70,3 @@ add_dependencies(volexFilter ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORT
 add_executable(volexFilter_node src/volexFilter_node.cpp)
 target_link_libraries(volexFilter_node volexFilter ${catkin_LIBRARIES})
 add_dependencies(volexFilter_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
-
-add_library(pcl2RotTrans src/pcl2RotTrans.cpp)
-add_dependencies(pcl2RotTrans ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
-add_executable(pcl2RotTrans_node src/pcl2RotTrans_node.cpp)
-target_link_libraries(pcl2RotTrans_node pcl2RotTrans ${catkin_LIBRARIES})
-add_dependencies(pcl2RotTrans_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
