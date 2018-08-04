@@ -34,7 +34,7 @@ void MapFilter::phase_cb(const std_msgs::Int8 phaseMode)
     {
     // Atraque
     case 1:
-        range_dock = 10;
+        range_dock = 20;
         cell_div = 2;
         break;
     // Puerto

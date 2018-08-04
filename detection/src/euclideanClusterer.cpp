@@ -7,7 +7,7 @@ EuclideanClusterer::EuclideanClusterer()
     // params();
 
     // Subscriptions
-    velodyne_sub = n.subscribe("/map_filtered2", 1, &EuclideanClusterer::cloud_cb, this);
+    velodyne_sub = n.subscribe("/volexFilterPoints", 1, &EuclideanClusterer::cloud_cb, this);
     sub_phase = n.subscribe("/phase", 1, &EuclideanClusterer::phase_cb, this);
 
     // Publishers
@@ -26,10 +26,10 @@ void EuclideanClusterer::phase_cb(const std_msgs::Int8 phaseMode)
     {
     // Atraque
     case 1:
-        distanceThreshold = 0.3;
-        clusterTolerance = 0.4;
+        distanceThreshold = 0.4;
+        clusterTolerance = 0.8;
         minClusterSize = 30;
-        maxClusterSize = 500;
+        maxClusterSize = 600;
         break;
     // Puerto
     case 2:

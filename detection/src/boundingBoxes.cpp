@@ -36,14 +36,14 @@ void BoundingBoxes::phase_cb(const std_msgs::Int8 phaseMode)
     // Atraque
     case 1:
         close_dist = 1.0;
-        xyMinPoste = 0.3;
-        xyMaxPoste = 0.7;
-        zMinPoste = 1.0;
-        zMaxPoste = 2.0;
+        xyMinPoste = 0.1;
+        xyMaxPoste = 0.6;
+        zMinPoste = 1;
+        zMaxPoste = 3.0;
         minDistPoste12 = 3.5;
-        maxDistPoste12 = 4.5;
-        minDistPoste13 = 9.0;
-        maxDistPoste13 = 10.0;
+        maxDistPoste12 = 3.9;
+        minDistPoste13 = 8.5;
+        maxDistPoste13 = 8.8;
         break;
     // Puerto
     case 2:
