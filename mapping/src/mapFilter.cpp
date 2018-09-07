@@ -55,7 +55,7 @@ void MapFilter::phase_cb(const std_msgs::Int8 phaseMode)
 
 void MapFilter::receiveSensor(const sensor_msgs::PointCloud2 &cloud)
 {
-    ros::Time begin = ros::Time::now();
+    double begin = ros::Time::now().toSec();
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_XYZ(new pcl::PointCloud<pcl::PointXYZ>);
     pcl::PointCloud<pcl::PointXYZ>::Ptr data_cloud(new pcl::PointCloud<pcl::PointXYZ>);
@@ -141,7 +141,7 @@ void MapFilter::receiveSensor(const sensor_msgs::PointCloud2 &cloud)
         // BUILD THE MAP (PointCloud2D)
         exploration(cloud_filtered);
     }
-    std::cout << "[ MAPP] Time: " << ros::Time::now() - begin << std::endl;
+    std::cout << "[ MAPP] Time: " << ros::Time::now().toSec() - begin << std::endl;
 }
 
 // BUILD THE MAP

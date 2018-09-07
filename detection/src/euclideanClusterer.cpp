@@ -99,7 +99,7 @@ void EuclideanClusterer::params()
 
 void EuclideanClusterer::cloud_cb(const boost::shared_ptr<const sensor_msgs::PointCloud2> &input)
 {
-    ros::Time begin = ros::Time::now();
+    double begin = ros::Time::now().toSec();
 
     sensor_msgs::PointCloud2 input_cloud = *input;
     pcl::PointCloud<pcl::PointXYZ>::Ptr downsampled_XYZ(new pcl::PointCloud<pcl::PointXYZ>);
@@ -199,7 +199,7 @@ void EuclideanClusterer::cloud_cb(const boost::shared_ptr<const sensor_msgs::Poi
     }
 
     pub_pointclouds.publish(vector_pointclouds);
-    std::cout << "[ EUCL] Time: " << ros::Time::now() - begin << std::endl;
+    std::cout << "[ EUCL] Time: " << ros::Time::now().toSec() - begin << std::endl;
 }
 
 void EuclideanClusterer::loop()
