@@ -33,6 +33,7 @@ private:
   void cleanVariables();
   void calcVecPolygons();
   void mergeBoundingBoxes();
+  void save_pose(int nPost, nav_msgs::Path path);
   void checkPostes(float xDim, float yDim, float zDim);
   Eigen::Vector4f pc2_centroid(const sensor_msgs::PointCloud2 pc2);
   void calcMaxDistancesCluster(const pcl::PointCloud<pcl::PointXYZ> cluster);
@@ -62,7 +63,7 @@ private:
   float maxDistX, maxDistY, maxDistZ, maxDistXpol, maxDistYpol, maxDistZpol, maxBoxX, maxBoxY, maxBoxZ;
   nav_msgs::Path pathPoste1, pathPoste2, pathPoste3, pathPoste12, pathPoste13, pathPoste23;
 
-  std::ofstream fileToPosts, fileBetweenPosts, fileToPostsTimes, fileBetweenPostsTimes;
+  std::ofstream fileToPosts, fileBetweenPosts, fileToPostsTimes, fileBetweenPostsTimes, filePost1, filePost2, filePost3;
   int contTest = 0;
   double startTime;
 

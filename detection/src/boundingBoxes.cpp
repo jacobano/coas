@@ -25,6 +25,9 @@ BoundingBoxes::BoundingBoxes()
     fileBetweenPosts.open("/home/hector/octave_ws/COAS/distancesBetweenPosts");
     fileBetweenPostsTimes.open("/home/hector/octave_ws/COAS/timesBetweenPosts");
     fileToPostsTimes.open("/home/hector/octave_ws/COAS/timesToPosts");
+    filePost1.open("/home/hector/octave_ws/COAS/post1");
+    filePost2.open("/home/hector/octave_ws/COAS/post2");
+    filePost3.open("/home/hector/octave_ws/COAS/post3");
 
     loop();
 }
@@ -35,6 +38,9 @@ BoundingBoxes::~BoundingBoxes()
     fileBetweenPosts.close();
     fileToPostsTimes.close();
     fileBetweenPostsTimes.close();
+    filePost1.close();
+    filePost2.close();
+    filePost3.close();
 }
 
 void BoundingBoxes::phase_cb(const std_msgs::Int8 phaseMode)
@@ -316,7 +322,7 @@ void BoundingBoxes::checkPostes(float xDim, float yDim, float zDim)
                             // cont_entrePostes++;
                             break;
                         }
-                    cont_entrePostes++;
+                        cont_entrePostes++;
                     }
                 }
             }
@@ -333,6 +339,18 @@ void BoundingBoxes::checkPostes(float xDim, float yDim, float zDim)
 
         save_distances(true, pathPoste1, pathPoste2, pathPoste3);
         save_distances(false, pathPoste12, pathPoste13, pathPoste23);
+        if (pathPoste1.poses.size() > 0)
+        {
+            save_pose(1, pathPoste1);
+        }
+        if (pathPoste2.poses.size() > 0)
+        {
+            save_pose(2, pathPoste2);
+        }
+        if (pathPoste3.poses.size() > 0)
+        {
+            save_pose(3, pathPoste3);
+        }
     }
 }
 
@@ -584,10 +602,27 @@ void BoundingBoxes::params()
     // }
 }
 
+void BoundingBoxes::save_pose(int nPost, nav_msgs::Path path)
+{
+    ROS_WARN("1");
+    switch (nPost)
+    {
+    case 1:
+        ROS_WARN("2");
+        filePost1 << path.poses.at(1).pose.position.x << path.poses.at(1).pose.position.y << std::endl;
+        break;
+    case 2:
+        filePost2 << path.poses.at(1).pose.position.x << path.poses.at(1).pose.position.y << std::endl;
+        break;
+    case 3:
+        filePost3 << path.poses.at(1).pose.position.x << path.poses.at(1).pose.position.y << std::endl;
+        break;
+    }
+    ROS_WARN("3");
+}
+
 void BoundingBoxes::save_distances(bool b, nav_msgs::Path path1, nav_msgs::Path path2, nav_msgs::Path path3)
 {
-    // std::ofstream file;
-    // file.open(fileName);
     float dist1, dist2, dist3;
 
     if (path1.poses.size() > 0)
@@ -626,12 +661,8 @@ void BoundingBoxes::save_distances(bool b, nav_msgs::Path path1, nav_msgs::Path 
         startTime = ros::Time::now().toSec();
         contTest++;
     }
-    // if(std::isnan(dist1) == true){
-    //     ROS_WARN("x");
-    // }
 
     if (dist1 != 0 && dist2 != 0 && dist3 != 0)
-    // if(std::isnan(dist1) == false || std::isnan(dist2) == false || std::isnan(dist3) == false )
     {
         if (b == true)
         {
@@ -644,8 +675,6 @@ void BoundingBoxes::save_distances(bool b, nav_msgs::Path path1, nav_msgs::Path 
             fileBetweenPostsTimes << ros::Time::now().toSec() - startTime << std::endl;
         }
     }
-
-    // file.close();
 }
 
 void BoundingBoxes::loop()
