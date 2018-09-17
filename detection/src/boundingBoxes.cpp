@@ -28,6 +28,11 @@ BoundingBoxes::BoundingBoxes()
     filePost1.open("/home/hector/octave_ws/COAS/post1");
     filePost2.open("/home/hector/octave_ws/COAS/post2");
     filePost3.open("/home/hector/octave_ws/COAS/post3");
+    filePost1Time.open("/home/hector/octave_ws/COAS/post1time");
+    filePost2Time.open("/home/hector/octave_ws/COAS/post2time");
+    filePost3Time.open("/home/hector/octave_ws/COAS/post3time");
+
+    contTest = contTestPose = 0;
 
     loop();
 }
@@ -41,6 +46,9 @@ BoundingBoxes::~BoundingBoxes()
     filePost1.close();
     filePost2.close();
     filePost3.close();
+    filePost1Time.close();
+    filePost2Time.close();
+    filePost3Time.close();
 }
 
 void BoundingBoxes::phase_cb(const std_msgs::Int8 phaseMode)
@@ -308,17 +316,17 @@ void BoundingBoxes::checkPostes(float xDim, float yDim, float zDim)
                         {
                         case 0:
                             pathPoste12 = constructPath(x1, y1, z1, 2);
-                            ROS_WARN("dist12: %f | cont_entrePostes: %i", dist, cont_entrePostes);
+                            // ROS_WARN("dist12: %f | cont_entrePostes: %i", dist, cont_entrePostes);
                             // cont_entrePostes++;
                             break;
                         case 1:
                             pathPoste13 = constructPath(x1, y1, z1, 2);
-                            ROS_WARN("dist13: %f | cont_entrePostes: %i", dist, cont_entrePostes);
+                            // ROS_WARN("dist13: %f | cont_entrePostes: %i", dist, cont_entrePostes);
                             // cont_entrePostes++;
                             break;
                         case 2:
                             pathPoste23 = constructPath(x1, y1, z1, 2);
-                            ROS_WARN("dist23: %f | cont_entrePostes: %i", dist, cont_entrePostes);
+                            // ROS_WARN("dist23: %f | cont_entrePostes: %i", dist, cont_entrePostes);
                             // cont_entrePostes++;
                             break;
                         }
@@ -339,6 +347,13 @@ void BoundingBoxes::checkPostes(float xDim, float yDim, float zDim)
 
         save_distances(true, pathPoste1, pathPoste2, pathPoste3);
         save_distances(false, pathPoste12, pathPoste13, pathPoste23);
+
+        if (contTestPose == 0)
+        {
+            startTimePose = ros::Time::now().toSec();
+            contTestPose++;
+        }
+
         if (pathPoste1.poses.size() > 0)
         {
             save_pose(1, pathPoste1);
@@ -604,21 +619,24 @@ void BoundingBoxes::params()
 
 void BoundingBoxes::save_pose(int nPost, nav_msgs::Path path)
 {
-    ROS_WARN("1");
+    // ROS_WARN("1");
     switch (nPost)
     {
     case 1:
-        ROS_WARN("2");
-        filePost1 << path.poses.at(1).pose.position.x << path.poses.at(1).pose.position.y << std::endl;
+        // ROS_WARN("2 timepose: %d | timedistance: %d", startTimePose, startTime);
+        filePost1 << path.poses.at(1).pose.position.x << " " << path.poses.at(1).pose.position.y << std::endl;
+        filePost1Time << ros::Time::now().toSec() - startTimePose << std::endl;
         break;
     case 2:
-        filePost2 << path.poses.at(1).pose.position.x << path.poses.at(1).pose.position.y << std::endl;
+        filePost2 << path.poses.at(1).pose.position.x << " " << path.poses.at(1).pose.position.y << std::endl;
+        filePost2Time << ros::Time::now().toSec() - startTimePose << std::endl;
         break;
     case 3:
-        filePost3 << path.poses.at(1).pose.position.x << path.poses.at(1).pose.position.y << std::endl;
+        filePost3 << path.poses.at(1).pose.position.x << " " << path.poses.at(1).pose.position.y << std::endl;
+        filePost3Time << ros::Time::now().toSec() - startTimePose << std::endl;
         break;
     }
-    ROS_WARN("3");
+    // ROS_WARN("3");
 }
 
 void BoundingBoxes::save_distances(bool b, nav_msgs::Path path1, nav_msgs::Path path2, nav_msgs::Path path3)

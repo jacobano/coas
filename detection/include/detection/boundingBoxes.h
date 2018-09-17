@@ -4,6 +4,7 @@
 #include <Eigen/Eigen>
 #include <nav_msgs/Path.h>
 #include <std_msgs/Int8.h>
+#include <std_msgs/Bool.h>
 #include <pcl_ros/transforms.h>
 #include <sensor_msgs/PointCloud2.h>
 #include "detection/vectorPointCloud.h"
@@ -52,8 +53,8 @@ private:
   ros::Publisher pub_boxArray, pub_mergeBoxesArray, pub_boxesRef, pub_pathPoste1, pub_pathPoste2, pub_pathPoste3, pub_pathPoste12, pub_pathPoste13, pub_pathPoste23;
 
   // Variables
-  Eigen::Vector4f centroid;
   int cont_postes = 0;
+  Eigen::Vector4f centroid;
   int label_box, label_mergeBox;
   std::vector<int> polygon_labels;
   std::vector<std::vector<int>> vec_polygon_labels;
@@ -63,9 +64,9 @@ private:
   float maxDistX, maxDistY, maxDistZ, maxDistXpol, maxDistYpol, maxDistZpol, maxBoxX, maxBoxY, maxBoxZ;
   nav_msgs::Path pathPoste1, pathPoste2, pathPoste3, pathPoste12, pathPoste13, pathPoste23;
 
-  std::ofstream fileToPosts, fileBetweenPosts, fileToPostsTimes, fileBetweenPostsTimes, filePost1, filePost2, filePost3;
-  int contTest = 0;
-  double startTime;
+  std::ofstream fileToPosts, fileBetweenPosts, fileToPostsTimes, fileBetweenPostsTimes, filePost1, filePost2, filePost3, filePost1Time, filePost2Time, filePost3Time;
+  int contTest, contTestPose;
+  double startTime, startTimePose;
 
   // Params
   int phase; // 1 Atraque - 2 Puerto - 3 Mar abierto

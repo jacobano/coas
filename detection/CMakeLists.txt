@@ -70,3 +70,10 @@ add_dependencies(volexFilter ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORT
 add_executable(volexFilter_node src/volexFilter_node.cpp)
 target_link_libraries(volexFilter_node volexFilter ${catkin_LIBRARIES})
 add_dependencies(volexFilter_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+add_library(matching src/matching.cpp)
+add_dependencies(matching ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+add_executable(matching_node src/matching_node.cpp)
+target_link_libraries(matching_node matching ${catkin_LIBRARIES})
+add_dependencies(matching_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
