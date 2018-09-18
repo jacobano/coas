@@ -13,10 +13,12 @@ Matching::Matching()
     ros::Subscriber sub_pathPoste23 = n.subscribe("/pathPoste23", 1, &Matching::cb_pathPoste23, this);
 
     // Publishers
-    pub = n.advertise<nav_msgs::Path>("/TestPath", 1);
     pub_marker1 = n.advertise<visualization_msgs::Marker>("/marker_post1", 1);
     pub_marker2 = n.advertise<visualization_msgs::Marker>("/marker_post2", 1);
     pub_marker3 = n.advertise<visualization_msgs::Marker>("/marker_post3", 1);
+    pub_marker4 = n.advertise<visualization_msgs::Marker>("/marker_post4", 1);
+    pub_marker5 = n.advertise<visualization_msgs::Marker>("/marker_post5", 1);
+    pub_marker6 = n.advertise<visualization_msgs::Marker>("/marker_post6", 1);
     cont = 0;
     toDo();
 
@@ -54,6 +56,7 @@ void Matching::cb_pathPoste13(const nav_msgs::Path path)
 
 void Matching::cb_pathPoste23(const nav_msgs::Path path)
 {
+
     nowPathPost23 = path;
     toDo();
 }
@@ -80,8 +83,8 @@ void Matching::drawPosts()
     marker_post1.pose.orientation.y = 0.0;
     marker_post1.pose.orientation.z = 0.0;
     marker_post1.pose.orientation.w = 1.0;
-    marker_post1.scale.x = 0.8;
-    marker_post1.scale.y = 0.8;
+    marker_post1.scale.x = 0.6;
+    marker_post1.scale.y = 0.6;
     marker_post1.scale.z = 0.6;
     marker_post1.color.a = 0.8;
     marker_post1.color.r = 1.0;
@@ -101,8 +104,8 @@ void Matching::drawPosts()
     marker_post2.pose.orientation.y = 0.0;
     marker_post2.pose.orientation.z = 0.0;
     marker_post2.pose.orientation.w = 1.0;
-    marker_post2.scale.x = 0.8;
-    marker_post2.scale.y = 0.8;
+    marker_post2.scale.x = 0.6;
+    marker_post2.scale.y = 0.6;
     marker_post2.scale.z = 0.6;
     marker_post2.color.a = 0.8;
     marker_post2.color.r = 0.0;
@@ -122,46 +125,118 @@ void Matching::drawPosts()
     marker_post3.pose.orientation.y = 0.0;
     marker_post3.pose.orientation.z = 0.0;
     marker_post3.pose.orientation.w = 1.0;
-    marker_post3.scale.x = 0.8;
-    marker_post3.scale.y = 0.8;
+    marker_post3.scale.x = 0.6;
+    marker_post3.scale.y = 0.6;
     marker_post3.scale.z = 0.6;
     marker_post3.color.a = 0.8;
     marker_post3.color.r = 0.0;
     marker_post3.color.g = 0.0;
     marker_post3.color.b = 1.0;
 
+    marker_post4.header.frame_id = "velodyne";
+    marker_post4.header.stamp = ros::Time();
+    marker_post4.ns = "my_namespace";
+    marker_post4.id = 0;
+    marker_post4.type = visualization_msgs::Marker::CYLINDER;
+    marker_post4.action = visualization_msgs::Marker::ADD;
+    marker_post4.pose.position.x = nowPathPosts.poses.at(0).pose.position.x;
+    marker_post4.pose.position.y = nowPathPosts.poses.at(0).pose.position.y;
+    marker_post4.pose.position.z = nowPathPosts.poses.at(0).pose.position.z;
+    marker_post4.pose.orientation.x = 0.0;
+    marker_post4.pose.orientation.y = 0.0;
+    marker_post4.pose.orientation.z = 0.0;
+    marker_post4.pose.orientation.w = 1.0;
+    marker_post4.scale.x = 0.3;
+    marker_post4.scale.y = 0.3;
+    marker_post4.scale.z = 1.0;
+    marker_post4.color.a = 1.0;
+    marker_post4.color.r = 0.5;
+    marker_post4.color.g = 0.5;
+    marker_post4.color.b = 0.0;
+
+    marker_post5.header.frame_id = "velodyne";
+    marker_post5.header.stamp = ros::Time();
+    marker_post5.ns = "my_namespace";
+    marker_post5.id = 0;
+    marker_post5.type = visualization_msgs::Marker::CYLINDER;
+    marker_post5.action = visualization_msgs::Marker::ADD;
+    marker_post5.pose.position.x = nowPathPosts.poses.at(1).pose.position.x;
+    marker_post5.pose.position.y = nowPathPosts.poses.at(1).pose.position.y;
+    marker_post5.pose.position.z = nowPathPosts.poses.at(1).pose.position.z;
+    marker_post5.pose.orientation.x = 0.0;
+    marker_post5.pose.orientation.y = 0.0;
+    marker_post5.pose.orientation.z = 0.0;
+    marker_post5.pose.orientation.w = 1.0;
+    marker_post5.scale.x = 0.3;
+    marker_post5.scale.y = 0.3;
+    marker_post5.scale.z = 1.0;
+    marker_post5.color.a = 1.0;
+    marker_post5.color.r = 0.5;
+    marker_post5.color.g = 0.0;
+    marker_post5.color.b = 0.5;
+
+    marker_post6.header.frame_id = "velodyne";
+    marker_post6.header.stamp = ros::Time();
+    marker_post6.ns = "my_namespace";
+    marker_post6.id = 0;
+    marker_post6.type = visualization_msgs::Marker::CYLINDER;
+    marker_post6.action = visualization_msgs::Marker::ADD;
+    marker_post6.pose.position.x = nowPathPosts.poses.at(2).pose.position.x;
+    marker_post6.pose.position.y = nowPathPosts.poses.at(2).pose.position.y;
+    marker_post6.pose.position.z = nowPathPosts.poses.at(2).pose.position.z;
+    marker_post6.pose.orientation.x = 0.0;
+    marker_post6.pose.orientation.y = 0.0;
+    marker_post6.pose.orientation.z = 0.0;
+    marker_post6.pose.orientation.w = 1.0;
+    marker_post6.scale.x = 0.3;
+    marker_post6.scale.y = 0.3;
+    marker_post6.scale.z = 1.0;
+    marker_post6.color.a = 1.0;
+    marker_post6.color.r = 0.0;
+    marker_post6.color.g = 0.5;
+    marker_post6.color.b = 0.5;
+
     pub_marker1.publish(marker_post1);
     pub_marker2.publish(marker_post2);
     pub_marker3.publish(marker_post3);
+    pub_marker4.publish(marker_post4);
+    pub_marker5.publish(marker_post5);
+    pub_marker6.publish(marker_post6);
 }
 
 void Matching::toDo()
 {
-    ROS_WARN("Matching | cont: %i", cont);
+    // En el instante inicial se guarda la primera entrada como etiquetas válidas
     switch (cont)
     {
     case 0:
+        // Se inicializa si están los tres postes validados. 
         if (!nowPathPost12.poses.empty() && !nowPathPost13.poses.empty() && !nowPathPost23.poses.empty())
         {
+            ROS_WARN("Init Matching");
+            // Se guardan los tres waypoints relevantes del estado actual en el vector del instante anterior.
             prevPathPosts.poses.push_back(nowPathPost1.poses.at(1));
             prevPathPosts.poses.push_back(nowPathPost2.poses.at(1));
             prevPathPosts.poses.push_back(nowPathPost3.poses.at(1));
-
             cont++;
         }
         break;
     case 1:
-        // Me aseguro de hacer este paso una vez por callback.
+        // Se ejecuta si están los tres postes validados y si los paths han cambiado.  
         if (prevPathPosts.poses.at(1).pose.position.x != nowPathPost1.poses.at(1).pose.position.x && !nowPathPost12.poses.empty() && !nowPathPost13.poses.empty() && !nowPathPost23.poses.empty())
         {
+            // Se guardan los tres waypoints relevantes del estado actual en un vector.
             nowPathPosts.poses.push_back(nowPathPost1.poses.at(1));
             nowPathPosts.poses.push_back(nowPathPost2.poses.at(1));
             nowPathPosts.poses.push_back(nowPathPost3.poses.at(1));
             std::vector<int> vec_labels;
+            std::vector<float> vec_check_dist;
+            // Se compara cada waypoint relevante del estado anterior con los waypoints del estado actual.
             for (int i = 0; i < prevPathPosts.poses.size(); i++)
             {
                 for (int j = 0; j < nowPathPosts.poses.size(); j++)
                 {
+                    // Se calcula la distancia que hay entre los waypoints del instante actual y el instante anterior.
                     vec_distAndLabel[j] = dist2Points(prevPathPosts.poses.at(i).pose.position.x, prevPathPosts.poses.at(i).pose.position.y, prevPathPosts.poses.at(i).pose.position.z,
                                                       nowPathPosts.poses.at(j).pose.position.x, nowPathPosts.poses.at(j).pose.position.y, nowPathPosts.poses.at(j).pose.position.z);
 
@@ -169,11 +244,7 @@ void Matching::toDo()
                                                    nowPathPosts.poses.at(j).pose.position.x, nowPathPosts.poses.at(j).pose.position.y, nowPathPosts.poses.at(j).pose.position.z));
                 }
 
-                // for (std::map<int, float>::iterator ii = vec_distAndLabel.begin(); ii != vec_distAndLabel.end(); ++ii)
-                // {
-                //     std::cout << (*ii).first << ": " << (*ii).second << std::endl;
-                // }
-
+                // Se ordenan todas las distancias resultantes de menor a mayor.
                 std::vector<pair> vec;
                 std::copy(vec_distAndLabel.begin(), vec_distAndLabel.end(), std::back_inserter<std::vector<pair>>(vec));
                 std::sort(vec.begin(), vec.end(),
@@ -184,41 +255,41 @@ void Matching::toDo()
                               return l.first < r.first;
                           });
 
-                // for (auto const &pair : vec)
-                // {
-                //     std::cout << '{' << pair.first << "," << pair.second << "}" << std::endl;
-                // }
-
                 vec_labels.push_back(vec[0].first);
-                // for (int i = 0; i < vec.size(); i++){
-                //     std::cout << vec[i].first << std::endl;
-                // }
-
-                // std::cout << "sort: ";
-                // std::sort(vec_dist.begin(), vec_dist.end());
-                // for (int i = 0; i < vec_dist.size(); i++)
-                // {
-                //     std::cout << vec_dist[i] << " ";
-                // }
-                // std::cout << "\n";
+                vec_check_dist.push_back(vec[0].second);
                 vec_dist.clear();
             }
-
+            // Se limpia el vector de waypoints del instante anterios y se le coloca el frame_id correspondiente. 
             prevPathPosts.poses.clear();
             prevPathPosts.header.frame_id = "velodyne";
-            std::cout << "[     ] Vec Labels: ";
+            // [PARA .BAG CON LOOP] Se revisan todas las distancias y si hay mucha diferencia, se asume que el estado actual es el bueno y, por tanto, se tiene que volver a inicializar.
+            for (int i = 0; i < vec_check_dist.size(); i++)
+            {
+                if (vec_check_dist[i] > 2.0)
+                {
+                    cont = 0;
+                    ROS_WARN("Reset Matching");
+                    break;
+                }
+            }
+            // [PARA .BAG CON LOOP] Se sale de el estado actual y reinicia el algoritmo.
+            if (cont == 0)
+            {
+                break;
+            }
+            // Se guarda como instante anterior, los postes con el identificador correctamente colocado. 
             for (int i = 0; i < vec_labels.size(); i++)
             {
-                std::cout << vec_labels[i] << " ";
                 prevPathPosts.poses.push_back(nowPathPosts.poses.at(vec_labels[i]));
             }
-            std::cout << std::endl;
-            pub.publish(prevPathPosts);
-            nowPathPost23.poses.clear();
-            nowPathPosts.poses.clear();
-            vec_labels.clear();
-
+            // Se utilizan Markers para visualizar en Rviz el resultado. 
             drawPosts();
+            // Limpia vectores.
+            vec_labels.clear();
+            vec_check_dist.clear();
+            vec_distAndLabel.clear();
+            nowPathPosts.poses.clear();
+            nowPathPost23.poses.clear();
         }
         break;
     }

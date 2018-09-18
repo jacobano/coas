@@ -47,7 +47,7 @@ void ThinMapping::params()
 
 void ThinMapping::matrix_cb(const mapping::vectorVector input)
 {
-    ros::Time begin = ros::Time::now();
+    double begin = ros::Time::now().toSec();
     mapping::vectorVector rows = input;
     std::vector<std::vector<int>> matrix(rr, std::vector<int>(cc));
     std::vector<std::vector<int>> thinMatrix(rr, std::vector<int>(cc));
@@ -112,7 +112,8 @@ void ThinMapping::matrix_cb(const mapping::vectorVector input)
     thinMatrix[rang][rang] = 1;
     save_matrix("/home/hector/Matlab_ws/matrix2.txt", matrix);
     save_matrix("/home/hector/Matlab_ws/thinMatrix.txt", thinMatrix);
-    std::cout << "[ THMP] Time: " << ros::Time::now() - begin << std::endl;
+    std::cout << " - - - - - - - - - - - - - - - - -" << std::endl;
+    std::cout << "[ THMP] Time: " << ros::Time::now().toSec() - begin << std::endl;
 }
 
 void ThinMapping::save_matrix(char *fileName, const std::vector<std::vector<int>> &M)
