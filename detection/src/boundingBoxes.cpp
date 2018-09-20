@@ -301,13 +301,13 @@ void BoundingBoxes::checkPostes(float xDim, float yDim, float zDim)
                     float dist = dist2Points(boxesRef.boxes.at(i).pose.position.x, boxesRef.boxes.at(i).pose.position.y, boxesRef.boxes.at(i).pose.position.z,
                                              boxesRef.boxes.at(j).pose.position.x, boxesRef.boxes.at(j).pose.position.y, boxesRef.boxes.at(j).pose.position.z);
                     // Prepara el path
-                    std::vector<float> x1, y1, z1;
-                    x1.push_back(boxesRef.boxes.at(i).pose.position.x);
-                    y1.push_back(boxesRef.boxes.at(i).pose.position.y);
-                    z1.push_back(boxesRef.boxes.at(i).pose.position.z);
-                    x1.push_back(boxesRef.boxes.at(j).pose.position.x);
-                    y1.push_back(boxesRef.boxes.at(j).pose.position.y);
-                    z1.push_back(boxesRef.boxes.at(j).pose.position.z);
+                    std::vector<float> x0, y0, z0;
+                    x0.push_back(boxesRef.boxes.at(i).pose.position.x);
+                    y0.push_back(boxesRef.boxes.at(i).pose.position.y);
+                    z0.push_back(boxesRef.boxes.at(i).pose.position.z);
+                    x0.push_back(boxesRef.boxes.at(j).pose.position.x);
+                    y0.push_back(boxesRef.boxes.at(j).pose.position.y);
+                    z0.push_back(boxesRef.boxes.at(j).pose.position.z);
                     // Si las distancias corresponden a las distancias buscadas
                     if ((minDistPoste12 < dist && dist < maxDistPoste12) || (minDistPoste13 < dist && dist < maxDistPoste13))
                     {
@@ -315,17 +315,17 @@ void BoundingBoxes::checkPostes(float xDim, float yDim, float zDim)
                         switch (cont_entrePostes)
                         {
                         case 0:
-                            pathPoste12 = constructPath(x1, y1, z1, 2);
+                            pathPoste12 = constructPath(x0, y0, z0, 2);
                             // ROS_WARN("dist12: %f | cont_entrePostes: %i", dist, cont_entrePostes);
                             // cont_entrePostes++;
                             break;
                         case 1:
-                            pathPoste13 = constructPath(x1, y1, z1, 2);
+                            pathPoste13 = constructPath(x0, y0, z0, 2);
                             // ROS_WARN("dist13: %f | cont_entrePostes: %i", dist, cont_entrePostes);
                             // cont_entrePostes++;
                             break;
                         case 2:
-                            pathPoste23 = constructPath(x1, y1, z1, 2);
+                            pathPoste23 = constructPath(x0, y0, z0, 2);
                             // ROS_WARN("dist23: %f | cont_entrePostes: %i", dist, cont_entrePostes);
                             // cont_entrePostes++;
                             break;

@@ -20,6 +20,7 @@ Matching::Matching()
     pub_marker5 = n.advertise<visualization_msgs::Marker>("/marker_post5", 1);
     pub_marker6 = n.advertise<visualization_msgs::Marker>("/marker_post6", 1);
     cont = 0;
+
     toDo();
 
     loop();
@@ -47,11 +48,13 @@ void Matching::cb_pathPoste3(const nav_msgs::Path path)
 void Matching::cb_pathPoste12(const nav_msgs::Path path)
 {
     nowPathPost12 = path;
+    toDo();
 }
 
 void Matching::cb_pathPoste13(const nav_msgs::Path path)
 {
     nowPathPost13 = path;
+    toDo();
 }
 
 void Matching::cb_pathPoste23(const nav_msgs::Path path)
@@ -206,11 +209,23 @@ void Matching::drawPosts()
 
 void Matching::toDo()
 {
+    marker_post1.action = visualization_msgs::Marker::DELETE;
+    pub_marker1.publish(marker_post1);
+    marker_post2.action = visualization_msgs::Marker::DELETE;
+    pub_marker2.publish(marker_post2);
+    marker_post3.action = visualization_msgs::Marker::DELETE;
+    pub_marker3.publish(marker_post3);
+    marker_post4.action = visualization_msgs::Marker::DELETE;
+    pub_marker4.publish(marker_post4);
+    marker_post5.action = visualization_msgs::Marker::DELETE;
+    pub_marker5.publish(marker_post5);
+    marker_post6.action = visualization_msgs::Marker::DELETE;
+    pub_marker6.publish(marker_post6);
     // En el instante inicial se guarda la primera entrada como etiquetas válidas
     switch (cont)
     {
     case 0:
-        // Se inicializa si están los tres postes validados. 
+        // Se inicializa si están los tres postes validados.
         if (!nowPathPost12.poses.empty() && !nowPathPost13.poses.empty() && !nowPathPost23.poses.empty())
         {
             ROS_WARN("Init Matching");
@@ -222,13 +237,28 @@ void Matching::toDo()
         }
         break;
     case 1:
-        // Se ejecuta si están los tres postes validados y si los paths han cambiado.  
-        if (prevPathPosts.poses.at(1).pose.position.x != nowPathPost1.poses.at(1).pose.position.x && !nowPathPost12.poses.empty() && !nowPathPost13.poses.empty() && !nowPathPost23.poses.empty())
+        // Se ejecuta si están los tres postes validados y si los paths han cambiado.
+        // if (/*prevPathPosts.poses.at(1).pose.position.x != nowPathPost1.poses.at(1).pose.position.x &&*/ (!nowPathPost12.poses.empty() && !nowPathPost13.poses.empty() || !nowPathPost23.poses.empty()))
+        if ((!nowPathPost12.poses.empty() && (!nowPathPost13.poses.empty() || !nowPathPost23.poses.empty())) ||
+            (!nowPathPost13.poses.empty() && (!nowPathPost12.poses.empty() || !nowPathPost23.poses.empty())) ||
+            (!nowPathPost23.poses.empty() && (!nowPathPost12.poses.empty() || !nowPathPost13.poses.empty())))
         {
-            // Se guardan los tres waypoints relevantes del estado actual en un vector.
-            nowPathPosts.poses.push_back(nowPathPost1.poses.at(1));
-            nowPathPosts.poses.push_back(nowPathPost2.poses.at(1));
-            nowPathPosts.poses.push_back(nowPathPost3.poses.at(1));
+            // Se guardan los 6 waypoints relevantes del estado actual en un vector.
+            if (!nowPathPost12.poses.empty())
+            {
+                nowPathPosts.poses.push_back(nowPathPost12.poses.at(0));
+                nowPathPosts.poses.push_back(nowPathPost12.poses.at(1));
+            }
+            if (!nowPathPost13.poses.empty())
+            {
+                nowPathPosts.poses.push_back(nowPathPost13.poses.at(0));
+                nowPathPosts.poses.push_back(nowPathPost13.poses.at(1));
+            }
+            if (!nowPathPost23.poses.empty())
+            {
+                nowPathPosts.poses.push_back(nowPathPost23.poses.at(0));
+                nowPathPosts.poses.push_back(nowPathPost23.poses.at(1));
+            }
             std::vector<int> vec_labels;
             std::vector<float> vec_check_dist;
             // Se compara cada waypoint relevante del estado anterior con los waypoints del estado actual.
@@ -251,7 +281,6 @@ void Matching::toDo()
                           [](const pair &l, const pair &r) {
                               if (l.second != r.second)
                                   return l.second < r.second;
-
                               return l.first < r.first;
                           });
 
@@ -259,30 +288,30 @@ void Matching::toDo()
                 vec_check_dist.push_back(vec[0].second);
                 vec_dist.clear();
             }
-            // Se limpia el vector de waypoints del instante anterios y se le coloca el frame_id correspondiente. 
+            // Se limpia el vector de waypoints del instante anterios y se le coloca el frame_id correspondiente.
             prevPathPosts.poses.clear();
             prevPathPosts.header.frame_id = "velodyne";
             // [PARA .BAG CON LOOP] Se revisan todas las distancias y si hay mucha diferencia, se asume que el estado actual es el bueno y, por tanto, se tiene que volver a inicializar.
-            for (int i = 0; i < vec_check_dist.size(); i++)
-            {
-                if (vec_check_dist[i] > 2.0)
-                {
-                    cont = 0;
-                    ROS_WARN("Reset Matching");
-                    break;
-                }
-            }
-            // [PARA .BAG CON LOOP] Se sale de el estado actual y reinicia el algoritmo.
-            if (cont == 0)
-            {
-                break;
-            }
-            // Se guarda como instante anterior, los postes con el identificador correctamente colocado. 
+            // for (int i = 0; i < vec_check_dist.size(); i++)
+            // {
+            //     if (vec_check_dist[i] > 2.0)
+            //     {
+            //         cont = 0;
+            //         ROS_WARN("Reset Matching");
+            //         break;
+            //     }
+            // }
+            // // [PARA .BAG CON LOOP] Se sale de el estado actual y reinicia el algoritmo.
+            // if (cont == 0)
+            // {
+            //     break;
+            // }
+            // Se guarda como instante anterior, los postes con el identificador correctamente colocado.
             for (int i = 0; i < vec_labels.size(); i++)
             {
                 prevPathPosts.poses.push_back(nowPathPosts.poses.at(vec_labels[i]));
             }
-            // Se utilizan Markers para visualizar en Rviz el resultado. 
+            // Se utilizan Markers para visualizar en Rviz el resultado.
             drawPosts();
             // Limpia vectores.
             vec_labels.clear();
