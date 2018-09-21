@@ -21,16 +21,16 @@ BoundingBoxes::BoundingBoxes()
     pub_pathPoste13 = n.advertise<nav_msgs::Path>("/pathPoste13", 1);
     pub_pathPoste23 = n.advertise<nav_msgs::Path>("/pathPoste23", 1);
 
-    fileToPosts.open("/home/hector/octave_ws/COAS/distancesToPosts");
-    fileBetweenPosts.open("/home/hector/octave_ws/COAS/distancesBetweenPosts");
-    fileBetweenPostsTimes.open("/home/hector/octave_ws/COAS/timesBetweenPosts");
-    fileToPostsTimes.open("/home/hector/octave_ws/COAS/timesToPosts");
-    filePost1.open("/home/hector/octave_ws/COAS/post1");
-    filePost2.open("/home/hector/octave_ws/COAS/post2");
-    filePost3.open("/home/hector/octave_ws/COAS/post3");
-    filePost1Time.open("/home/hector/octave_ws/COAS/post1time");
-    filePost2Time.open("/home/hector/octave_ws/COAS/post2time");
-    filePost3Time.open("/home/hector/octave_ws/COAS/post3time");
+    fileToPosts.open("/home/hector/matlab_ws/COAS/distancesToPosts");
+    fileBetweenPosts.open("/home/hector/matlab_ws/COAS/distancesBetweenPosts");
+    fileBetweenPostsTimes.open("/home/hector/matlab_ws/COAS/timesBetweenPosts");
+    fileToPostsTimes.open("/home/hector/matlab_ws/COAS/timesToPosts");
+    filePost1.open("/home/hector/matlab_ws/COAS/post1");
+    filePost2.open("/home/hector/matlab_ws/COAS/post2");
+    filePost3.open("/home/hector/matlab_ws/COAS/post3");
+    filePost1Time.open("/home/hector/matlab_ws/COAS/post1time");
+    filePost2Time.open("/home/hector/matlab_ws/COAS/post2time");
+    filePost3Time.open("/home/hector/matlab_ws/COAS/post3time");
 
     contTest = contTestPose = 0;
 

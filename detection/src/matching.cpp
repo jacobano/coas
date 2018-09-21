@@ -19,6 +19,14 @@ Matching::Matching()
     pub_marker4 = n.advertise<visualization_msgs::Marker>("/marker_post4", 1);
     pub_marker5 = n.advertise<visualization_msgs::Marker>("/marker_post5", 1);
     pub_marker6 = n.advertise<visualization_msgs::Marker>("/marker_post6", 1);
+
+    filePost1.open("/home/hector/matlab_ws/COAS/matchPost1");
+    filePost2.open("/home/hector/matlab_ws/COAS/matchPost2");
+    filePost3.open("/home/hector/matlab_ws/COAS/matchPost3");
+    filePost1Time.open("/home/hector/matlab_ws/COAS/matchPost1time");
+    filePost2Time.open("/home/hector/matlab_ws/COAS/matchPost2time");
+    filePost3Time.open("/home/hector/matlab_ws/COAS/matchPost3time");
+
     cont = 0;
 
     toDo();
@@ -28,6 +36,12 @@ Matching::Matching()
 
 Matching::~Matching()
 {
+    filePost1.close();
+    filePost2.close();
+    filePost3.close();
+    filePost1Time.close();
+    filePost2Time.close();
+    filePost3Time.close();
 }
 
 void Matching::cb_pathPoste1(const nav_msgs::Path path)
@@ -207,6 +221,28 @@ void Matching::drawPosts()
     pub_marker6.publish(marker_post6);
 }
 
+void Matching::save_pose(int nPost, geometry_msgs::PoseStamped waypoint)
+{
+    // ROS_WARN("1");
+    switch (nPost)
+    {
+    case 0:
+        // ROS_WARN("2 timepose: %d | timedistance: %d", startTimePose, startTime);
+        filePost1 << waypoint.pose.position.x << " " << waypoint.pose.position.y << std::endl;
+        filePost1Time << ros::Time::now().toSec() - startTimePose << std::endl;
+        break;
+    case 1:
+        filePost2 << waypoint.pose.position.x << " " << waypoint.pose.position.y << std::endl;
+        filePost2Time << ros::Time::now().toSec() - startTimePose << std::endl;
+        break;
+    case 2:
+        filePost3 << waypoint.pose.position.x << " " << waypoint.pose.position.y << std::endl;
+        filePost3Time << ros::Time::now().toSec() - startTimePose << std::endl;
+        break;
+    }
+    // ROS_WARN("3");
+}
+
 void Matching::toDo()
 {
     marker_post1.action = visualization_msgs::Marker::DELETE;
@@ -234,11 +270,12 @@ void Matching::toDo()
             prevPathPosts.poses.push_back(nowPathPost2.poses.at(1));
             prevPathPosts.poses.push_back(nowPathPost3.poses.at(1));
             cont++;
+            startTimePose = ros::Time::now().toSec();
         }
         break;
     case 1:
         // Se ejecuta si están los tres postes validados y si los paths han cambiado.
-        // if (/*prevPathPosts.poses.at(1).pose.position.x != nowPathPost1.poses.at(1).pose.position.x &&*/ (!nowPathPost12.poses.empty() && !nowPathPost13.poses.empty() || !nowPathPost23.poses.empty()))
+        // if (!nowPathPost12.poses.empty() || !nowPathPost13.poses.empty() || !nowPathPost23.poses.empty())
         if ((!nowPathPost12.poses.empty() && (!nowPathPost13.poses.empty() || !nowPathPost23.poses.empty())) ||
             (!nowPathPost13.poses.empty() && (!nowPathPost12.poses.empty() || !nowPathPost23.poses.empty())) ||
             (!nowPathPost23.poses.empty() && (!nowPathPost12.poses.empty() || !nowPathPost13.poses.empty())))
@@ -310,6 +347,11 @@ void Matching::toDo()
             for (int i = 0; i < vec_labels.size(); i++)
             {
                 prevPathPosts.poses.push_back(nowPathPosts.poses.at(vec_labels[i]));
+            }
+            // Se guardan las posiciones de los postes identificados
+            for (int i = 0; i < prevPathPosts.poses.size(); i++)
+            {
+                save_pose(i, prevPathPosts.poses.at(i));
             }
             // Se utilizan Markers para visualizar en Rviz el resultado.
             drawPosts();
