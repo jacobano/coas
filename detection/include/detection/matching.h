@@ -19,6 +19,7 @@ private:
   void drawPosts();
   void save_pose(int nPost, geometry_msgs::PoseStamped waypoint);
   float dist2Points(float x1, float y1, float z1, float x2, float y2, float z2);
+  geometry_msgs::PoseStamped findMissingPost(float x2, float y2, float x3, float y3);
 
   // Callbacks
   void cb_pathPoste1(const nav_msgs::Path path);
@@ -40,7 +41,6 @@ private:
   // Variables
   typedef std::pair<int, float> pair;
   int cont;
-  std::vector<float> vec_dist;
   std::map<int, float> vec_distAndLabel;
   nav_msgs::Path nowPathPost1, nowPathPost2, nowPathPost3, nowPathPost12, nowPathPost13, nowPathPost23, prevPathPosts, nowPathPosts;
   std::ofstream filePost1, filePost2, filePost3, filePost1Time, filePost2Time, filePost3Time;

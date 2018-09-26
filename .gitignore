@@ -1,3 +1,4 @@
 /tracking/
 /mapping/src/mapping-origin.cpp
 /mapping/src/voxtraversalOriginal.cpp
+/detection/src/test_root_finding.cpp

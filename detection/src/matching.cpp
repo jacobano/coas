@@ -1,4 +1,5 @@
 #include <detection/matching.h>
+#include "rootfinding/multi_dimensional_root_finding.hpp"
 
 Matching::Matching()
 {
@@ -87,131 +88,144 @@ float Matching::dist2Points(float x1, float y1, float z1, float x2, float y2, fl
 
 void Matching::drawPosts()
 {
-    marker_post1.header.frame_id = "velodyne";
-    marker_post1.header.stamp = ros::Time();
-    marker_post1.ns = "my_namespace";
-    marker_post1.id = 0;
-    marker_post1.type = visualization_msgs::Marker::CYLINDER;
-    marker_post1.action = visualization_msgs::Marker::ADD;
-    marker_post1.pose.position.x = prevPathPosts.poses.at(0).pose.position.x;
-    marker_post1.pose.position.y = prevPathPosts.poses.at(0).pose.position.y;
-    marker_post1.pose.position.z = prevPathPosts.poses.at(0).pose.position.z;
-    marker_post1.pose.orientation.x = 0.0;
-    marker_post1.pose.orientation.y = 0.0;
-    marker_post1.pose.orientation.z = 0.0;
-    marker_post1.pose.orientation.w = 1.0;
-    marker_post1.scale.x = 0.6;
-    marker_post1.scale.y = 0.6;
-    marker_post1.scale.z = 0.6;
-    marker_post1.color.a = 0.8;
-    marker_post1.color.r = 1.0;
-    marker_post1.color.g = 0.0;
-    marker_post1.color.b = 0.0;
-
-    marker_post2.header.frame_id = "velodyne";
-    marker_post2.header.stamp = ros::Time();
-    marker_post2.ns = "my_namespace";
-    marker_post2.id = 0;
-    marker_post2.type = visualization_msgs::Marker::CYLINDER;
-    marker_post2.action = visualization_msgs::Marker::ADD;
-    marker_post2.pose.position.x = prevPathPosts.poses.at(1).pose.position.x;
-    marker_post2.pose.position.y = prevPathPosts.poses.at(1).pose.position.y;
-    marker_post2.pose.position.z = prevPathPosts.poses.at(1).pose.position.z;
-    marker_post2.pose.orientation.x = 0.0;
-    marker_post2.pose.orientation.y = 0.0;
-    marker_post2.pose.orientation.z = 0.0;
-    marker_post2.pose.orientation.w = 1.0;
-    marker_post2.scale.x = 0.6;
-    marker_post2.scale.y = 0.6;
-    marker_post2.scale.z = 0.6;
-    marker_post2.color.a = 0.8;
-    marker_post2.color.r = 0.0;
-    marker_post2.color.g = 1.0;
-    marker_post2.color.b = 0.0;
-
-    marker_post3.header.frame_id = "velodyne";
-    marker_post3.header.stamp = ros::Time();
-    marker_post3.ns = "my_namespace";
-    marker_post3.id = 0;
-    marker_post3.type = visualization_msgs::Marker::CYLINDER;
-    marker_post3.action = visualization_msgs::Marker::ADD;
-    marker_post3.pose.position.x = prevPathPosts.poses.at(2).pose.position.x;
-    marker_post3.pose.position.y = prevPathPosts.poses.at(2).pose.position.y;
-    marker_post3.pose.position.z = prevPathPosts.poses.at(2).pose.position.z;
-    marker_post3.pose.orientation.x = 0.0;
-    marker_post3.pose.orientation.y = 0.0;
-    marker_post3.pose.orientation.z = 0.0;
-    marker_post3.pose.orientation.w = 1.0;
-    marker_post3.scale.x = 0.6;
-    marker_post3.scale.y = 0.6;
-    marker_post3.scale.z = 0.6;
-    marker_post3.color.a = 0.8;
-    marker_post3.color.r = 0.0;
-    marker_post3.color.g = 0.0;
-    marker_post3.color.b = 1.0;
-
-    marker_post4.header.frame_id = "velodyne";
-    marker_post4.header.stamp = ros::Time();
-    marker_post4.ns = "my_namespace";
-    marker_post4.id = 0;
-    marker_post4.type = visualization_msgs::Marker::CYLINDER;
-    marker_post4.action = visualization_msgs::Marker::ADD;
-    marker_post4.pose.position.x = nowPathPosts.poses.at(0).pose.position.x;
-    marker_post4.pose.position.y = nowPathPosts.poses.at(0).pose.position.y;
-    marker_post4.pose.position.z = nowPathPosts.poses.at(0).pose.position.z;
-    marker_post4.pose.orientation.x = 0.0;
-    marker_post4.pose.orientation.y = 0.0;
-    marker_post4.pose.orientation.z = 0.0;
-    marker_post4.pose.orientation.w = 1.0;
-    marker_post4.scale.x = 0.3;
-    marker_post4.scale.y = 0.3;
-    marker_post4.scale.z = 1.0;
-    marker_post4.color.a = 1.0;
-    marker_post4.color.r = 0.5;
-    marker_post4.color.g = 0.5;
-    marker_post4.color.b = 0.0;
-
-    marker_post5.header.frame_id = "velodyne";
-    marker_post5.header.stamp = ros::Time();
-    marker_post5.ns = "my_namespace";
-    marker_post5.id = 0;
-    marker_post5.type = visualization_msgs::Marker::CYLINDER;
-    marker_post5.action = visualization_msgs::Marker::ADD;
-    marker_post5.pose.position.x = nowPathPosts.poses.at(1).pose.position.x;
-    marker_post5.pose.position.y = nowPathPosts.poses.at(1).pose.position.y;
-    marker_post5.pose.position.z = nowPathPosts.poses.at(1).pose.position.z;
-    marker_post5.pose.orientation.x = 0.0;
-    marker_post5.pose.orientation.y = 0.0;
-    marker_post5.pose.orientation.z = 0.0;
-    marker_post5.pose.orientation.w = 1.0;
-    marker_post5.scale.x = 0.3;
-    marker_post5.scale.y = 0.3;
-    marker_post5.scale.z = 1.0;
-    marker_post5.color.a = 1.0;
-    marker_post5.color.r = 0.5;
-    marker_post5.color.g = 0.0;
-    marker_post5.color.b = 0.5;
-
-    marker_post6.header.frame_id = "velodyne";
-    marker_post6.header.stamp = ros::Time();
-    marker_post6.ns = "my_namespace";
-    marker_post6.id = 0;
-    marker_post6.type = visualization_msgs::Marker::CYLINDER;
-    marker_post6.action = visualization_msgs::Marker::ADD;
-    marker_post6.pose.position.x = nowPathPosts.poses.at(2).pose.position.x;
-    marker_post6.pose.position.y = nowPathPosts.poses.at(2).pose.position.y;
-    marker_post6.pose.position.z = nowPathPosts.poses.at(2).pose.position.z;
-    marker_post6.pose.orientation.x = 0.0;
-    marker_post6.pose.orientation.y = 0.0;
-    marker_post6.pose.orientation.z = 0.0;
-    marker_post6.pose.orientation.w = 1.0;
-    marker_post6.scale.x = 0.3;
-    marker_post6.scale.y = 0.3;
-    marker_post6.scale.z = 1.0;
-    marker_post6.color.a = 1.0;
-    marker_post6.color.r = 0.0;
-    marker_post6.color.g = 0.5;
-    marker_post6.color.b = 0.5;
+    if (prevPathPosts.poses.size() > 0)
+    {
+        marker_post1.header.frame_id = "velodyne";
+        marker_post1.header.stamp = ros::Time();
+        marker_post1.ns = "my_namespace";
+        marker_post1.id = 0;
+        marker_post1.type = visualization_msgs::Marker::CYLINDER;
+        marker_post1.action = visualization_msgs::Marker::ADD;
+        marker_post1.pose.position.x = prevPathPosts.poses.at(0).pose.position.x;
+        marker_post1.pose.position.y = prevPathPosts.poses.at(0).pose.position.y;
+        marker_post1.pose.position.z = prevPathPosts.poses.at(0).pose.position.z;
+        marker_post1.pose.orientation.x = 0.0;
+        marker_post1.pose.orientation.y = 0.0;
+        marker_post1.pose.orientation.z = 0.0;
+        marker_post1.pose.orientation.w = 1.0;
+        marker_post1.scale.x = 0.6;
+        marker_post1.scale.y = 0.6;
+        marker_post1.scale.z = 0.6;
+        marker_post1.color.a = 0.8;
+        marker_post1.color.r = 1.0;
+        marker_post1.color.g = 0.0;
+        marker_post1.color.b = 0.0;
+    }
+    if (prevPathPosts.poses.size() > 1)
+    {
+        marker_post2.header.frame_id = "velodyne";
+        marker_post2.header.stamp = ros::Time();
+        marker_post2.ns = "my_namespace";
+        marker_post2.id = 0;
+        marker_post2.type = visualization_msgs::Marker::CYLINDER;
+        marker_post2.action = visualization_msgs::Marker::ADD;
+        marker_post2.pose.position.x = prevPathPosts.poses.at(1).pose.position.x;
+        marker_post2.pose.position.y = prevPathPosts.poses.at(1).pose.position.y;
+        marker_post2.pose.position.z = prevPathPosts.poses.at(1).pose.position.z;
+        marker_post2.pose.orientation.x = 0.0;
+        marker_post2.pose.orientation.y = 0.0;
+        marker_post2.pose.orientation.z = 0.0;
+        marker_post2.pose.orientation.w = 1.0;
+        marker_post2.scale.x = 0.6;
+        marker_post2.scale.y = 0.6;
+        marker_post2.scale.z = 0.6;
+        marker_post2.color.a = 0.8;
+        marker_post2.color.r = 0.0;
+        marker_post2.color.g = 1.0;
+        marker_post2.color.b = 0.0;
+    }
+    if (prevPathPosts.poses.size() > 2)
+    {
+        marker_post3.header.frame_id = "velodyne";
+        marker_post3.header.stamp = ros::Time();
+        marker_post3.ns = "my_namespace";
+        marker_post3.id = 0;
+        marker_post3.type = visualization_msgs::Marker::CYLINDER;
+        marker_post3.action = visualization_msgs::Marker::ADD;
+        marker_post3.pose.position.x = prevPathPosts.poses.at(2).pose.position.x;
+        marker_post3.pose.position.y = prevPathPosts.poses.at(2).pose.position.y;
+        marker_post3.pose.position.z = prevPathPosts.poses.at(2).pose.position.z;
+        marker_post3.pose.orientation.x = 0.0;
+        marker_post3.pose.orientation.y = 0.0;
+        marker_post3.pose.orientation.z = 0.0;
+        marker_post3.pose.orientation.w = 1.0;
+        marker_post3.scale.x = 0.6;
+        marker_post3.scale.y = 0.6;
+        marker_post3.scale.z = 0.6;
+        marker_post3.color.a = 0.8;
+        marker_post3.color.r = 0.0;
+        marker_post3.color.g = 0.0;
+        marker_post3.color.b = 1.0;
+    }
+    if (nowPathPosts.poses.size() > 0)
+    {
+        marker_post4.header.frame_id = "velodyne";
+        marker_post4.header.stamp = ros::Time();
+        marker_post4.ns = "my_namespace";
+        marker_post4.id = 0;
+        marker_post4.type = visualization_msgs::Marker::CYLINDER;
+        marker_post4.action = visualization_msgs::Marker::ADD;
+        marker_post4.pose.position.x = nowPathPosts.poses.at(0).pose.position.x;
+        marker_post4.pose.position.y = nowPathPosts.poses.at(0).pose.position.y;
+        marker_post4.pose.position.z = nowPathPosts.poses.at(0).pose.position.z;
+        marker_post4.pose.orientation.x = 0.0;
+        marker_post4.pose.orientation.y = 0.0;
+        marker_post4.pose.orientation.z = 0.0;
+        marker_post4.pose.orientation.w = 1.0;
+        marker_post4.scale.x = 0.3;
+        marker_post4.scale.y = 0.3;
+        marker_post4.scale.z = 1.0;
+        marker_post4.color.a = 1.0;
+        marker_post4.color.r = 0.5;
+        marker_post4.color.g = 0.5;
+        marker_post4.color.b = 0.0;
+    }
+    if (nowPathPosts.poses.size() > 1)
+    {
+        marker_post5.header.frame_id = "velodyne";
+        marker_post5.header.stamp = ros::Time();
+        marker_post5.ns = "my_namespace";
+        marker_post5.id = 0;
+        marker_post5.type = visualization_msgs::Marker::CYLINDER;
+        marker_post5.action = visualization_msgs::Marker::ADD;
+        marker_post5.pose.position.x = nowPathPosts.poses.at(1).pose.position.x;
+        marker_post5.pose.position.y = nowPathPosts.poses.at(1).pose.position.y;
+        marker_post5.pose.position.z = nowPathPosts.poses.at(1).pose.position.z;
+        marker_post5.pose.orientation.x = 0.0;
+        marker_post5.pose.orientation.y = 0.0;
+        marker_post5.pose.orientation.z = 0.0;
+        marker_post5.pose.orientation.w = 1.0;
+        marker_post5.scale.x = 0.3;
+        marker_post5.scale.y = 0.3;
+        marker_post5.scale.z = 1.0;
+        marker_post5.color.a = 1.0;
+        marker_post5.color.r = 0.5;
+        marker_post5.color.g = 0.0;
+        marker_post5.color.b = 0.5;
+    }
+    if (nowPathPosts.poses.size() > 2)
+    {
+        marker_post6.header.frame_id = "velodyne";
+        marker_post6.header.stamp = ros::Time();
+        marker_post6.ns = "my_namespace";
+        marker_post6.id = 0;
+        marker_post6.type = visualization_msgs::Marker::CYLINDER;
+        marker_post6.action = visualization_msgs::Marker::ADD;
+        marker_post6.pose.position.x = nowPathPosts.poses.at(2).pose.position.x;
+        marker_post6.pose.position.y = nowPathPosts.poses.at(2).pose.position.y;
+        marker_post6.pose.position.z = nowPathPosts.poses.at(2).pose.position.z;
+        marker_post6.pose.orientation.x = 0.0;
+        marker_post6.pose.orientation.y = 0.0;
+        marker_post6.pose.orientation.z = 0.0;
+        marker_post6.pose.orientation.w = 1.0;
+        marker_post6.scale.x = 0.3;
+        marker_post6.scale.y = 0.3;
+        marker_post6.scale.z = 1.0;
+        marker_post6.color.a = 1.0;
+        marker_post6.color.r = 0.0;
+        marker_post6.color.g = 0.5;
+        marker_post6.color.b = 0.5;
+    }
 
     pub_marker1.publish(marker_post1);
     pub_marker2.publish(marker_post2);
@@ -243,8 +257,49 @@ void Matching::save_pose(int nPost, geometry_msgs::PoseStamped waypoint)
     // ROS_WARN("3");
 }
 
+geometry_msgs::PoseStamped Matching::findMissingPost(float x2, float y2, float x3, float y3)
+{
+    NonlinearSystem<2> sys;
+    float l, s;
+    l = 8.60;
+    s = 3.70;
+    // Equations
+    // cerr << "===================================================" << endl;
+    // cout << sqrt(pow((x2 - x3), 2) + pow((y2 - y3), 2)) << endl;
+    if (5 < sqrt(pow((x2 - x3), 2) + pow((y2 - y3), 2)))
+    {
+        s = 3.7;
+    }
+    else
+    {
+        s = 8.6;
+    }
+    // cout << s << endl;
+    // ROS_WARN("x2 = %f; y2 = %f; x3 = %f; y3 = %f;", x2, y2, x3, y3);
+    equation_type eq1 = [x2, y2, x3, y3, s](const vector_type &x) {
+        return sqrt((x2 - x[0]) * (x2 - x[0]) + (y2 - x[1]) * (y2 - x[1])) - s;
+    };
+    sys.assign_equation(eq1, 0);
+    equation_type eq2 = [x2, y2, x3, y3, l](const vector_type &x) {
+        return sqrt((x3 - x[0]) * (x3 - x[0]) + (y3 - x[1]) * (y3 - x[1])) - l;
+    };
+    sys.assign_equation(eq2, 1);
+    array<double, 2> init = {0, 0};
+    sys.initialize(init);
+    sys.find_roots_gnewton();
+    boost::numeric::ublas::vector<double> r;
+    r = sys.get_values();
+    // cout << "Point: [" << r[0] << ", " << r[1] << "]" << endl;
+    // cerr << "===================================================" << endl;
+    geometry_msgs::PoseStamped result;
+    result.pose.position.x = r[0];
+    result.pose.position.y = r[1];
+    return result;
+}
+
 void Matching::toDo()
 {
+    // Borra las marcas generadas con anterioridad.
     marker_post1.action = visualization_msgs::Marker::DELETE;
     pub_marker1.publish(marker_post1);
     marker_post2.action = visualization_msgs::Marker::DELETE;
@@ -257,9 +312,10 @@ void Matching::toDo()
     pub_marker5.publish(marker_post5);
     marker_post6.action = visualization_msgs::Marker::DELETE;
     pub_marker6.publish(marker_post6);
-    // En el instante inicial se guarda la primera entrada como etiquetas válidas
+    // En el instante inicial se guarda la primera entrada como etiquetas válidas.
     switch (cont)
     {
+    // Init
     case 0:
         // Se inicializa si están los tres postes validados.
         if (!nowPathPost12.poses.empty() && !nowPathPost13.poses.empty() && !nowPathPost23.poses.empty())
@@ -275,27 +331,54 @@ void Matching::toDo()
         break;
     case 1:
         // Se ejecuta si están los tres postes validados y si los paths han cambiado.
-        // if (!nowPathPost12.poses.empty() || !nowPathPost13.poses.empty() || !nowPathPost23.poses.empty())
-        if ((!nowPathPost12.poses.empty() && (!nowPathPost13.poses.empty() || !nowPathPost23.poses.empty())) ||
-            (!nowPathPost13.poses.empty() && (!nowPathPost12.poses.empty() || !nowPathPost23.poses.empty())) ||
-            (!nowPathPost23.poses.empty() && (!nowPathPost12.poses.empty() || !nowPathPost13.poses.empty())))
+        if (!nowPathPost12.poses.empty() || !nowPathPost13.poses.empty() || !nowPathPost23.poses.empty())
+        // if ((!nowPathPost12.poses.empty() && (!nowPathPost13.poses.empty() || !nowPathPost23.poses.empty())) ||
+        //     (!nowPathPost13.poses.empty() && (!nowPathPost12.poses.empty() || !nowPathPost23.poses.empty())) ||
+        //     (!nowPathPost23.poses.empty() && (!nowPathPost12.poses.empty() || !nowPathPost13.poses.empty())))
         {
+            int contposts = 0;
             // Se guardan los 6 waypoints relevantes del estado actual en un vector.
             if (!nowPathPost12.poses.empty())
             {
                 nowPathPosts.poses.push_back(nowPathPost12.poses.at(0));
                 nowPathPosts.poses.push_back(nowPathPost12.poses.at(1));
+                contposts++;
+                // ROS_WARN("contposts: %i, now path size: %i", contposts, nowPathPosts.poses.size());
             }
             if (!nowPathPost13.poses.empty())
             {
                 nowPathPosts.poses.push_back(nowPathPost13.poses.at(0));
                 nowPathPosts.poses.push_back(nowPathPost13.poses.at(1));
+                contposts++;
+                // ROS_WARN("contposts: %i, now path size: %i", contposts, nowPathPosts.poses.size());
             }
             if (!nowPathPost23.poses.empty())
             {
                 nowPathPosts.poses.push_back(nowPathPost23.poses.at(0));
                 nowPathPosts.poses.push_back(nowPathPost23.poses.at(1));
+                contposts++;
+                // ROS_WARN("contposts: %i, now path size: %i", contposts, nowPathPosts.poses.size());
             }
+
+            if (contposts == 1)
+            {
+                if (!nowPathPost12.poses.empty())
+                {
+                    nowPathPosts.poses.push_back(findMissingPost(nowPathPost12.poses.at(0).pose.position.x, nowPathPost12.poses.at(0).pose.position.y,
+                                                                 nowPathPost12.poses.at(1).pose.position.x, nowPathPost12.poses.at(1).pose.position.y));
+                }
+                if (!nowPathPost13.poses.empty())
+                {
+                    nowPathPosts.poses.push_back(findMissingPost(nowPathPost13.poses.at(0).pose.position.x, nowPathPost13.poses.at(0).pose.position.y,
+                                                                 nowPathPost13.poses.at(1).pose.position.x, nowPathPost13.poses.at(1).pose.position.y));
+                }
+                if (!nowPathPost23.poses.empty())
+                {
+                    nowPathPosts.poses.push_back(findMissingPost(nowPathPost23.poses.at(0).pose.position.x, nowPathPost23.poses.at(0).pose.position.y,
+                                                                 nowPathPost23.poses.at(1).pose.position.x, nowPathPost23.poses.at(1).pose.position.y));
+                }
+            }
+            // ROS_WARN("* now size: %i", nowPathPosts.poses.size());
             std::vector<int> vec_labels;
             std::vector<float> vec_check_dist;
             // Se compara cada waypoint relevante del estado anterior con los waypoints del estado actual.
@@ -306,11 +389,7 @@ void Matching::toDo()
                     // Se calcula la distancia que hay entre los waypoints del instante actual y el instante anterior.
                     vec_distAndLabel[j] = dist2Points(prevPathPosts.poses.at(i).pose.position.x, prevPathPosts.poses.at(i).pose.position.y, prevPathPosts.poses.at(i).pose.position.z,
                                                       nowPathPosts.poses.at(j).pose.position.x, nowPathPosts.poses.at(j).pose.position.y, nowPathPosts.poses.at(j).pose.position.z);
-
-                    vec_dist.push_back(dist2Points(prevPathPosts.poses.at(i).pose.position.x, prevPathPosts.poses.at(i).pose.position.y, prevPathPosts.poses.at(i).pose.position.z,
-                                                   nowPathPosts.poses.at(j).pose.position.x, nowPathPosts.poses.at(j).pose.position.y, nowPathPosts.poses.at(j).pose.position.z));
                 }
-
                 // Se ordenan todas las distancias resultantes de menor a mayor.
                 std::vector<pair> vec;
                 std::copy(vec_distAndLabel.begin(), vec_distAndLabel.end(), std::back_inserter<std::vector<pair>>(vec));
@@ -323,7 +402,6 @@ void Matching::toDo()
 
                 vec_labels.push_back(vec[0].first);
                 vec_check_dist.push_back(vec[0].second);
-                vec_dist.clear();
             }
             // Se limpia el vector de waypoints del instante anterios y se le coloca el frame_id correspondiente.
             prevPathPosts.poses.clear();
@@ -346,9 +424,11 @@ void Matching::toDo()
             // Se guarda como instante anterior, los postes con el identificador correctamente colocado.
             for (int i = 0; i < vec_labels.size(); i++)
             {
+                // cout << vec_labels[i] << " ";
                 prevPathPosts.poses.push_back(nowPathPosts.poses.at(vec_labels[i]));
             }
-            // Se guardan las posiciones de los postes identificados
+            // cout << endl;
+            // Se guardan las posiciones de los postes identificados para dijubarlos en Matlab.
             for (int i = 0; i < prevPathPosts.poses.size(); i++)
             {
                 save_pose(i, prevPathPosts.poses.at(i));
@@ -360,7 +440,6 @@ void Matching::toDo()
             vec_check_dist.clear();
             vec_distAndLabel.clear();
             nowPathPosts.poses.clear();
-            nowPathPost23.poses.clear();
         }
         break;
     }

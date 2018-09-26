@@ -31,7 +31,7 @@ generate_messages(
 
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES detection
+  LIBRARIES detection rootfinding
   CATKIN_DEPENDS roscpp rospy message_runtime jsk_recognition_msgs
   DEPENDS EIGEN3
 )
@@ -77,3 +77,6 @@ add_dependencies(matching ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_
 add_executable(matching_node src/matching_node.cpp)
 target_link_libraries(matching_node matching ${catkin_LIBRARIES})
 add_dependencies(matching_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+add_executable(test_root_finding src/test_root_finding.cpp)
+add_dependencies(test_root_finding ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
