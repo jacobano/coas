@@ -48,6 +48,7 @@ Matching::~Matching()
 void Matching::cb_pathPoste1(const nav_msgs::Path path)
 {
     nowPathPost1 = path;
+    toDo();
 }
 
 void Matching::cb_pathPoste2(const nav_msgs::Path path)
@@ -63,20 +64,20 @@ void Matching::cb_pathPoste3(const nav_msgs::Path path)
 void Matching::cb_pathPoste12(const nav_msgs::Path path)
 {
     nowPathPost12 = path;
-    toDo();
+    // toDo();
 }
 
 void Matching::cb_pathPoste13(const nav_msgs::Path path)
 {
     nowPathPost13 = path;
-    toDo();
+    // toDo();
 }
 
 void Matching::cb_pathPoste23(const nav_msgs::Path path)
 {
 
     nowPathPost23 = path;
-    toDo();
+    // toDo();
 }
 
 float Matching::dist2Points(float x1, float y1, float z1, float x2, float y2, float z2)
@@ -284,7 +285,8 @@ geometry_msgs::PoseStamped Matching::findMissingPost(float x2, float y2, float x
         return sqrt((x3 - x[0]) * (x3 - x[0]) + (y3 - x[1]) * (y3 - x[1])) - l;
     };
     sys.assign_equation(eq2, 1);
-    array<double, 2> init = {0, 0};
+    // IMPORTANTE COLOCAR BIEN init EN FUNCIÓN DE LA POSICIÓN DE LOS POSTES RESPECTO DEL VELODYNE
+    array<double, 2> init = {15, 15};
     sys.initialize(init);
     sys.find_roots_gnewton();
     boost::numeric::ublas::vector<double> r;
@@ -331,7 +333,7 @@ void Matching::toDo()
         break;
     case 1:
         // Se ejecuta si están los tres postes validados y si los paths han cambiado.
-        if (!nowPathPost12.poses.empty() || !nowPathPost13.poses.empty() || !nowPathPost23.poses.empty())
+        if ((!nowPathPost12.poses.empty() || !nowPathPost13.poses.empty() || !nowPathPost23.poses.empty()))
         // if ((!nowPathPost12.poses.empty() && (!nowPathPost13.poses.empty() || !nowPathPost23.poses.empty())) ||
         //     (!nowPathPost13.poses.empty() && (!nowPathPost12.poses.empty() || !nowPathPost23.poses.empty())) ||
         //     (!nowPathPost23.poses.empty() && (!nowPathPost12.poses.empty() || !nowPathPost13.poses.empty())))
@@ -382,14 +384,31 @@ void Matching::toDo()
             std::vector<int> vec_labels;
             std::vector<float> vec_check_dist;
             // Se compara cada waypoint relevante del estado anterior con los waypoints del estado actual.
+            ROS_WARN("prev size: %i, now size: %i", prevPathPosts.poses.size(), nowPathPosts.poses.size());
             for (int i = 0; i < prevPathPosts.poses.size(); i++)
             {
+                std::vector<float> vtest;
+                // cout << "vec with zeros : [ ";
                 for (int j = 0; j < nowPathPosts.poses.size(); j++)
                 {
                     // Se calcula la distancia que hay entre los waypoints del instante actual y el instante anterior.
                     vec_distAndLabel[j] = dist2Points(prevPathPosts.poses.at(i).pose.position.x, prevPathPosts.poses.at(i).pose.position.y, prevPathPosts.poses.at(i).pose.position.z,
-                                                      nowPathPosts.poses.at(j).pose.position.x, nowPathPosts.poses.at(j).pose.position.y, nowPathPosts.poses.at(j).pose.position.z);
+                      nowPathPosts.poses.at(j).pose.position.x, nowPathPosts.poses.at(j).pose.position.y, nowPathPosts.poses.at(j).pose.position.z);
+                    // vtest.push_back(dist2Points(prevPathPosts.poses.at(i).pose.position.x, prevPathPosts.poses.at(i).pose.position.y, prevPathPosts.poses.at(i).pose.position.z,
+                                                // nowPathPosts.poses.at(j).pose.position.x, nowPathPosts.poses.at(j).pose.position.y, nowPathPosts.poses.at(j).pose.position.z));
+                    // cout << vtest[j] << " ";
                 }
+                // cout << "]" << endl;
+                // cout << "vec without zeros : [ ";
+                // vtest.erase(
+                //     std::remove(vtest.begin(), vtest.end(), 0),
+                //     vtest.end());
+                for (int k = 0; k < vtest.size(); k++)
+                {
+                    // cout << vtest[k] << " ";
+                    // vec_distAndLabel[k] = vtest[k];
+                }
+                // cout << "]" << endl;
                 // Se ordenan todas las distancias resultantes de menor a mayor.
                 std::vector<pair> vec;
                 std::copy(vec_distAndLabel.begin(), vec_distAndLabel.end(), std::back_inserter<std::vector<pair>>(vec));
@@ -399,6 +418,11 @@ void Matching::toDo()
                                   return l.second < r.second;
                               return l.first < r.first;
                           });
+                vec.shrink_to_fit();
+                for (auto const &pair : vec)
+                {
+                    cout << "{" << pair.first << ", " << pair.second << "}" << endl;
+                }
 
                 vec_labels.push_back(vec[0].first);
                 vec_check_dist.push_back(vec[0].second);
@@ -424,10 +448,10 @@ void Matching::toDo()
             // Se guarda como instante anterior, los postes con el identificador correctamente colocado.
             for (int i = 0; i < vec_labels.size(); i++)
             {
-                // cout << vec_labels[i] << " ";
+                cout << "[" << vec_labels[i] << ", " << vec_check_dist[vec_labels[i]] << "]";
                 prevPathPosts.poses.push_back(nowPathPosts.poses.at(vec_labels[i]));
             }
-            // cout << endl;
+            cout << endl;
             // Se guardan las posiciones de los postes identificados para dijubarlos en Matlab.
             for (int i = 0; i < prevPathPosts.poses.size(); i++)
             {
