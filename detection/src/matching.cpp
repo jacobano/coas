@@ -28,6 +28,14 @@ Matching::Matching()
     filePost2Time.open("/home/hector/matlab_ws/COAS/matchPost2time");
     filePost3Time.open("/home/hector/matlab_ws/COAS/matchPost3time");
 
+    flagInit12 = true;
+    flagInit13 = true;
+    flagInit23 = true;
+
+    checkDiff12 = false;
+    checkDiff13 = false;
+    checkDiff23 = false;
+
     cont = 0;
 
     toDo();
@@ -63,21 +71,83 @@ void Matching::cb_pathPoste3(const nav_msgs::Path path)
 
 void Matching::cb_pathPoste12(const nav_msgs::Path path)
 {
-    nowPathPost12 = path;
-    // toDo();
+    if (flagInit12 == true)
+    {
+        nowPathPost12 = path;
+        flagInit12 = false;
+    }
+    else
+    {
+        checkDiff12 = checkDiff(1, path);
+        nowPathPost12 = path;
+    }
 }
 
 void Matching::cb_pathPoste13(const nav_msgs::Path path)
 {
-    nowPathPost13 = path;
-    // toDo();
+    if (flagInit13 == true)
+    {
+        nowPathPost13 = path;
+        flagInit13 = false;
+    }
+    else
+    {
+        checkDiff13 = checkDiff(2, path);
+        nowPathPost13 = path;
+    }
 }
 
 void Matching::cb_pathPoste23(const nav_msgs::Path path)
 {
+    if (flagInit23 == true)
+    {
+        nowPathPost23 = path;
+        flagInit23 = false;
+    }
+    else
+    {
+        checkDiff23 = checkDiff(3, path);
+        nowPathPost23 = path;
+    }
+}
 
-    nowPathPost23 = path;
-    // toDo();
+bool Matching::checkDiff(int p, const nav_msgs::Path checkPath)
+{
+    if (!checkPath.poses.empty())
+    {
+
+        nav_msgs::Path comparePath;
+        bool result;
+        float xPre, xNow;
+        switch (p)
+        {
+        case 1:
+            comparePath = nowPathPost12;
+            break;
+        case 2:
+            comparePath = nowPathPost13;
+            break;
+        case 3:
+            comparePath = nowPathPost23;
+            break;
+        }
+        if (!comparePath.poses.empty())
+        {
+            xNow = checkPath.poses.at(0).pose.position.x;
+            xPre = comparePath.poses.at(0).pose.position.x;
+            if (xNow != xPre)
+            {
+                ROS_WARN("true");
+                result = true;
+            }
+            else
+            {
+                ROS_WARN("false");
+                result = false;
+            }
+            return result;
+        }
+    }
 }
 
 float Matching::dist2Points(float x1, float y1, float z1, float x2, float y2, float z2)
@@ -328,16 +398,23 @@ void Matching::toDo()
             prevPathPosts.poses.push_back(nowPathPost2.poses.at(1));
             prevPathPosts.poses.push_back(nowPathPost3.poses.at(1));
             cont++;
+            // sleep(1.0);
             startTimePose = ros::Time::now().toSec();
         }
         break;
     case 1:
         // Se ejecuta si están los tres postes validados y si los paths han cambiado.
-        if ((!nowPathPost12.poses.empty() || !nowPathPost13.poses.empty() || !nowPathPost23.poses.empty()))
+        if ((!nowPathPost12.poses.empty() && checkDiff12 == true) ||
+            (!nowPathPost13.poses.empty() && checkDiff13 == true) ||
+            (!nowPathPost23.poses.empty() && checkDiff23 == true))
+
+        // if (!nowPathPost12.poses.empty() || !nowPathPost13.poses.empty() || !nowPathPost23.poses.empty())
+
         // if ((!nowPathPost12.poses.empty() && (!nowPathPost13.poses.empty() || !nowPathPost23.poses.empty())) ||
         //     (!nowPathPost13.poses.empty() && (!nowPathPost12.poses.empty() || !nowPathPost23.poses.empty())) ||
         //     (!nowPathPost23.poses.empty() && (!nowPathPost12.poses.empty() || !nowPathPost13.poses.empty())))
         {
+
             int contposts = 0;
             // Se guardan los 6 waypoints relevantes del estado actual en un vector.
             if (!nowPathPost12.poses.empty())
@@ -380,7 +457,7 @@ void Matching::toDo()
                                                                  nowPathPost23.poses.at(1).pose.position.x, nowPathPost23.poses.at(1).pose.position.y));
                 }
             }
-            // ROS_WARN("* now size: %i", nowPathPosts.poses.size());
+            ROS_WARN("* now size: %i", nowPathPosts.poses.size());
             std::vector<int> vec_labels;
             std::vector<float> vec_check_dist;
             // Se compara cada waypoint relevante del estado anterior con los waypoints del estado actual.
@@ -389,13 +466,20 @@ void Matching::toDo()
             {
                 std::vector<float> vtest;
                 // cout << "vec with zeros : [ ";
+                cout << endl;
                 for (int j = 0; j < nowPathPosts.poses.size(); j++)
                 {
                     // Se calcula la distancia que hay entre los waypoints del instante actual y el instante anterior.
+
+                    // if (0 < dist2Points(prevPathPosts.poses.at(i).pose.position.x, prevPathPosts.poses.at(i).pose.position.y, prevPathPosts.poses.at(i).pose.position.z,
+                    //                     nowPathPosts.poses.at(j).pose.position.x, nowPathPosts.poses.at(j).pose.position.y, nowPathPosts.poses.at(j).pose.position.z))
+                    // {
                     vec_distAndLabel[j] = dist2Points(prevPathPosts.poses.at(i).pose.position.x, prevPathPosts.poses.at(i).pose.position.y, prevPathPosts.poses.at(i).pose.position.z,
-                      nowPathPosts.poses.at(j).pose.position.x, nowPathPosts.poses.at(j).pose.position.y, nowPathPosts.poses.at(j).pose.position.z);
+                                                      nowPathPosts.poses.at(j).pose.position.x, nowPathPosts.poses.at(j).pose.position.y, nowPathPosts.poses.at(j).pose.position.z);
+                    // }
+
                     // vtest.push_back(dist2Points(prevPathPosts.poses.at(i).pose.position.x, prevPathPosts.poses.at(i).pose.position.y, prevPathPosts.poses.at(i).pose.position.z,
-                                                // nowPathPosts.poses.at(j).pose.position.x, nowPathPosts.poses.at(j).pose.position.y, nowPathPosts.poses.at(j).pose.position.z));
+                    // nowPathPosts.poses.at(j).pose.position.x, nowPathPosts.poses.at(j).pose.position.y, nowPathPosts.poses.at(j).pose.position.z));
                     // cout << vtest[j] << " ";
                 }
                 // cout << "]" << endl;
@@ -424,8 +508,34 @@ void Matching::toDo()
                     cout << "{" << pair.first << ", " << pair.second << "}" << endl;
                 }
 
+                // if (vec_labels.size() > 0)
+                // {
+                //     for (int j = 0; j < vec.size(); j++)
+                //     {
+                //         for (int k = 0; k < vec_labels.size(); k++)
+                //         {
+                //             if (vec[j].first != vec_labels[k])
+                //             {
+                //                 vec_labels.push_back(vec[j].first);
+                //                 ROS_WARN("!=");
+                //                 k = vec_labels.size();
+                //                 j = vec.size();
+                //             }
+                //             else
+                //             {
+                //                 ROS_WARN("%f = %f", vec[j].first, vec_labels[k]);
+                //             }
+                //         }
+                //     }
+                // }
+
                 vec_labels.push_back(vec[0].first);
                 vec_check_dist.push_back(vec[0].second);
+                for (int k = 0; k < vec_labels.size(); k++)
+                {
+                    cout << vec_labels[k] << " ";
+                }
+                cout << endl;
             }
             // Se limpia el vector de waypoints del instante anterios y se le coloca el frame_id correspondiente.
             prevPathPosts.poses.clear();
@@ -464,6 +574,7 @@ void Matching::toDo()
             vec_check_dist.clear();
             vec_distAndLabel.clear();
             nowPathPosts.poses.clear();
+            checkDiff12 = checkDiff13 = checkDiff23 = false;
         }
         break;
     }
@@ -473,7 +584,7 @@ void Matching::loop()
 {
     while (ros::ok())
     {
-        sleep(0.1);
+        sleep(0.9);
         ros::spinOnce();
     }
 }

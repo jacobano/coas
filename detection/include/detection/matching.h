@@ -17,6 +17,7 @@ public:
 private:
   //
   void drawPosts();
+  bool checkDiff(int p, const nav_msgs::Path checkPath);
   void save_pose(int nPost, geometry_msgs::PoseStamped waypoint);
   float dist2Points(float x1, float y1, float z1, float x2, float y2, float z2);
   geometry_msgs::PoseStamped findMissingPost(float x2, float y2, float x3, float y3);
@@ -41,8 +42,11 @@ private:
   // Variables
   typedef std::pair<int, float> pair;
   int cont;
+  bool flagInit12, flagInit13, flagInit23; 
+  bool checkDiff12, checkDiff13, checkDiff23;
   std::map<int, float> vec_distAndLabel;
   nav_msgs::Path nowPathPost1, nowPathPost2, nowPathPost3, nowPathPost12, nowPathPost13, nowPathPost23, prevPathPosts, nowPathPosts;
+  nav_msgs::Path checkPathPost12, checkPathPost13, checkPathPost23; 
   std::ofstream filePost1, filePost2, filePost3, filePost1Time, filePost2Time, filePost3Time;
   double startTimePose;
   // Markers
