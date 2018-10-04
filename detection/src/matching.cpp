@@ -115,7 +115,6 @@ bool Matching::checkDiff(int p, const nav_msgs::Path checkPath)
 {
     if (!checkPath.poses.empty())
     {
-
         nav_msgs::Path comparePath;
         bool result;
         float xPre, xNow;
@@ -137,12 +136,12 @@ bool Matching::checkDiff(int p, const nav_msgs::Path checkPath)
             xPre = comparePath.poses.at(0).pose.position.x;
             if (xNow != xPre)
             {
-                ROS_WARN("true");
+                ROS_WARN("[%i] true -> xNow: %f = xPrev: %f", p, xNow, xPre);
                 result = true;
             }
             else
             {
-                ROS_WARN("false");
+                ROS_WARN("[%i] false -> xNow: %f = xPrev: %f", p, xNow, xPre);
                 result = false;
             }
             return result;
@@ -457,16 +456,16 @@ void Matching::toDo()
                                                                  nowPathPost23.poses.at(1).pose.position.x, nowPathPost23.poses.at(1).pose.position.y));
                 }
             }
-            ROS_WARN("* now size: %i", nowPathPosts.poses.size());
+            // ROS_WARN("* now size: %i", nowPathPosts.poses.size());
             std::vector<int> vec_labels;
             std::vector<float> vec_check_dist;
             // Se compara cada waypoint relevante del estado anterior con los waypoints del estado actual.
-            ROS_WARN("prev size: %i, now size: %i", prevPathPosts.poses.size(), nowPathPosts.poses.size());
+            // ROS_WARN("prev size: %i, now size: %i", prevPathPosts.poses.size(), nowPathPosts.poses.size());
             for (int i = 0; i < prevPathPosts.poses.size(); i++)
             {
                 std::vector<float> vtest;
                 // cout << "vec with zeros : [ ";
-                cout << endl;
+                // cout << endl;
                 for (int j = 0; j < nowPathPosts.poses.size(); j++)
                 {
                     // Se calcula la distancia que hay entre los waypoints del instante actual y el instante anterior.
@@ -505,7 +504,7 @@ void Matching::toDo()
                 vec.shrink_to_fit();
                 for (auto const &pair : vec)
                 {
-                    cout << "{" << pair.first << ", " << pair.second << "}" << endl;
+                    // cout << "{" << pair.first << ", " << pair.second << "}" << endl;
                 }
 
                 // if (vec_labels.size() > 0)
@@ -533,9 +532,9 @@ void Matching::toDo()
                 vec_check_dist.push_back(vec[0].second);
                 for (int k = 0; k < vec_labels.size(); k++)
                 {
-                    cout << vec_labels[k] << " ";
+                    // cout << vec_labels[k] << " ";
                 }
-                cout << endl;
+                // cout << endl;
             }
             // Se limpia el vector de waypoints del instante anterios y se le coloca el frame_id correspondiente.
             prevPathPosts.poses.clear();
