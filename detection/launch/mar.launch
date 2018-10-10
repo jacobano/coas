@@ -3,7 +3,7 @@
     <node pkg="rostopic" type="rostopic" name="phase" args="pub /phase std_msgs/Int8 3"/>
 
     <node pkg="rviz" type="rviz" name="rviz" args="-d /home/hector/coas_ws/src/coas/detection/rviz/mar.rviz" required="true"/>
-    <node pkg="rosbag" type="play" name="rosbag" args=" --loop --start=40 -r 1 --duration=15 /home/hector/bags/Na/20180425_Pruebas/2018-04-25-12-57-04.bag" required="true"/>
+    <node pkg="rosbag" type="play" name="rosbag" args=" --loop --start=40 -r 1 --duration=15 /media/hector/HDD/bags/Na/20180425_Pruebas/2018-04-25-12-57-04.bag" required="true"/>
 
 
     <node pkg="mapping" type="mapFilter_node" name="mapping_node" output="screen" required="true"/>
