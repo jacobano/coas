@@ -3,6 +3,7 @@
 #include <nav_msgs/Path.h>
 #include <geometry_msgs/PoseStamped.h>
 #include "visualization_msgs/Marker.h"
+#include "rootfinding/multi_dimensional_root_finding.hpp"
 
 class Matching
 {
