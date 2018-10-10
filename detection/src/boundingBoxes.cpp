@@ -316,18 +316,12 @@ void BoundingBoxes::checkPostes(float xDim, float yDim, float zDim)
                         {
                         case 0:
                             pathPoste12 = constructPath(x0, y0, z0, 2);
-                            // ROS_WARN("dist12: %f | cont_entrePostes: %i", dist, cont_entrePostes);
-                            // cont_entrePostes++;
                             break;
                         case 1:
                             pathPoste13 = constructPath(x0, y0, z0, 2);
-                            // ROS_WARN("dist13: %f | cont_entrePostes: %i", dist, cont_entrePostes);
-                            // cont_entrePostes++;
                             break;
                         case 2:
                             pathPoste23 = constructPath(x0, y0, z0, 2);
-                            // ROS_WARN("dist23: %f | cont_entrePostes: %i", dist, cont_entrePostes);
-                            // cont_entrePostes++;
                             break;
                         }
                         cont_entrePostes++;
@@ -619,7 +613,6 @@ void BoundingBoxes::params()
 
 void BoundingBoxes::save_pose(int nPost, nav_msgs::Path path)
 {
-    // ROS_WARN("1");
     switch (nPost)
     {
     case 1:
@@ -636,7 +629,6 @@ void BoundingBoxes::save_pose(int nPost, nav_msgs::Path path)
         filePost3Time << ros::Time::now().toSec() - startTimePose << std::endl;
         break;
     }
-    // ROS_WARN("3");
 }
 
 void BoundingBoxes::save_distances(bool b, nav_msgs::Path path1, nav_msgs::Path path2, nav_msgs::Path path3)
@@ -652,7 +644,6 @@ void BoundingBoxes::save_distances(bool b, nav_msgs::Path path1, nav_msgs::Path 
     {
         dist1 = 0.0;
     }
-    // std::cout << path1.poses.size() << " " <<  dist1 << std::endl;
     if (path2.poses.size() > 0)
     {
         dist2 = dist2Points(path2.poses.at(0).pose.position.x, path2.poses.at(0).pose.position.y, path2.poses.at(0).pose.position.z,
@@ -662,8 +653,6 @@ void BoundingBoxes::save_distances(bool b, nav_msgs::Path path1, nav_msgs::Path 
     {
         dist2 = 0.0;
     }
-    // std::cout << path2.poses.size() << std::endl;
-    // std::cout << path2.poses.size() << " " <<  dist2 << std::endl;
     if (path3.poses.size() > 0)
     {
         dist3 = dist2Points(path3.poses.at(0).pose.position.x, path3.poses.at(0).pose.position.y, path3.poses.at(0).pose.position.z,

@@ -20,7 +20,6 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
   std_msgs
 )
-find_package(Eigen3 REQUIRED)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -116,7 +115,7 @@ catkin_package(
   INCLUDE_DIRS include
   LIBRARIES mapping
   CATKIN_DEPENDS roscpp rospy std_msgs message_runtime
-  DEPENDS EIGEN3
+  # DEPENDS
 )
 
 ###########
@@ -160,13 +159,6 @@ include_directories(
 #   ${catkin_LIBRARIES}
 # )
 
-add_library(thinMapping src/thinMapping.cpp)
-add_dependencies(thinMapping ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
-add_executable(thinMapping_node src/thinMapping_node.cpp)
-target_link_libraries(thinMapping_node thinMapping ${catkin_LIBRARIES})
-add_dependencies(thinMapping_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
 add_library(mapFilter src/mapFilter.cpp)
 add_dependencies(mapFilter ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
@@ -174,9 +166,12 @@ add_executable(mapFilter_node src/mapFilter_node.cpp)
 target_link_libraries(mapFilter_node mapFilter ${catkin_LIBRARIES})
 add_dependencies(mapFilter_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-add_executable(voxtraversal src/voxtraversal.cpp)
-add_dependencies(voxtraversal    ${catkin_EXPORTED_TARGETS})
-target_link_libraries(voxtraversal ${MRPT_LIBS} ${catkin_LIBRARIES})
+add_library(volexFilter src/volexFilter.cpp)
+add_dependencies(volexFilter ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+add_executable(volexFilter_node src/volexFilter_node.cpp)
+target_link_libraries(volexFilter_node volexFilter ${catkin_LIBRARIES})
+add_dependencies(volexFilter_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 #############
 ## Install ##

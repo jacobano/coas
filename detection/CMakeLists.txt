@@ -64,13 +64,6 @@ target_link_libraries(boundingBoxes_node boundingBoxes ${catkin_LIBRARIES})
 add_dependencies(boundingBoxes_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 
-add_library(volexFilter src/volexFilter.cpp)
-add_dependencies(volexFilter ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
-add_executable(volexFilter_node src/volexFilter_node.cpp)
-target_link_libraries(volexFilter_node volexFilter ${catkin_LIBRARIES})
-add_dependencies(volexFilter_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
 add_library(matching src/matching.cpp)
 add_dependencies(matching ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
