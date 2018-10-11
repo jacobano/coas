@@ -35,7 +35,7 @@ private:
   void calcVecPolygons();
   void mergeBoundingBoxes();
   void save_pose(int nPost, nav_msgs::Path path);
-  void checkPostes(float xDim, float yDim, float zDim);
+  void checkPosts(float xDim, float yDim, float zDim);
   Eigen::Vector4f pc2_centroid(const sensor_msgs::PointCloud2 pc2);
   void calcMaxDistancesCluster(const pcl::PointCloud<pcl::PointXYZ> cluster);
   float dist2Points(float x1, float y1, float z1, float x2, float y2, float z2);
@@ -53,7 +53,7 @@ private:
   ros::Publisher pub_boxArray, pub_mergeBoxesArray, pub_boxesRef, pub_pathPoste1, pub_pathPoste2, pub_pathPoste3, pub_pathPoste12, pub_pathPoste13, pub_pathPoste23;
 
   // Variables
-  int cont_postes = 0;
+  int cont_posts = 0;
   Eigen::Vector4f centroid;
   int label_box, label_mergeBox;
   std::vector<int> polygon_labels;

@@ -223,11 +223,9 @@ void Matching::drawPosts()
 
 void Matching::save_pose(int nPost, geometry_msgs::PoseStamped waypoint)
 {
-    // ROS_WARN("1");
     switch (nPost)
     {
     case 0:
-        // ROS_WARN("2 timepose: %d | timedistance: %d", startTimePose, startTime);
         filePost1 << waypoint.pose.position.x << " " << waypoint.pose.position.y << std::endl;
         filePost1Time << ros::Time::now().toSec() - startTimePose << std::endl;
         break;
@@ -240,7 +238,6 @@ void Matching::save_pose(int nPost, geometry_msgs::PoseStamped waypoint)
         filePost3Time << ros::Time::now().toSec() - startTimePose << std::endl;
         break;
     }
-    // ROS_WARN("3");
 }
 
 void Matching::toDo()
@@ -257,15 +254,15 @@ void Matching::toDo()
     pub_marker5.publish(marker_post5);
     marker_post6.action = visualization_msgs::Marker::DELETE;
     pub_marker6.publish(marker_post6);
-    // En el instante inicial se guarda la primera entrada como etiquetas válidas
+    // At the initial instant it storage the first entry as valid labels
     switch (cont)
     {
     case 0:
-        // Se inicializa si están los tres postes validados.
+        // It initializes if there are three valid posts
         if (!nowPathPost12.poses.empty() && !nowPathPost13.poses.empty() && !nowPathPost23.poses.empty())
         {
             ROS_WARN("Init Matching");
-            // Se guardan los tres waypoints relevantes del estado actual en el vector del instante anterior.
+            // It storages the three relevant waypoints of the actual state into the previous state vector
             prevPathPosts.poses.push_back(nowPathPost1.poses.at(1));
             prevPathPosts.poses.push_back(nowPathPost2.poses.at(1));
             prevPathPosts.poses.push_back(nowPathPost3.poses.at(1));
@@ -274,13 +271,12 @@ void Matching::toDo()
         }
         break;
     case 1:
-        // Se ejecuta si están los tres postes validados y si los paths han cambiado.
-        // if (!nowPathPost12.poses.empty() || !nowPathPost13.poses.empty() || !nowPathPost23.poses.empty())
+        // If there are three valid posts and paths did not change
         if ((!nowPathPost12.poses.empty() && (!nowPathPost13.poses.empty() || !nowPathPost23.poses.empty())) ||
             (!nowPathPost13.poses.empty() && (!nowPathPost12.poses.empty() || !nowPathPost23.poses.empty())) ||
             (!nowPathPost23.poses.empty() && (!nowPathPost12.poses.empty() || !nowPathPost13.poses.empty())))
         {
-            // Se guardan los 6 waypoints relevantes del estado actual en un vector.
+            // Storage the six relevant waypoints of the actual state in a vector
             if (!nowPathPost12.poses.empty())
             {
                 nowPathPosts.poses.push_back(nowPathPost12.poses.at(0));
@@ -298,12 +294,12 @@ void Matching::toDo()
             }
             std::vector<int> vec_labels;
             std::vector<float> vec_check_dist;
-            // Se compara cada waypoint relevante del estado anterior con los waypoints del estado actual.
+            // Compare each relevant waypoint of the previous state with the waypoints of the actual state
             for (int i = 0; i < prevPathPosts.poses.size(); i++)
             {
                 for (int j = 0; j < nowPathPosts.poses.size(); j++)
                 {
-                    // Se calcula la distancia que hay entre los waypoints del instante actual y el instante anterior.
+                    // Calculate the distance between the waypoints of the previous state and the waypoints of the actual state
                     vec_distAndLabel[j] = dist2Points(prevPathPosts.poses.at(i).pose.position.x, prevPathPosts.poses.at(i).pose.position.y, prevPathPosts.poses.at(i).pose.position.z,
                                                       nowPathPosts.poses.at(j).pose.position.x, nowPathPosts.poses.at(j).pose.position.y, nowPathPosts.poses.at(j).pose.position.z);
 
@@ -311,7 +307,7 @@ void Matching::toDo()
                                                    nowPathPosts.poses.at(j).pose.position.x, nowPathPosts.poses.at(j).pose.position.y, nowPathPosts.poses.at(j).pose.position.z));
                 }
 
-                // Se ordenan todas las distancias resultantes de menor a mayor.
+                // Sort all distances from lowest to highest
                 std::vector<pair> vec;
                 std::copy(vec_distAndLabel.begin(), vec_distAndLabel.end(), std::back_inserter<std::vector<pair>>(vec));
                 std::sort(vec.begin(), vec.end(),
@@ -325,10 +321,10 @@ void Matching::toDo()
                 vec_check_dist.push_back(vec[0].second);
                 vec_dist.clear();
             }
-            // Se limpia el vector de waypoints del instante anterios y se le coloca el frame_id correspondiente.
+            // Clean the vector of waypoints from the previous state
             prevPathPosts.poses.clear();
             prevPathPosts.header.frame_id = "velodyne";
-            // [PARA .BAG CON LOOP] Se revisan todas las distancias y si hay mucha diferencia, se asume que el estado actual es el bueno y, por tanto, se tiene que volver a inicializar.
+            // [LOOP .BAG]
             // for (int i = 0; i < vec_check_dist.size(); i++)
             // {
             //     if (vec_check_dist[i] > 2.0)
@@ -338,24 +334,24 @@ void Matching::toDo()
             //         break;
             //     }
             // }
-            // // [PARA .BAG CON LOOP] Se sale de el estado actual y reinicia el algoritmo.
+            // // [LOOP.BAG]
             // if (cont == 0)
             // {
             //     break;
             // }
-            // Se guarda como instante anterior, los postes con el identificador correctamente colocado.
+            // Storage as previous state the posts with the correct label placed
             for (int i = 0; i < vec_labels.size(); i++)
             {
                 prevPathPosts.poses.push_back(nowPathPosts.poses.at(vec_labels[i]));
             }
-            // Se guardan las posiciones de los postes identificados
+            // Storage identified posts positions 
             for (int i = 0; i < prevPathPosts.poses.size(); i++)
             {
                 save_pose(i, prevPathPosts.poses.at(i));
             }
-            // Se utilizan Markers para visualizar en Rviz el resultado.
+            // Use markers to visualize on Rviz the result
             drawPosts();
-            // Limpia vectores.
+            // Clean vectors
             vec_labels.clear();
             vec_check_dist.clear();
             vec_distAndLabel.clear();

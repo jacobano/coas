@@ -56,7 +56,7 @@ void BoundingBoxes::phase_cb(const std_msgs::Int8 phaseMode)
     phase = phaseMode.data;
     switch (phase)
     {
-    // Atraque
+    // Docking
     case 1:
         close_dist = 1.0;
         xyMinPoste = 0.1;
@@ -68,7 +68,7 @@ void BoundingBoxes::phase_cb(const std_msgs::Int8 phaseMode)
         minDistPoste13 = 8.5;
         maxDistPoste13 = 8.8;
         break;
-    // Puerto
+    // Harbor
     case 2:
         close_dist = 1.0;
         xyMinPoste = 0.3;
@@ -80,7 +80,7 @@ void BoundingBoxes::phase_cb(const std_msgs::Int8 phaseMode)
         minDistPoste13 = 15.0;
         maxDistPoste13 = 17.0;
         break;
-    // Mar abierto
+    // Sea
     case 3:
         close_dist = 5.0;
         xyMinPoste = 0.0;
@@ -102,29 +102,29 @@ void BoundingBoxes::clusters_cb(const detection::vectorPointCloud input)
     if (!clusters.clouds.empty())
     {
         label_box = label_mergeBox = 0;
-        // Trabaja con cada uno de los clusters
+        // Work with every single cluster
         for (int i = 0; i < clusters.clouds.size(); i++)
         {
             pcl::PCLPointCloud2 pcl_pc2;
             pcl_conversions::toPCL(clusters.clouds[i], pcl_pc2);
             pcl::PointCloud<pcl::PointXYZ>::Ptr temp_cloud(new pcl::PointCloud<pcl::PointXYZ>);
             pcl::fromPCLPointCloud2(pcl_pc2, *temp_cloud);
-            // Reinicializa variables
+            // Reinitialize variables
             resetVariables();
-            // Calcula el centroide del cluster
+            // Calculate centroid of the cluster
             pcl::compute3DCentroid(*temp_cloud, centroid);
-            // Calcula distancias máximas del cluster
+            // Calculate maximum distances of the cluster
             calcMaxDistancesCluster(*temp_cloud);
-            // Calcula el centro del cluster
+            // Calculate center of the cluster
             calcCenters();
-            // Construye la boundingBox
+            // Construct bounding box
             constructBoundingBoxes(centerX, centerY, centerZ, maxDistX, maxDistY, maxDistZ, false);
         }
-        // Publica todas las boxes de una vez y limpia el vector de boxes
+        // Publish all boxes at one time and clean boxes vector 
         pub_boxArray.publish(boxes);
-        // Calcula todos los poligonos posibles entre clusters
+        // Calculate all possible polygons formed by clusters
         calcVecPolygons();
-        // Unifica las boundingBoxes que forman el poligono en una boundingBox
+        // Merge all bounding boxes that form one polygon into a new bounding box
         mergeBoundingBoxes();
     }
     std::cout << "[ BBXS] Time: " << ros::Time::now().toSec() - begin << std::endl;
@@ -154,17 +154,17 @@ void BoundingBoxes::cleanVariables()
     pathPoste12.poses.clear();
     pathPoste13.poses.clear();
     pathPoste23.poses.clear();
-    cont_postes = 0;
+    cont_posts = 0;
 }
 
 void BoundingBoxes::calcMaxDistancesCluster(const pcl::PointCloud<pcl::PointXYZ> cluster)
 {
-    // Compara todos los puntos con el resto de puntos de la nube de puntos
+    // Compare every single point with the rest of the point cloud
     for (int i = 0; i < cluster.points.size(); i++)
     {
         for (int j = 0; j < cluster.points.size(); j++)
         {
-            // Almacenar la distancia mayor en X
+            // Storage the largest distance in X
             if (maxDistX < fabs(cluster.points[i].x - cluster.points[j].x))
             {
                 maxDistX = fabs(cluster.points[i].x - cluster.points[j].x);
@@ -179,7 +179,7 @@ void BoundingBoxes::calcMaxDistancesCluster(const pcl::PointCloud<pcl::PointXYZ>
                     xMin = cluster.points[i].x;
                 }
             }
-            // Almacenar la distancia mayor en Y
+            // Storage the largest distance in Y
             if (maxDistY < fabs(cluster.points[i].y - cluster.points[j].y))
             {
                 maxDistY = fabs(cluster.points[i].y - cluster.points[j].y);
@@ -194,7 +194,7 @@ void BoundingBoxes::calcMaxDistancesCluster(const pcl::PointCloud<pcl::PointXYZ>
                     yMin = cluster.points[i].y;
                 }
             }
-            // Almacenar la distancia mayor en Z
+            // Storage the largest distance in Z
             if (maxDistZ < fabs(cluster.points[i].z - cluster.points[j].z))
             {
                 maxDistZ = fabs(cluster.points[i].z - cluster.points[j].z);
@@ -239,10 +239,10 @@ void BoundingBoxes::constructBoundingBoxes(float x, float y, float z, float dimX
         box.dimensions.y = dimY;
         box.dimensions.z = dimZ;
         box.label = label_box;
-        // Si está en modo atraque, busca y valida los postes.
+        // If it is at docking mode search and valid posts
         if (phase == 1)
         {
-            checkPostes(dimX, dimY, dimZ);
+            checkPosts(dimX, dimY, dimZ);
         }
         boxes.boxes.push_back(box);
         label_box++;
@@ -258,14 +258,14 @@ void BoundingBoxes::constructBoundingBoxes(float x, float y, float z, float dimX
     }
 }
 
-void BoundingBoxes::checkPostes(float xDim, float yDim, float zDim)
+void BoundingBoxes::checkPosts(float xDim, float yDim, float zDim)
 {
-    // Revisa si la boundingBox actual es un poste
+    // Check if the actual bounding box is a post
     if (xyMinPoste < xDim && xDim < xyMaxPoste && xyMinPoste < yDim && yDim < xyMaxPoste && zMinPoste < zDim && zDim < zMaxPoste)
     {
-        // Distancia al poste
+        // Distance to the post
         float dist = dist2Points(0, 0, 0, box.pose.position.x, box.pose.position.y, box.pose.position.z);
-        // Prepara el path
+        // Prepare the path
         std::vector<float> x1, y1, z1;
         x1.push_back(0.0);
         y1.push_back(0.0);
@@ -273,8 +273,8 @@ void BoundingBoxes::checkPostes(float xDim, float yDim, float zDim)
         x1.push_back(box.pose.position.x);
         y1.push_back(box.pose.position.y);
         z1.push_back(box.pose.position.z);
-        // Construye el path y mete la box de referencia en el array
-        switch (cont_postes)
+        // Construct the path and put the bounding box in the reference array
+        switch (cont_posts)
         {
         case 0:
             pathPoste1 = constructPath(x1, y1, z1, 2);
@@ -289,18 +289,18 @@ void BoundingBoxes::checkPostes(float xDim, float yDim, float zDim)
             boxesRef.boxes.push_back(box);
             break;
         }
-        // Si hay más de un poste detectado
+        // If there is more than one post detected
         if (boxesRef.boxes.size() > 1)
         {
             int cont_entrePostes = 0;
-            // Calcula la distancia entre todos los postes
+            // Calculate the distance between all posts 
             for (int i = 0; i < boxesRef.boxes.size(); i++)
             {
                 for (int j = i + 1; j < boxesRef.boxes.size(); j++)
                 {
                     float dist = dist2Points(boxesRef.boxes.at(i).pose.position.x, boxesRef.boxes.at(i).pose.position.y, boxesRef.boxes.at(i).pose.position.z,
                                              boxesRef.boxes.at(j).pose.position.x, boxesRef.boxes.at(j).pose.position.y, boxesRef.boxes.at(j).pose.position.z);
-                    // Prepara el path
+                    // Prepare the path
                     std::vector<float> x0, y0, z0;
                     x0.push_back(boxesRef.boxes.at(i).pose.position.x);
                     y0.push_back(boxesRef.boxes.at(i).pose.position.y);
@@ -308,10 +308,10 @@ void BoundingBoxes::checkPostes(float xDim, float yDim, float zDim)
                     x0.push_back(boxesRef.boxes.at(j).pose.position.x);
                     y0.push_back(boxesRef.boxes.at(j).pose.position.y);
                     z0.push_back(boxesRef.boxes.at(j).pose.position.z);
-                    // Si las distancias corresponden a las distancias buscadas
+                    // If the calculated distances match with the searched distances
                     if ((minDistPoste12 < dist && dist < maxDistPoste12) || (minDistPoste13 < dist && dist < maxDistPoste13))
                     {
-                        // Construye el path para representar distancias entre postes
+                        // Construct the path to represent distances between posts
                         switch (cont_entrePostes)
                         {
                         case 0:
@@ -329,8 +329,8 @@ void BoundingBoxes::checkPostes(float xDim, float yDim, float zDim)
                 }
             }
         }
-        cont_postes++;
-        // Publicaciones
+        cont_posts++;
+        // Publishers
         pub_boxesRef.publish(boxesRef);
         pub_pathPoste1.publish(pathPoste1);
         pub_pathPoste2.publish(pathPoste2);
@@ -338,16 +338,14 @@ void BoundingBoxes::checkPostes(float xDim, float yDim, float zDim)
         pub_pathPoste12.publish(pathPoste12);
         pub_pathPoste13.publish(pathPoste13);
         pub_pathPoste23.publish(pathPoste23);
-
+        // Save logs
         save_distances(true, pathPoste1, pathPoste2, pathPoste3);
         save_distances(false, pathPoste12, pathPoste13, pathPoste23);
-
         if (contTestPose == 0)
         {
             startTimePose = ros::Time::now().toSec();
             contTestPose++;
         }
-
         if (pathPoste1.poses.size() > 0)
         {
             save_pose(1, pathPoste1);
@@ -382,7 +380,7 @@ void BoundingBoxes::calcVecPolygons()
 {
     float dist;
     bool repeat, found;
-    // Compara todas las distancias entre boxes
+    // Compare all distances between boxes
     for (int i = 0; i < boxes.boxes.size(); i++)
     {
         found = false;
@@ -391,25 +389,25 @@ void BoundingBoxes::calcVecPolygons()
             dist = dist2Points(boxes.boxes[i].pose.position.x, boxes.boxes[i].pose.position.y, boxes.boxes[i].pose.position.z,
                                boxes.boxes[j].pose.position.x, boxes.boxes[j].pose.position.y, boxes.boxes[j].pose.position.z);
 
-            // Si el label ya está en otro polígono, no incluirlo en un nuevo polígono
+            // If the label is in another polygon do not use it in a new polygon
             repeat = false;
             for (int k = 0; k < vec_polygon_labels.size(); k++)
             {
-                // Comprueba label del iterador i
+                // Check the label of the iterator i
                 if (std::find(vec_polygon_labels[k].begin(), vec_polygon_labels[k].end(), boxes.boxes[i].label) != vec_polygon_labels[k].end())
                 {
                     repeat = true;
                 }
-                // Comprueba label del iterador j
+                // Check the label of the iterator j
                 if (std::find(vec_polygon_labels[k].begin(), vec_polygon_labels[k].end(), boxes.boxes[j].label) != vec_polygon_labels[k].end())
                 {
                     repeat = true;
                 }
             }
-            // Si están cerca
+            // If they are close
             if (0.01 < dist && dist < close_dist && repeat == false)
             {
-                // Si el polígono está vacío introduce i en vez de j
+                // If the polygon is empty put in i instead of j
                 if (polygon_labels.empty())
                 {
                     polygon_labels.push_back(boxes.boxes[i].label);
@@ -418,37 +416,37 @@ void BoundingBoxes::calcVecPolygons()
                 {
                     if (std::find(polygon_labels.begin(), polygon_labels.end(), boxes.boxes[j].label) != polygon_labels.end())
                     {
-                        // Repetido
+                        // Repeated
                     }
                     else
                     {
-                        // No repetido
+                        // Not repeated
                         polygon_labels.push_back(boxes.boxes[j].label);
                     }
                 }
                 found = true;
             }
         }
-        // Si no se ha encontrado ningún label[j] cerca del label[i]
+        // If no label[j] has been found near label[i].
         if (found == false)
         {
-            // Si el polígono no está vacío, almacena el polígono generado en el vector de polígonos
+            // If the polygon is not empty storage it in the polygons vector
             if (!polygon_labels.empty())
             {
                 vec_polygon_labels.push_back(polygon_labels);
             }
             else
             {
-                // Comprueba que el label de i no está en ningún otro polígono
+                // Check that label i is not in another polygon
                 for (int k = 0; k < vec_polygon_labels.size(); k++)
                 {
-                    // Comprueba label del iterador i
+                    // Check label of the iterator i
                     if (std::find(vec_polygon_labels[k].begin(), vec_polygon_labels[k].end(), boxes.boxes[i].label) != vec_polygon_labels[k].end())
                     {
                         repeat = true;
                     }
                 }
-                // Si no está se almacena como polígono de un único label
+                // If not, storage it like a polygon formed by one label
                 if (repeat == false)
                 {
                     polygon_labels.push_back(boxes.boxes[i].label);
@@ -480,29 +478,29 @@ float BoundingBoxes::dist2Points(float x1, float y1, float z1, float x2, float y
 
 void BoundingBoxes::mergeBoundingBoxes()
 {
-    // Para cada poligono, crea una boundingBox
+    // For each polygon create a bounding box
     for (int i = 0; i < vec_polygon_labels.size(); i++)
     {
         pcl::PointCloud<pcl::PointXYZ> polygon_cloud_temp;
         polygon_labels.clear();
         polygon_labels = vec_polygon_labels[i];
-        // Agrupo las nubes de puntos de los clusters que forman un poligono en una unica nube de puntos
+        // Merge all point clouds (clusters) that form a polygon in a single point cloud
         for (int j = 0; j < polygon_labels.size(); j++)
         {
-            // El centroide de una boundingBox se transforma en punto de PC2
+            // Transform the bounding box centroid into a PC2 point
             pcl::PointXYZ point;
             point.x = boxes.boxes[polygon_labels[j]].pose.position.x;
             point.y = boxes.boxes[polygon_labels[j]].pose.position.y;
             point.z = boxes.boxes[polygon_labels[j]].pose.position.z;
-            // Crea una nube de puntos con todos los centroides de las boundingBoxes cercanas
+            // Create a point cloud with every centroid of the near bounding boxes
             pcl::PointCloud<pcl::PointXYZ>::Ptr temp_cluster(new pcl::PointCloud<pcl::PointXYZ>);
             temp_cluster->points.push_back(point);
             polygon_cloud_temp += *temp_cluster;
         }
-        // Calcular centroide de esta nube de puntos unica
+        // Calculate the centroid of this single point cloud
         Eigen::Vector4f centroid_polygon_cloud;
         pcl::compute3DCentroid(polygon_cloud_temp, centroid_polygon_cloud);
-        // Caluclar dimensiones para la nueva boundingBox con las distancias maximas.
+        // Calculate dimensions for the new bounding box using maximum distances
         maxDistXpol = maxDistYpol = maxDistZpol = 0;
         for (int k = 0; k < polygon_cloud_temp.size(); k++)
         {
@@ -519,7 +517,7 @@ void BoundingBoxes::mergeBoundingBoxes()
                 maxDistZpol = fabs(centroid_polygon_cloud[2] - boxes.boxes[polygon_labels[k]].pose.position.z) + boxes.boxes[polygon_labels[k]].dimensions.z;
             }
         }
-        // Crea la boundingBox que engloba las demás
+        // Create the bounding box that includes the others
         constructBoundingBoxes(centroid_polygon_cloud[0], centroid_polygon_cloud[1], centroid_polygon_cloud[2], maxDistXpol, maxDistYpol, maxDistZpol, true);
     }
     pub_mergeBoxesArray.publish(mergeBoxes);
@@ -616,7 +614,6 @@ void BoundingBoxes::save_pose(int nPost, nav_msgs::Path path)
     switch (nPost)
     {
     case 1:
-        // ROS_WARN("2 timepose: %d | timedistance: %d", startTimePose, startTime);
         filePost1 << path.poses.at(1).pose.position.x << " " << path.poses.at(1).pose.position.y << std::endl;
         filePost1Time << ros::Time::now().toSec() - startTimePose << std::endl;
         break;

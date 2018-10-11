@@ -7,9 +7,9 @@
 
 
     <node pkg="mapping" type="mapFilter_node" name="mapping_node" output="screen" required="true"/>
+    <node pkg="mapping" type="volexFilter_node" name="volexFilter_node" required="true"/>
     <node pkg="detection" type="euclideanClusterer_node" name="euclideanClusterer_node" output="screen" required="true"/>
     <node pkg="detection" type="boundingBoxes_node" name="boundingBoxes_node" output="screen" required="true"/>
-    <node pkg="detection" type="volexFilter_node" name="volexFilter_node" required="true"/>
 
     <!-- <arg name="phase" default="1"/> -->
 
