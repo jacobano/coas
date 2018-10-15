@@ -1,10 +1,10 @@
-#include <mapping/volexFilter.h>
+#include <mapping/voxelFilter.h>
 
 int main(int _argc, char **_argv)
 {
-    ros::init(_argc, _argv, "volexFilter_node");
+    ros::init(_argc, _argv, "voxelFilter_node");
 
-    VolexFilter filter;
+    VoxelFilter filter;
 
     while (ros::ok())
     {

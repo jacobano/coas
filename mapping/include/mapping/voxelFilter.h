@@ -3,12 +3,12 @@
 #include <sensor_msgs/PointCloud2.h>
 #include <pcl_conversions/pcl_conversions.h>
 
-class VolexFilter
+class VoxelFilter
 {
 
 public:
-  VolexFilter();
-  ~VolexFilter();
+  VoxelFilter();
+  ~VoxelFilter();
 
   void loop();
 

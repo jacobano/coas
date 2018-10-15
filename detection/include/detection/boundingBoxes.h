@@ -64,9 +64,10 @@ private:
   float maxDistX, maxDistY, maxDistZ, maxDistXpol, maxDistYpol, maxDistZpol, maxBoxX, maxBoxY, maxBoxZ;
   nav_msgs::Path pathPoste1, pathPoste2, pathPoste3, pathPoste12, pathPoste13, pathPoste23;
 
-  std::ofstream fileToPosts, fileBetweenPosts, fileToPostsTimes, fileBetweenPostsTimes, filePost1, filePost2, filePost3, filePost1Time, filePost2Time, filePost3Time;
+  std::string logOutput;
   int contTest, contTestPose;
   double startTime, startTimePose;
+  std::ofstream fileToPosts, fileBetweenPosts, fileToPostsTimes, fileBetweenPostsTimes, filePost1, filePost2, filePost3, filePost1Time, filePost2Time, filePost3Time;
 
   // Params
   int phase; // 1 Atraque - 2 Puerto - 3 Mar abierto

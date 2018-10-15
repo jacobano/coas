@@ -21,16 +21,18 @@ BoundingBoxes::BoundingBoxes()
     pub_pathPoste13 = n.advertise<nav_msgs::Path>("/pathPoste13", 1);
     pub_pathPoste23 = n.advertise<nav_msgs::Path>("/pathPoste23", 1);
 
-    fileToPosts.open("/home/hector/matlab_ws/COAS/distancesToPosts");
-    fileBetweenPosts.open("/home/hector/matlab_ws/COAS/distancesBetweenPosts");
-    fileBetweenPostsTimes.open("/home/hector/matlab_ws/COAS/timesBetweenPosts");
-    fileToPostsTimes.open("/home/hector/matlab_ws/COAS/timesToPosts");
-    filePost1.open("/home/hector/matlab_ws/COAS/post1");
-    filePost2.open("/home/hector/matlab_ws/COAS/post2");
-    filePost3.open("/home/hector/matlab_ws/COAS/post3");
-    filePost1Time.open("/home/hector/matlab_ws/COAS/post1time");
-    filePost2Time.open("/home/hector/matlab_ws/COAS/post2time");
-    filePost3Time.open("/home/hector/matlab_ws/COAS/post3time");
+    logOutput = "/home/hector/matlab_ws/COAS/";
+
+    fileToPosts.open(logOutput + "distancesToPosts");
+    fileBetweenPosts.open(logOutput + "distancesBetweenPosts");
+    fileBetweenPostsTimes.open(logOutput + "timesBetweenPosts");
+    fileToPostsTimes.open(logOutput + "timesToPosts");
+    filePost1.open(logOutput + "post1");
+    filePost2.open(logOutput + "post2");
+    filePost3.open(logOutput + "post3");
+    filePost1Time.open(logOutput + "post1time");
+    filePost2Time.open(logOutput + "post2time");
+    filePost3Time.open(logOutput + "post3time");
 
     contTest = contTestPose = 0;
 
@@ -120,7 +122,7 @@ void BoundingBoxes::clusters_cb(const detection::vectorPointCloud input)
             // Construct bounding box
             constructBoundingBoxes(centerX, centerY, centerZ, maxDistX, maxDistY, maxDistZ, false);
         }
-        // Publish all boxes at one time and clean boxes vector 
+        // Publish all boxes at one time and clean boxes vector
         pub_boxArray.publish(boxes);
         // Calculate all possible polygons formed by clusters
         calcVecPolygons();
@@ -293,7 +295,7 @@ void BoundingBoxes::checkPosts(float xDim, float yDim, float zDim)
         if (boxesRef.boxes.size() > 1)
         {
             int cont_entrePostes = 0;
-            // Calculate the distance between all posts 
+            // Calculate the distance between all posts
             for (int i = 0; i < boxesRef.boxes.size(); i++)
             {
                 for (int j = i + 1; j < boxesRef.boxes.size(); j++)

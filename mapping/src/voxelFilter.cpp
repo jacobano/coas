@@ -1,23 +1,23 @@
-#include <mapping/volexFilter.h>
+#include <mapping/voxelFilter.h>
 
-VolexFilter::VolexFilter()
+VoxelFilter::VoxelFilter()
 {
     n = ros::NodeHandle();
 
     // Subscriptions
-    ros::Subscriber velodyne_sub = n.subscribe("/map_filtered2", 1, &VolexFilter::cloud_cb, this);
+    ros::Subscriber velodyne_sub = n.subscribe("/map_filtered2", 1, &VoxelFilter::cloud_cb, this);
 
     // Publishers
-    pub = n.advertise<sensor_msgs::PointCloud2>("/volexFilterPoints", 1);
+    pub = n.advertise<sensor_msgs::PointCloud2>("/voxelFilterPoints", 1);
 
     loop();
 }
 
-VolexFilter::~VolexFilter()
+VoxelFilter::~VoxelFilter()
 {
 }
 
-void VolexFilter::cloud_cb(const boost::shared_ptr<const sensor_msgs::PointCloud2> &input)
+void VoxelFilter::cloud_cb(const boost::shared_ptr<const sensor_msgs::PointCloud2> &input)
 {
     sensor_msgs::PointCloud2 output;
 
@@ -37,7 +37,7 @@ void VolexFilter::cloud_cb(const boost::shared_ptr<const sensor_msgs::PointCloud
     pub.publish(output);
 }
 
-void VolexFilter::loop()
+void VoxelFilter::loop()
 {
     while (ros::ok())
     {

@@ -166,12 +166,12 @@ add_executable(mapFilter_node src/mapFilter_node.cpp)
 target_link_libraries(mapFilter_node mapFilter ${catkin_LIBRARIES})
 add_dependencies(mapFilter_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-add_library(volexFilter src/volexFilter.cpp)
-add_dependencies(volexFilter ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_library(voxelFilter src/voxelFilter.cpp)
+add_dependencies(voxelFilter ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-add_executable(volexFilter_node src/volexFilter_node.cpp)
-target_link_libraries(volexFilter_node volexFilter ${catkin_LIBRARIES})
-add_dependencies(volexFilter_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_executable(voxelFilter_node src/voxelFilter_node.cpp)
+target_link_libraries(voxelFilter_node voxelFilter ${catkin_LIBRARIES})
+add_dependencies(voxelFilter_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 #############
 ## Install ##

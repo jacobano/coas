@@ -1,7 +1,6 @@
 #include <ros/ros.h>
 #include <fstream>
 #include <std_msgs/Int8.h>
-#include <pcl/point_types.h>
 #include "mapping/vectorInt.h"
 #include "mapping/vectorVector.h"
 #include <sensor_msgs/PointCloud2.h>
@@ -18,7 +17,7 @@ public:
 
 private:
   // Callbacks
-  void exploration(const sensor_msgs::PointCloud2 &nube3d_uav);
+  void exploration(const sensor_msgs::PointCloud2 &cloud2d_usv);
   void receiveSensor(const sensor_msgs::PointCloud2 &cloud);
 
   typedef std::vector<float> VI;
@@ -43,7 +42,7 @@ private:
 
   // Variables
   int phase, range_dock, range_sea, rang, rows, columns;
-  float cell_div; // (2) número de celdas por 1 metro
+  float cell_div; // number of cell per meter
 
   // Params
 };

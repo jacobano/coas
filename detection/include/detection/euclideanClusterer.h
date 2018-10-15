@@ -37,6 +37,6 @@ private:
   // Variables
 
   // Params
-  int phase; // 1 Atraque - 2 Puerto - 3 Mar
+  int phase; // 1 Docking - 2 Harbor - 3 Sea
   float distanceThreshold, clusterTolerance, minClusterSize, maxClusterSize;
 };

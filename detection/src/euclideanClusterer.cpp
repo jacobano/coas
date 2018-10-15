@@ -7,7 +7,7 @@ EuclideanClusterer::EuclideanClusterer()
     // params();
 
     // Subscriptions
-    velodyne_sub = n.subscribe("/volexFilterPoints", 1, &EuclideanClusterer::cloud_cb, this);
+    velodyne_sub = n.subscribe("/voxelFilterPoints", 1, &EuclideanClusterer::cloud_cb, this);
     sub_phase = n.subscribe("/phase", 1, &EuclideanClusterer::phase_cb, this);
 
     // Publishers

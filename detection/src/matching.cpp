@@ -20,12 +20,14 @@ Matching::Matching()
     pub_marker5 = n.advertise<visualization_msgs::Marker>("/marker_post5", 1);
     pub_marker6 = n.advertise<visualization_msgs::Marker>("/marker_post6", 1);
 
-    filePost1.open("/home/hector/matlab_ws/COAS/matchPost1");
-    filePost2.open("/home/hector/matlab_ws/COAS/matchPost2");
-    filePost3.open("/home/hector/matlab_ws/COAS/matchPost3");
-    filePost1Time.open("/home/hector/matlab_ws/COAS/matchPost1time");
-    filePost2Time.open("/home/hector/matlab_ws/COAS/matchPost2time");
-    filePost3Time.open("/home/hector/matlab_ws/COAS/matchPost3time");
+    logOutput = "/home/hector/matlab_ws/COAS/";
+
+    filePost1.open(logOutput + "matchPost1");
+    filePost2.open(logOutput + "matchPost2");
+    filePost3.open(logOutput + "matchPost3");
+    filePost1Time.open(logOutput + "matchPost1time");
+    filePost2Time.open(logOutput + "matchPost2time");
+    filePost3Time.open(logOutput + "matchPost3time");
 
     cont = 0;
 
@@ -344,7 +346,7 @@ void Matching::toDo()
             {
                 prevPathPosts.poses.push_back(nowPathPosts.poses.at(vec_labels[i]));
             }
-            // Storage identified posts positions 
+            // Storage identified posts positions
             for (int i = 0; i < prevPathPosts.poses.size(); i++)
             {
                 save_pose(i, prevPathPosts.poses.at(i));
