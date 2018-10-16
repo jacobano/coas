@@ -1,4 +1,4 @@
-#include <detection/boundingBoxes.h>
+#include <detection/bounding_boxes.h>
 
 BoundingBoxes::BoundingBoxes()
 {
@@ -11,15 +11,15 @@ BoundingBoxes::BoundingBoxes()
     sub_phase = n.subscribe("/phase", 1, &BoundingBoxes::phase_cb, this);
 
     // Publishers
-    pub_boxArray = n.advertise<jsk_recognition_msgs::BoundingBoxArray>("/boundingBoxes", 1);
-    pub_mergeBoxesArray = n.advertise<jsk_recognition_msgs::BoundingBoxArray>("/mergeBoundingBoxes", 1);
-    pub_boxesRef = n.advertise<jsk_recognition_msgs::BoundingBoxArray>("/boxesRef", 1);
-    pub_pathPoste1 = n.advertise<nav_msgs::Path>("/pathPoste1", 1);
-    pub_pathPoste2 = n.advertise<nav_msgs::Path>("/pathPoste2", 1);
-    pub_pathPoste3 = n.advertise<nav_msgs::Path>("/pathPoste3", 1);
-    pub_pathPoste12 = n.advertise<nav_msgs::Path>("/pathPoste12", 1);
-    pub_pathPoste13 = n.advertise<nav_msgs::Path>("/pathPoste13", 1);
-    pub_pathPoste23 = n.advertise<nav_msgs::Path>("/pathPoste23", 1);
+    pub_boxArray = n.advertise<jsk_recognition_msgs::BoundingBoxArray>("/bounding_boxes", 1);
+    pub_mergeBoxesArray = n.advertise<jsk_recognition_msgs::BoundingBoxArray>("/merge_bounding_boxes", 1);
+    pub_boxesRef = n.advertise<jsk_recognition_msgs::BoundingBoxArray>("/reference_bounding_boxes", 1);
+    pub_pathPoste1 = n.advertise<nav_msgs::Path>("/path_poste1", 1);
+    pub_pathPoste3 = n.advertise<nav_msgs::Path>("/path_poste3", 1);
+    pub_pathPoste2 = n.advertise<nav_msgs::Path>("/path_poste2", 1);
+    pub_pathPoste12 = n.advertise<nav_msgs::Path>("/path_poste12", 1);
+    pub_pathPoste13 = n.advertise<nav_msgs::Path>("/path_poste13", 1);
+    pub_pathPoste23 = n.advertise<nav_msgs::Path>("/path_poste23", 1);
 
     logOutput = "/home/hector/matlab_ws/COAS/";
 
@@ -97,10 +97,10 @@ void BoundingBoxes::phase_cb(const std_msgs::Int8 phaseMode)
     }
 }
 
-void BoundingBoxes::clusters_cb(const detection::vectorPointCloud input)
+void BoundingBoxes::clusters_cb(const detection::VectorPointCloud input)
 {
     double begin = ros::Time::now().toSec();
-    detection::vectorPointCloud clusters = input;
+    detection::VectorPointCloud clusters = input;
     if (!clusters.clouds.empty())
     {
         label_box = label_mergeBox = 0;

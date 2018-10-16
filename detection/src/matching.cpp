@@ -5,12 +5,12 @@ Matching::Matching()
     n = ros::NodeHandle();
 
     // Subscriptions
-    ros::Subscriber sub_pathPoste1 = n.subscribe("/pathPoste1", 1, &Matching::cb_pathPoste1, this);
-    ros::Subscriber sub_pathPoste2 = n.subscribe("/pathPoste2", 1, &Matching::cb_pathPoste2, this);
-    ros::Subscriber sub_pathPoste3 = n.subscribe("/pathPoste3", 1, &Matching::cb_pathPoste3, this);
-    ros::Subscriber sub_pathPoste12 = n.subscribe("/pathPoste12", 1, &Matching::cb_pathPoste12, this);
-    ros::Subscriber sub_pathPoste13 = n.subscribe("/pathPoste13", 1, &Matching::cb_pathPoste13, this);
-    ros::Subscriber sub_pathPoste23 = n.subscribe("/pathPoste23", 1, &Matching::cb_pathPoste23, this);
+    ros::Subscriber sub_pathPoste2 = n.subscribe("/path_poste2", 1, &Matching::cb_pathPoste2, this);
+    ros::Subscriber sub_pathPoste3 = n.subscribe("/path_poste3", 1, &Matching::cb_pathPoste3, this);
+    ros::Subscriber sub_pathPoste1 = n.subscribe("/path_poste1", 1, &Matching::cb_pathPoste1, this);
+    ros::Subscriber sub_pathPoste12 = n.subscribe("/path_poste12", 1, &Matching::cb_pathPoste12, this);
+    ros::Subscriber sub_pathPoste13 = n.subscribe("/path_poste13", 1, &Matching::cb_pathPoste13, this);
+    ros::Subscriber sub_pathPoste23 = n.subscribe("/path_poste23", 1, &Matching::cb_pathPoste23, this);
 
     // Publishers
     pub_marker1 = n.advertise<visualization_msgs::Marker>("/marker_post1", 1);

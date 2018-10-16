@@ -1,7 +1,7 @@
 #include <ros/ros.h>
 #include <std_msgs/Int8.h>
 #include <sensor_msgs/PointCloud2.h>
-#include "detection/vectorPointCloud.h"
+#include "detection/VectorPointCloud.h"
 #include <pcl/filters/extract_indices.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl/segmentation/sac_segmentation.h>

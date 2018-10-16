@@ -103,17 +103,17 @@ Visualization Manager:
       Size (Pixels): 3
       Size (m): 0.0199999996
       Style: Flat Squares
-      Topic: /map_filtered2
+      Topic: /filter_points
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
       Value: true
     - Class: jsk_rviz_plugin/BoundingBoxArray
-      Enabled: true
+      Enabled: false
       Name: boxesRef
-      Topic: /boxesRef
+      Topic: /reference_bounding_boxes
       Unreliable: false
-      Value: true
+      Value: false
       alpha: 1
       color: 255; 0; 255
       coloring: Flat color
@@ -140,7 +140,7 @@ Visualization Manager:
       Radius: 0.0299999993
       Shaft Diameter: 0.100000001
       Shaft Length: 0.100000001
-      Topic: /pathPoste1
+      Topic: /path_poste1
       Unreliable: false
       Value: false
     - Alpha: 1
@@ -163,7 +163,7 @@ Visualization Manager:
       Radius: 0.0299999993
       Shaft Diameter: 0.100000001
       Shaft Length: 0.100000001
-      Topic: /pathPoste2
+      Topic: /path_poste2
       Unreliable: false
       Value: false
     - Alpha: 1
@@ -186,7 +186,7 @@ Visualization Manager:
       Radius: 0.0299999993
       Shaft Diameter: 0.100000001
       Shaft Length: 0.100000001
-      Topic: /pathPoste3
+      Topic: /path_poste3
       Unreliable: false
       Value: false
     - Alpha: 1
@@ -209,7 +209,7 @@ Visualization Manager:
       Radius: 0.0299999993
       Shaft Diameter: 0.100000001
       Shaft Length: 0.100000001
-      Topic: /pathPoste12
+      Topic: /path_poste12
       Unreliable: false
       Value: true
     - Alpha: 1
@@ -232,7 +232,7 @@ Visualization Manager:
       Radius: 0.0299999993
       Shaft Diameter: 0.100000001
       Shaft Length: 0.100000001
-      Topic: /pathPoste13
+      Topic: /path_poste13
       Unreliable: false
       Value: true
     - Alpha: 1
@@ -255,15 +255,15 @@ Visualization Manager:
       Radius: 0.0299999993
       Shaft Diameter: 0.100000001
       Shaft Length: 0.100000001
-      Topic: /pathPoste23
+      Topic: /path_poste23
       Unreliable: false
       Value: true
     - Class: jsk_rviz_plugin/BoundingBoxArray
-      Enabled: true
+      Enabled: false
       Name: BoundingBoxArray
-      Topic: /boundingBoxes
+      Topic: /bounding_boxes
       Unreliable: false
-      Value: true
+      Value: false
       alpha: 0.800000012
       color: 25; 255; 0
       coloring: Auto
@@ -273,7 +273,7 @@ Visualization Manager:
     - Class: jsk_rviz_plugin/BoundingBoxArray
       Enabled: false
       Name: mergeBoundingBoxArray
-      Topic: /mergeBoundingBoxes
+      Topic: /merge_bounding_boxes
       Unreliable: false
       Value: false
       alpha: 0.800000012
@@ -281,18 +281,6 @@ Visualization Manager:
       coloring: Label
       line width: 0.0500000007
       only edge: true
-      show coords: false
-    - Class: jsk_rviz_plugin/BoundingBoxArray
-      Enabled: false
-      Name: trackBoundingBoxArray
-      Topic: /trackBoundingBoxes
-      Unreliable: false
-      Value: false
-      alpha: 0.300000012
-      color: 25; 255; 0
-      coloring: Auto
-      line width: 0.00499999989
-      only edge: false
       show coords: false
     - Alpha: 1
       Autocompute Intensity Bounds: true
@@ -654,29 +642,6 @@ Visualization Manager:
       Use Fixed Frame: true
       Use rainbow: true
       Value: false
-    - Alpha: 1
-      Buffer Length: 1
-      Class: rviz/Path
-      Color: 255; 255; 255
-      Enabled: false
-      Head Diameter: 0.300000012
-      Head Length: 0.200000003
-      Length: 0.300000012
-      Line Style: Lines
-      Line Width: 0.0299999993
-      Name: Path
-      Offset:
-        X: 0
-        Y: 0
-        Z: 0
-      Pose Color: 255; 85; 255
-      Pose Style: None
-      Radius: 0.0299999993
-      Shaft Diameter: 0.100000001
-      Shaft Length: 0.100000001
-      Topic: /TestPath
-      Unreliable: false
-      Value: false
     - Class: rviz/Marker
       Enabled: true
       Marker Topic: /marker_post1
@@ -749,7 +714,7 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Angle: 0.00999961235
+      Angle: 0.150002778
       Class: rviz/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
@@ -759,11 +724,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Scale: 60.4792213
+      Scale: 43.5587082
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
-      X: 4.99959707
-      Y: 7.96852875
+      X: -0.539683223
+      Y: 6.08015156
     Saved: ~
 Window Geometry:
   Displays:

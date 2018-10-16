@@ -1,17 +1,17 @@
 #include <ros/ros.h>
 #include <fstream>
 #include <std_msgs/Int8.h>
-#include "mapping/vectorInt.h"
-#include "mapping/vectorVector.h"
+#include "filtering/VectorInt.h"
+#include "filtering/VectorVector.h"
 #include <sensor_msgs/PointCloud2.h>
 #include <pcl_conversions/pcl_conversions.h>
 
-class MapFilter
+class SensorFilter
 {
 
 public:
-  MapFilter();
-  ~MapFilter();
+  SensorFilter();
+  ~SensorFilter();
 
   void loop();
 

@@ -1,4 +1,4 @@
-#include <detection/euclideanClusterer.h>
+#include <detection/euclidean_clusterer.h>
 
 EuclideanClusterer::EuclideanClusterer()
 {
@@ -7,11 +7,11 @@ EuclideanClusterer::EuclideanClusterer()
     // params();
 
     // Subscriptions
-    velodyne_sub = n.subscribe("/voxelFilterPoints", 1, &EuclideanClusterer::cloud_cb, this);
+    velodyne_sub = n.subscribe("/voxel_filter_points", 1, &EuclideanClusterer::cloud_cb, this);
     sub_phase = n.subscribe("/phase", 1, &EuclideanClusterer::phase_cb, this);
 
     // Publishers
-    pub_pointclouds = n.advertise<detection::vectorPointCloud>("/vector_pointclouds", 1);
+    pub_pointclouds = n.advertise<detection::VectorPointCloud>("/vector_pointclouds", 1);
     loop();
 }
 
@@ -180,7 +180,7 @@ void EuclideanClusterer::cloud_cb(const boost::shared_ptr<const sensor_msgs::Poi
         pub_vec.push_back(pub);
     }
     int j = 0;
-    detection::vectorPointCloud vector_pointclouds;
+    detection::VectorPointCloud vector_pointclouds;
     for (std::vector<pcl::PointIndices>::const_iterator it = cluster_indices.begin(); it != cluster_indices.end(); ++it)
     {
         pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_cluster(new pcl::PointCloud<pcl::PointXYZ>);

@@ -1,7 +1,7 @@
 #cmake_minimum_required(VERSION 2.8.3)
 cmake_minimum_required(VERSION 3.1)
 set (CMAKE_CXX_STANDARD 14)
-project(mapping)
+project(filtering)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -58,8 +58,8 @@ find_package(catkin REQUIRED COMPONENTS
 #
  add_message_files(
    FILES
-   vectorInt.msg
-   vectorVector.msg
+   VectorInt.msg
+   VectorVector.msg
  )
 
 ## Generate services in the 'srv' folder
@@ -113,7 +113,7 @@ generate_messages(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES mapping
+  LIBRARIES filtering
   CATKIN_DEPENDS roscpp rospy std_msgs message_runtime
   # DEPENDS
 )
@@ -131,7 +131,7 @@ include_directories(
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/mapping.cpp
+#   src/${PROJECT_NAME}/filtering.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -142,7 +142,7 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/mapping_node.cpp)
+# add_executable(${PROJECT_NAME}_node src/filtering_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -159,19 +159,19 @@ include_directories(
 #   ${catkin_LIBRARIES}
 # )
 
-add_library(mapFilter src/mapFilter.cpp)
-add_dependencies(mapFilter ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_library(sensor_filter src/sensor_filter.cpp)
+add_dependencies(sensor_filter ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-add_executable(mapFilter_node src/mapFilter_node.cpp)
-target_link_libraries(mapFilter_node mapFilter ${catkin_LIBRARIES})
-add_dependencies(mapFilter_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_executable(sensor_filter_node src/sensor_filter_node.cpp)
+target_link_libraries(sensor_filter_node sensor_filter ${catkin_LIBRARIES})
+add_dependencies(sensor_filter_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-add_library(voxelFilter src/voxelFilter.cpp)
-add_dependencies(voxelFilter ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_library(voxel_filter src/voxel_filter.cpp)
+add_dependencies(voxel_filter ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-add_executable(voxelFilter_node src/voxelFilter_node.cpp)
-target_link_libraries(voxelFilter_node voxelFilter ${catkin_LIBRARIES})
-add_dependencies(voxelFilter_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_executable(voxel_filter_node src/voxel_filter_node.cpp)
+target_link_libraries(voxel_filter_node voxel_filter ${catkin_LIBRARIES})
+add_dependencies(voxel_filter_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 #############
 ## Install ##
@@ -213,7 +213,7 @@ add_dependencies(voxelFilter_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_E
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_mapping.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_filtering.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()

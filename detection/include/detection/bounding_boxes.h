@@ -7,7 +7,7 @@
 #include <std_msgs/Bool.h>
 #include <pcl_ros/transforms.h>
 #include <sensor_msgs/PointCloud2.h>
-#include "detection/vectorPointCloud.h"
+#include "detection/VectorPointCloud.h"
 #include <pcl_conversions/pcl_conversions.h>
 #include <jsk_recognition_msgs/BoundingBox.h>
 #include <jsk_recognition_msgs/BoundingBoxArray.h>
@@ -24,7 +24,7 @@ public:
 private:
   // Callbacks
   void phase_cb(const std_msgs::Int8 phaseMode);
-  void clusters_cb(const detection::vectorPointCloud input);
+  void clusters_cb(const detection::VectorPointCloud input);
 
   //
   void params();

@@ -1,14 +1,14 @@
-#include <mapping/voxelFilter.h>
+#include <filtering/voxel_filter.h>
 
 VoxelFilter::VoxelFilter()
 {
     n = ros::NodeHandle();
 
     // Subscriptions
-    ros::Subscriber velodyne_sub = n.subscribe("/map_filtered2", 1, &VoxelFilter::cloud_cb, this);
+    ros::Subscriber velodyne_sub = n.subscribe("/filter_points", 1, &VoxelFilter::cloud_cb, this);
 
     // Publishers
-    pub = n.advertise<sensor_msgs::PointCloud2>("/voxelFilterPoints", 1);
+    pub = n.advertise<sensor_msgs::PointCloud2>("/voxel_filter_points", 1);
 
     loop();
 }
