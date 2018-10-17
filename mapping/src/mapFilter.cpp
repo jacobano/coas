@@ -16,9 +16,9 @@ MapFilter::MapFilter()
     range_dock = 10;
     range_sea = 100;
     cell_div;
-    rang = range_dock * cell_div;
-    rows = 2 * rang + 1;
-    columns = 2 * rang + 1;
+    range = range_dock * cell_div;
+    rows = 2 * range + 1;
+    columns = 2 * range + 1;
 
     loop();
 }
@@ -48,9 +48,9 @@ void MapFilter::phase_cb(const std_msgs::Int8 phaseMode)
         cell_div = 1; // Check this. Default = 2 but it was too slow.
         break;
     }
-    rang = range_dock * cell_div;
-    rows = 2 * rang + 1;
-    columns = 2 * rang + 1;
+    range = range_dock * cell_div;
+    rows = 2 * range + 1;
+    columns = 2 * range + 1;
 }
 
 void MapFilter::receiveSensor(const sensor_msgs::PointCloud2 &cloud)
@@ -176,7 +176,7 @@ void MapFilter::exploration(const sensor_msgs::PointCloud2 &cloud3d_uas)
         }
     }
     // Indicate the cell where the vessel is.
-    V[rang][rang][0] = 4; //Position of the sensor (it is always the same because the map is local)
+    V[range][range][0] = 4; //Position of the sensor (it is always the same because the map is local)
 
     int tam = cloud3d_uas.width * cloud3d_uas.height;
 
@@ -192,9 +192,9 @@ void MapFilter::exploration(const sensor_msgs::PointCloud2 &cloud3d_uas)
         float cloud_dist = hypot(fil_cloud_XYZ->points[i].x, fil_cloud_XYZ->points[i].y);
         if (cloud_dist >= cloud_thres_distance)
         {
-            int iM = round(rang - cell_div * fil_cloud_XYZ->points[i].x);
-            int jM = round(rang - cell_div * fil_cloud_XYZ->points[i].y);
-            if (cloud_dist < rang && is_in_map(iM, jM) == 1 && readV(V, iM, jM) != 4)
+            int iM = round(range - cell_div * fil_cloud_XYZ->points[i].x);
+            int jM = round(range - cell_div * fil_cloud_XYZ->points[i].y);
+            if (cloud_dist < range && is_in_map(iM, jM) == 1 && readV(V, iM, jM) != 4)
             {
                 if (V[iM][jM][0] != 1)
                 {
@@ -248,9 +248,9 @@ void MapFilter::exploration(const sensor_msgs::PointCloud2 &cloud3d_uas)
         float cloud_dist = hypot(fil_cloud_XYZ->points[i].x, fil_cloud_XYZ->points[i].y);
         if (cloud_dist >= cloud_thres_distance)
         {
-            int iM = round(rang - cell_div * fil_cloud_XYZ->points[i].x);
-            int jM = round(rang - cell_div * fil_cloud_XYZ->points[i].y);
-            if (cloud_dist < rang && is_in_map(iM, jM) == 1 && readV(V, iM, jM) != 4)
+            int iM = round(range - cell_div * fil_cloud_XYZ->points[i].x);
+            int jM = round(range - cell_div * fil_cloud_XYZ->points[i].y);
+            if (cloud_dist < range && is_in_map(iM, jM) == 1 && readV(V, iM, jM) != 4)
             {
                 if (V[iM][jM][0] == 1 && V_map[iM][jM][0] == 0)
                 {
@@ -270,9 +270,22 @@ void MapFilter::exploration(const sensor_msgs::PointCloud2 &cloud3d_uas)
     pub_filtered_map2.publish(filtered_cloud_3D);
 
     // GENERATE FILES TO CHECK THE OUTPUTS AND THE GENERATION OF THE MATRIX.
+    char* envvar_home;
+    envvar_home = std::getenv("HOME");
+    std::stringstream matrix_filename;
+    std::stringstream counter_filename;
+    std::stringstream map_filename;
+    matrix_filename << envvar_home << "/Matlab_ws/matrix.txt";
+    counter_filename << envvar_home << "/Matlab_ws/counter.txt";
+    map_filename << envvar_home << "/Matlab_ws/map.txt";
+    save_matrix3d(matrix_filename.str().c_str(), V, false);
+    save_matrix3d(counter_filename.str().c_str(), cont_V, false);
+    save_matrix3d(map_filename.str().c_str(), V_map, false);  
+    /**
     save_matrix3d("/home/hector/Matlab_ws/matrix.txt", V, false);
     save_matrix3d("/home/hector/Matlab_ws/counter.txt", cont_V, false);
     save_matrix3d("/home/hector/Matlab_ws/map.txt", V_map, false);
+    **/
 }
 
 int MapFilter::is_in_map(int i, int j)
