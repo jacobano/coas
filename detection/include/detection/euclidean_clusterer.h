@@ -18,25 +18,25 @@ public:
 
 private:
   // Callbacks
-  void cloud_cb(const sensor_msgs::PointCloud2ConstPtr &input);
-  void phase_cb(const std_msgs::Int8 phaseMode);
+  void cloudCallback(const sensor_msgs::PointCloud2ConstPtr &input);
+  void phaseCallback(const std_msgs::Int8 phaseMode);
 
   //
-  void params();
+  void getParameters();
 
   // Node handlers
   ros::NodeHandle n;
 
   // Subscribers
-  ros::Subscriber velodyne_sub, sub_phase;
+  ros::Subscriber sub_velodyne, sub_phase;
 
   // Publishers
-  ros::Publisher pub_pointclouds;
-  std::vector<ros::Publisher> pub_vec;
+  ros::Publisher pub_point_clouds;
+  std::vector<ros::Publisher> pub_vec_point_clouds;
 
   // Variables
 
-  // Params
+  // getParameters
   int phase; // 1 Docking - 2 Harbor - 3 Sea
-  float distanceThreshold, clusterTolerance, minClusterSize, maxClusterSize;
+  float distance_threshold, cluster_tolerance, min_cluster_size, max_cluster_size;
 };
