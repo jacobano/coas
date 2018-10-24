@@ -99,7 +99,7 @@ void BoundingBoxes::phaseCallback(const std_msgs::Int8 phaseMode)
 
 void BoundingBoxes::clustersCallback(const detection::VectorPointCloud input)
 {
-    double begin = ros::Time::now().toSec();
+    double time_begin = ros::Time::now().toSec();
     detection::VectorPointCloud clusters = input;
     if (!clusters.clouds.empty())
     {
@@ -129,7 +129,7 @@ void BoundingBoxes::clustersCallback(const detection::VectorPointCloud input)
         // Merge all bounding boxes that form one polygon into a new bounding box
         mergeBoundingBoxes();
     }
-    std::cout << "[ BBXS] Time: " << ros::Time::now().toSec() - begin << std::endl;
+    std::cout << "[ BBXS] Time: " << ros::Time::now().toSec() - time_begin << std::endl;
     std::cout << " - - - - - - - - - - - - - - - - -" << std::endl;
 
     cleanVariables();
@@ -294,7 +294,7 @@ void BoundingBoxes::checkPostDimension(float xDim, float yDim, float zDim)
         // If there is more than one post detected
         if (reference_boxes.boxes.size() > 1)
         {
-            int cont_entrePostes = 0;
+            int counter_between_posts = 0;
             // Calculate the distance between all posts
             for (int i = 0; i < reference_boxes.boxes.size(); i++)
             {
@@ -314,7 +314,7 @@ void BoundingBoxes::checkPostDimension(float xDim, float yDim, float zDim)
                     if ((min_distance_post_12 < dist && dist < max_distance_post_12) || (min_distance_post_13 < dist && dist < max_distance_post_13))
                     {
                         // Construct the path to represent distances between posts
-                        switch (cont_entrePostes)
+                        switch (counter_between_posts)
                         {
                         case 0:
                             path_post_12 = constructPath(x0, y0, z0, 2);
@@ -326,7 +326,7 @@ void BoundingBoxes::checkPostDimension(float xDim, float yDim, float zDim)
                             path_post_23 = constructPath(x0, y0, z0, 2);
                             break;
                         }
-                        cont_entrePostes++;
+                        counter_between_posts++;
                     }
                 }
             }
@@ -365,17 +365,17 @@ void BoundingBoxes::checkPostDimension(float xDim, float yDim, float zDim)
 
 nav_msgs::Path BoundingBoxes::constructPath(std::vector<float> x, std::vector<float> y, std::vector<float> z, int length)
 {
-    nav_msgs::Path msg;
+    nav_msgs::Path path;
     std::vector<geometry_msgs::PoseStamped> poses(length);
-    msg.header.frame_id = "velodyne";
+    path.header.frame_id = "velodyne";
     for (int i = 0; i < length; i++)
     {
         poses.at(i).pose.position.x = x[i];
         poses.at(i).pose.position.y = y[i];
         poses.at(i).pose.position.z = z[i];
     }
-    msg.poses = poses;
-    return msg;
+    path.poses = poses;
+    return path;
 }
 
 void BoundingBoxes::calculateVectorPolygons()
@@ -632,34 +632,34 @@ void BoundingBoxes::savePose(int nPost, nav_msgs::Path path)
 
 void BoundingBoxes::saveDistances(bool b, nav_msgs::Path path1, nav_msgs::Path path2, nav_msgs::Path path3)
 {
-    float dist1, dist2, dist3;
+    float dist_1, dist_2, dist_3;
 
     if (path1.poses.size() > 0)
     {
-        dist1 = calculateDistance2Points(path1.poses.at(0).pose.position.x, path1.poses.at(0).pose.position.y, path1.poses.at(0).pose.position.z,
-                                         path1.poses.at(1).pose.position.x, path1.poses.at(1).pose.position.y, path1.poses.at(1).pose.position.z);
+        dist_1 = calculateDistance2Points(path1.poses.at(0).pose.position.x, path1.poses.at(0).pose.position.y, path1.poses.at(0).pose.position.z,
+                                          path1.poses.at(1).pose.position.x, path1.poses.at(1).pose.position.y, path1.poses.at(1).pose.position.z);
     }
     else
     {
-        dist1 = 0.0;
+        dist_1 = 0.0;
     }
     if (path2.poses.size() > 0)
     {
-        dist2 = calculateDistance2Points(path2.poses.at(0).pose.position.x, path2.poses.at(0).pose.position.y, path2.poses.at(0).pose.position.z,
-                                         path2.poses.at(1).pose.position.x, path2.poses.at(1).pose.position.y, path2.poses.at(1).pose.position.z);
+        dist_2 = calculateDistance2Points(path2.poses.at(0).pose.position.x, path2.poses.at(0).pose.position.y, path2.poses.at(0).pose.position.z,
+                                          path2.poses.at(1).pose.position.x, path2.poses.at(1).pose.position.y, path2.poses.at(1).pose.position.z);
     }
     else
     {
-        dist2 = 0.0;
+        dist_2 = 0.0;
     }
     if (path3.poses.size() > 0)
     {
-        dist3 = calculateDistance2Points(path3.poses.at(0).pose.position.x, path3.poses.at(0).pose.position.y, path3.poses.at(0).pose.position.z,
-                                         path3.poses.at(1).pose.position.x, path3.poses.at(1).pose.position.y, path3.poses.at(1).pose.position.z);
+        dist_3 = calculateDistance2Points(path3.poses.at(0).pose.position.x, path3.poses.at(0).pose.position.y, path3.poses.at(0).pose.position.z,
+                                          path3.poses.at(1).pose.position.x, path3.poses.at(1).pose.position.y, path3.poses.at(1).pose.position.z);
     }
     else
     {
-        dist3 = 0.0;
+        dist_3 = 0.0;
     }
 
     if (contTest == 0)
@@ -668,16 +668,16 @@ void BoundingBoxes::saveDistances(bool b, nav_msgs::Path path1, nav_msgs::Path p
         contTest++;
     }
 
-    if (dist1 != 0 && dist2 != 0 && dist3 != 0)
+    if (dist_1 != 0 && dist_2 != 0 && dist_3 != 0)
     {
         if (b == true)
         {
-            file_distance_to_posts << dist1 << " " << dist2 << " " << dist3 << std::endl;
+            file_distance_to_posts << dist_1 << " " << dist_2 << " " << dist_3 << std::endl;
             file_distance_to_posts_times << ros::Time::now().toSec() - time_start << std::endl;
         }
         else
         {
-            file_distance_between_posts << dist1 << " " << dist2 << " " << dist3 << std::endl;
+            file_distance_between_posts << dist_1 << " " << dist_2 << " " << dist_3 << std::endl;
             file_distance_between_posts_times << ros::Time::now().toSec() - time_start << std::endl;
         }
     }
