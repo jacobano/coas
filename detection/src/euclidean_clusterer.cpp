@@ -1,17 +1,17 @@
-#include <detection/euclideanClusterer.h>
+#include <detection/euclidean_clusterer.h>
 
 EuclideanClusterer::EuclideanClusterer()
 {
     n = ros::NodeHandle();
 
-    // params();
+    // getParameters();
 
     // Subscriptions
-    velodyne_sub = n.subscribe("/voxelFilterPoints", 1, &EuclideanClusterer::cloud_cb, this);
-    sub_phase = n.subscribe("/phase", 1, &EuclideanClusterer::phase_cb, this);
+    sub_velodyne = n.subscribe("/voxel_filter_points", 1, &EuclideanClusterer::cloudCallback, this);
+    sub_phase = n.subscribe("/phase", 1, &EuclideanClusterer::phaseCallback, this);
 
     // Publishers
-    pub_pointclouds = n.advertise<detection::vectorPointCloud>("/vector_pointclouds", 1);
+    pub_point_clouds = n.advertise<detection::VectorPointCloud>("/vector_pointclouds", 1);
     loop();
 }
 
@@ -19,73 +19,73 @@ EuclideanClusterer::~EuclideanClusterer()
 {
 }
 
-void EuclideanClusterer::phase_cb(const std_msgs::Int8 phaseMode)
+void EuclideanClusterer::phaseCallback(const std_msgs::Int8 phaseMode)
 {
     phase = phaseMode.data;
     switch (phase)
     {
     // Docking
     case 1:
-        distanceThreshold = 0.4;
-        clusterTolerance = 0.8;
-        minClusterSize = 30;
-        maxClusterSize = 600;
+        distance_threshold = 0.4;
+        cluster_tolerance = 0.8;
+        min_cluster_size = 30;
+        max_cluster_size = 600;
         break;
     // Harbor
     case 2:
-        distanceThreshold = 0.5;
-        clusterTolerance = 0.8;
-        minClusterSize = 30;
-        maxClusterSize = 25000;
+        distance_threshold = 0.5;
+        cluster_tolerance = 0.8;
+        min_cluster_size = 30;
+        max_cluster_size = 25000;
         break;
     // Sea
     case 3:
-        distanceThreshold = 0.5;
-        clusterTolerance = 0.8;
-        minClusterSize = 2;
-        maxClusterSize = 25000;
+        distance_threshold = 0.5;
+        cluster_tolerance = 0.8;
+        min_cluster_size = 2;
+        max_cluster_size = 25000;
         break;
     }
 }
 
-void EuclideanClusterer::params()
+void EuclideanClusterer::getParameters()
 {
     // ros::NodeHandle nparam("~");
-    // if (nparam.getParam("distanceThreshold", distanceThreshold))
+    // if (nparam.getParam("distance_threshold", distance_threshold))
     // {
-    //     ROS_WARN("Got EuclideanClusterer param distanceThreshold: %f", distanceThreshold);
+    //     ROS_WARN("Got EuclideanClusterer param distance_threshold: %f", distance_threshold);
     // }
     // else
     // {
-    //     distanceThreshold = 0.02;
-    //     ROS_WARN("Failed to get EuclideanClusterer param distanceThreshold: %f", distanceThreshold);
+    //     distance_threshold = 0.02;
+    //     ROS_WARN("Failed to get EuclideanClusterer param distance_threshold: %f", distance_threshold);
     // }
-    // if (nparam.getParam("clusterTolerance", clusterTolerance))
+    // if (nparam.getParam("cluster_tolerance", cluster_tolerance))
     // {
-    //     ROS_WARN("Got EuclideanClusterer param param clusterTolerance: %f", clusterTolerance);
-    // }
-    // else
-    // {
-    //     clusterTolerance = 0.02;
-    //     ROS_WARN("Failed to get EuclideanClusterer param clusterTolerance: %f", clusterTolerance);
-    // }
-    // if (nparam.getParam("minClusterSize", minClusterSize))
-    // {
-    //     ROS_WARN("Got EuclideanClusterer param minClusterSize: %f", minClusterSize);
+    //     ROS_WARN("Got EuclideanClusterer param param cluster_tolerance: %f", cluster_tolerance);
     // }
     // else
     // {
-    //     minClusterSize = 100;
-    //     ROS_WARN("Failed to get EuclideanClusterer param minClusterSize: %f", minClusterSize);
+    //     cluster_tolerance = 0.02;
+    //     ROS_WARN("Failed to get EuclideanClusterer param cluster_tolerance: %f", cluster_tolerance);
     // }
-    // if (nparam.getParam("maxClusterSize", maxClusterSize))
+    // if (nparam.getParam("min_cluster_size", min_cluster_size))
     // {
-    //     ROS_WARN("Got EuclideanClusterer param maxClusterSize: %f", maxClusterSize);
+    //     ROS_WARN("Got EuclideanClusterer param min_cluster_size: %f", min_cluster_size);
     // }
     // else
     // {
-    //     maxClusterSize = 25000;
-    //     ROS_WARN("Failed to get EuclideanClusterer param maxClusterSize: %f", maxClusterSize);
+    //     min_cluster_size = 100;
+    //     ROS_WARN("Failed to get EuclideanClusterer param min_cluster_size: %f", min_cluster_size);
+    // }
+    // if (nparam.getParam("max_cluster_size", max_cluster_size))
+    // {
+    //     ROS_WARN("Got EuclideanClusterer param max_cluster_size: %f", max_cluster_size);
+    // }
+    // else
+    // {
+    //     max_cluster_size = 25000;
+    //     ROS_WARN("Failed to get EuclideanClusterer param max_cluster_size: %f", max_cluster_size);
     // }
     // if (nparam.getParam("phase", phase))
     // {
@@ -97,7 +97,7 @@ void EuclideanClusterer::params()
     // }
 }
 
-void EuclideanClusterer::cloud_cb(const boost::shared_ptr<const sensor_msgs::PointCloud2> &input)
+void EuclideanClusterer::cloudCallback(const boost::shared_ptr<const sensor_msgs::PointCloud2> &input)
 {
     double begin = ros::Time::now().toSec();
 
@@ -119,7 +119,7 @@ void EuclideanClusterer::cloud_cb(const boost::shared_ptr<const sensor_msgs::Poi
     seg.setMethodType(pcl::SAC_RANSAC);
     seg.setMaxIterations(100);
     // How close must be a point from the model to consider it in line
-    seg.setDistanceThreshold(distanceThreshold); // (default 0.02)
+    seg.setDistanceThreshold(distance_threshold); // (default 0.02)
 
     int i = 0, nr_points = (int)downsampled_XYZ->points.size();
 
@@ -165,9 +165,9 @@ void EuclideanClusterer::cloud_cb(const boost::shared_ptr<const sensor_msgs::Poi
 
     std::vector<pcl::PointIndices> cluster_indices;
     pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
-    ec.setClusterTolerance(clusterTolerance); // default = 0.02 (2cm)
-    ec.setMinClusterSize(minClusterSize);     // Sea = 2 // Docking = 30 // default = 100
-    ec.setMaxClusterSize(maxClusterSize);
+    ec.setClusterTolerance(cluster_tolerance); // default = 0.02 (2cm)
+    ec.setMinClusterSize(min_cluster_size);    // Sea = 2 // Docking = 30 // default = 100
+    ec.setMaxClusterSize(max_cluster_size);
     ec.setSearchMethod(tree);
     ec.setInputCloud(downsampled_XYZ);
     ec.extract(cluster_indices);
@@ -177,10 +177,10 @@ void EuclideanClusterer::cloud_cb(const boost::shared_ptr<const sensor_msgs::Poi
     {
         std::string topicName = "/cluster" + boost::lexical_cast<std::string>(i);
         ros::Publisher pub = n.advertise<sensor_msgs::PointCloud2>(topicName, 1);
-        pub_vec.push_back(pub);
+        pub_vec_point_clouds.push_back(pub);
     }
     int j = 0;
-    detection::vectorPointCloud vector_pointclouds;
+    detection::VectorPointCloud vector_pointclouds;
     for (std::vector<pcl::PointIndices>::const_iterator it = cluster_indices.begin(); it != cluster_indices.end(); ++it)
     {
         pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_cluster(new pcl::PointCloud<pcl::PointXYZ>);
@@ -194,11 +194,11 @@ void EuclideanClusterer::cloud_cb(const boost::shared_ptr<const sensor_msgs::Poi
         pcl::toROSMsg(*cloud_cluster, *output);
         output->header.frame_id = input_cloud.header.frame_id;
         vector_pointclouds.clouds.push_back(*output);
-        pub_vec[j].publish(output);
+        pub_vec_point_clouds[j].publish(output);
         ++j;
     }
 
-    pub_pointclouds.publish(vector_pointclouds);
+    pub_point_clouds.publish(vector_pointclouds);
     std::cout << "[ EUCL] Time: " << ros::Time::now().toSec() - begin << std::endl;
 }
 

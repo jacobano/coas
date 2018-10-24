@@ -6,10 +6,13 @@
     <!-- <node pkg="rosbag" type="play" name="rosbag" args="-l -r 1 -s 80 -u 10 /home/hector/bags/testpatio/2018-07-11-10-29-33.bag" required="true"/> -->
     <!-- <node pkg="rosbag" type="play" name="rosbag" args="-l -s 15 -u 60 /home/hector/bags/postes/2018-08-02-10-17-32.bag" required="true"/> -->
     <!-- <node pkg="rosbag" type="play" name="rosbag" args="-s 25 -u 40 /home/hector/bags/postes/2018-08-02-10-13-51.bag" required="true"/> -->
+
     <node pkg="rosbag" type="play" name="rosbag" args="--clock -s 25 -u 22 $(arg bags_path)/postes/2018-08-02-10-13-51.bag" required="true"/>
     <node pkg="rviz" type="rviz" name="rviz" args="-d $(find detection)/rviz/docking.rviz" required="true"/>
-    <node pkg="mapping" type="mapFilter_node" name="mapFilter_node" output="screen" required="true"/>
-    <node pkg="mapping" type="voxelFilter_node" name="voxelFilter_node" output="screen" required="true"/>
+
+    <node pkg="filtering" type="sensor_filter_node" name="sensor_filter_node" output="screen" required="true"/>
+    <node pkg="filtering" type="voxel_filter_node" name="voxel_filter_node" output="screen" required="true"/>
+
     <node pkg="detection" type="euclideanClusterer_node" name="euclideanClusterer_node" output="screen" required="true"/>
     <node pkg="detection" type="boundingBoxes_node" name="boundingBoxes_node" output="screen" required="true"/>
     <node pkg="detection" type="matching_node" name="matching_node" output="screen" required="true"/>

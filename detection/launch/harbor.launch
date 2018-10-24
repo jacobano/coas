@@ -7,14 +7,10 @@
     <node pkg="rviz" type="rviz" name="rviz" args="-d $(find detection)/rviz/harbor.rviz" required="true"/>
     <node pkg="rosbag" type="play" name="rosbag" args="-l $(args bags_path)/bags/Bags_Velodyne/2017-02-03-11-42-21.bag" required="true"/>
 
-    <node pkg="mapping" type="mapFilter_node" name="mapping_node" output="screen" required="true"/>
-    <node pkg="mapping" type="voxelFilter_node" name="voxelFilter_node" required="true"/>
+    <node pkg="filtering" type="sensor_filter_node" name="sensor_filter_node" output="screen" required="true"/>
+    <node pkg="filtering" type="voxel_filter_node" name="voxel_filter_node" output="screen" required="true"/>
     <node pkg="detection" type="euclideanClusterer_node" name="euclideanClusterer_node" output="screen" required="true"/>
     <node pkg="detection" type="boundingBoxes_node" name="boundingBoxes_node" output="screen" required="true"/>
-
-    <!-- <node pkg="mapping" type="thinMapping_node" name="thinMapping_node" output="screen" required="true">
-        <param name="phase" value="$(arg phase)"/>
-    </node> -->
 
     <!-- <node pkg="tracking" type="tracking_node" name="tracking_node" required="true">
         <param name="phase" value="$(arg phase)"/>

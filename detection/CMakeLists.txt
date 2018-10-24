@@ -20,7 +20,7 @@ find_package(Eigen3 REQUIRED)
 
 add_message_files(
   FILES
-  vectorPointCloud.msg
+  VectorPointCloud.msg
 )
 
 generate_messages(
@@ -48,20 +48,20 @@ include_directories(
 
 include_directories(src ${EIGEN3_INCLUDE_DIR})
 
-add_library(euclideanClusterer src/euclideanClusterer.cpp)
-add_dependencies(euclideanClusterer ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_library(euclidean_clusterer src/euclidean_clusterer.cpp)
+add_dependencies(euclidean_clusterer ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-add_executable(euclideanClusterer_node src/euclideanClusterer_node.cpp)
-target_link_libraries(euclideanClusterer_node euclideanClusterer boundingBoxes ${catkin_LIBRARIES})
-add_dependencies(euclideanClusterer_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_executable(euclidean_clusterer_node src/euclidean_clusterer_node.cpp)
+target_link_libraries(euclidean_clusterer_node euclidean_clusterer bounding_boxes ${catkin_LIBRARIES})
+add_dependencies(euclidean_clusterer_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 
-add_library(boundingBoxes src/boundingBoxes.cpp)
-add_dependencies(boundingBoxes ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_library(bounding_boxes src/bounding_boxes.cpp)
+add_dependencies(bounding_boxes ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-add_executable(boundingBoxes_node src/boundingBoxes_node.cpp)
-target_link_libraries(boundingBoxes_node boundingBoxes ${catkin_LIBRARIES})
-add_dependencies(boundingBoxes_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_executable(bounding_boxes_node src/bounding_boxes_node.cpp)
+target_link_libraries(bounding_boxes_node bounding_boxes ${catkin_LIBRARIES})
+add_dependencies(bounding_boxes_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 
 add_library(matching src/matching.cpp)

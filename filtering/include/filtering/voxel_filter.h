@@ -14,17 +14,15 @@ public:
 
 private:
   // Callbacks
-  void cloud_cb(const sensor_msgs::PointCloud2ConstPtr &input);
+  void sensorCallback(const sensor_msgs::PointCloud2ConstPtr &input);
 
   // Node handlers
   ros::NodeHandle n;
 
   // Subscribers
-  ros::Subscriber cloud_sub;
 
   // Publishers
-  ros::Publisher pub;
-  std::vector<ros::Publisher> pub_vec;
+  ros::Publisher pub_voxel_filter_points;
 
   // Variables
 };

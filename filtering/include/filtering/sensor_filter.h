@@ -1,44 +1,44 @@
 #include <ros/ros.h>
 #include <fstream>
 #include <std_msgs/Int8.h>
-#include "mapping/vectorInt.h"
-#include "mapping/vectorVector.h"
+#include "filtering/VectorInt.h"
+#include "filtering/VectorVector.h"
 #include <sensor_msgs/PointCloud2.h>
 #include <pcl_conversions/pcl_conversions.h>
 
-class MapFilter
+class SensorFilter
 {
 
 public:
-  MapFilter();
-  ~MapFilter();
+  SensorFilter();
+  ~SensorFilter();
 
   void loop();
 
 private:
   // Callbacks
-  void exploration(const sensor_msgs::PointCloud2 &cloud2d_usv);
-  void receiveSensor(const sensor_msgs::PointCloud2 &cloud);
+  void sensorCallback(const sensor_msgs::PointCloud2 &cloud);
+  void phaseCallback(const std_msgs::Int8 phase_mode);
 
   typedef std::vector<float> VI;
   typedef std::vector<VI> VVI;
   typedef std::vector<VVI> VVVI;
 
   //
-  int is_in_map(int i, int j);
+  void exploration(const sensor_msgs::PointCloud2 &cloud_3D_usv);
+  int isInMap(int i, int j);
   int readV(const VVVI &V, int i, int j);
-  void save_matrix(char *filename, const VVVI &M);
-  void save_matrix3d(const char *fileName, const VVVI &m, bool vel);
-  void phase_cb(const std_msgs::Int8 phaseMode);
+  void saveMatrix(const char * file_name, const VVVI &M);
+  void saveMatrix3D(const char *file_name, const VVVI &m, bool vel);
 
   // Node handlers
   ros::NodeHandle n;
 
   // Subscribers
-  ros::Subscriber sub_phase, sub;
+  ros::Subscriber sub_phase, sub_sensor;
 
   // Publishers
-  ros::Publisher pub_filtered_map2, pub_matrix;
+  ros::Publisher pub_filtered_cloud_3D, pub_matrix;
 
   // Variables
   int phase, range_dock, range_sea, range, rows, columns;

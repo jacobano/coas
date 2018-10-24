@@ -1,14 +1,14 @@
-#include <mapping/voxelFilter.h>
+#include <filtering/voxel_filter.h>
 
 VoxelFilter::VoxelFilter()
 {
     n = ros::NodeHandle();
 
     // Subscriptions
-    ros::Subscriber velodyne_sub = n.subscribe("/map_filtered2", 1, &VoxelFilter::cloud_cb, this);
+    ros::Subscriber sub_sensor = n.subscribe("/filter_points", 1, &VoxelFilter::sensorCallback, this);
 
     // Publishers
-    pub = n.advertise<sensor_msgs::PointCloud2>("/voxelFilterPoints", 1);
+    pub_voxel_filter_points = n.advertise<sensor_msgs::PointCloud2>("/voxel_filter_points", 1);
 
     loop();
 }
@@ -17,7 +17,7 @@ VoxelFilter::~VoxelFilter()
 {
 }
 
-void VoxelFilter::cloud_cb(const boost::shared_ptr<const sensor_msgs::PointCloud2> &input)
+void VoxelFilter::sensorCallback(const boost::shared_ptr<const sensor_msgs::PointCloud2> &input)
 {
     sensor_msgs::PointCloud2 output;
 
@@ -34,7 +34,7 @@ void VoxelFilter::cloud_cb(const boost::shared_ptr<const sensor_msgs::PointCloud
 
     pcl_conversions::fromPCL(cloud_filtered, output);
 
-    pub.publish(output);
+    pub_voxel_filter_points.publish(output);
 }
 
 void VoxelFilter::loop()

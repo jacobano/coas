@@ -101,17 +101,17 @@ Visualization Manager:
       Size (Pixels): 3
       Size (m): 0.0199999996
       Style: Flat Squares
-      Topic: /map_filtered2
+      Topic: /voxel_filter_points
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
       Value: true
     - Class: jsk_rviz_plugin/BoundingBoxArray
-      Enabled: true
+      Enabled: false
       Name: boxesRef
-      Topic: /boxesRef
+      Topic: /reference_bounding_boxes
       Unreliable: false
-      Value: true
+      Value: false
       alpha: 1
       color: 255; 0; 255
       coloring: Flat color
@@ -138,7 +138,7 @@ Visualization Manager:
       Radius: 0.0299999993
       Shaft Diameter: 0.100000001
       Shaft Length: 0.100000001
-      Topic: /pathPoste1
+      Topic: /path_poste1
       Unreliable: false
       Value: false
     - Alpha: 1
@@ -161,7 +161,7 @@ Visualization Manager:
       Radius: 0.0299999993
       Shaft Diameter: 0.100000001
       Shaft Length: 0.100000001
-      Topic: /pathPoste2
+      Topic: /path_poste2
       Unreliable: false
       Value: true
     - Alpha: 1
@@ -184,7 +184,7 @@ Visualization Manager:
       Radius: 0.0299999993
       Shaft Diameter: 0.100000001
       Shaft Length: 0.100000001
-      Topic: /pathPoste3
+      Topic: /path_poste3
       Unreliable: false
       Value: false
     - Alpha: 1
@@ -207,7 +207,7 @@ Visualization Manager:
       Radius: 0.0299999993
       Shaft Diameter: 0.100000001
       Shaft Length: 0.100000001
-      Topic: /pathPoste12
+      Topic: /path_poste12
       Unreliable: false
       Value: true
     - Alpha: 1
@@ -230,7 +230,7 @@ Visualization Manager:
       Radius: 0.0299999993
       Shaft Diameter: 0.100000001
       Shaft Length: 0.100000001
-      Topic: /pathPoste13
+      Topic: /path_poste13
       Unreliable: false
       Value: true
     - Alpha: 1
@@ -253,13 +253,13 @@ Visualization Manager:
       Radius: 0.0299999993
       Shaft Diameter: 0.100000001
       Shaft Length: 0.100000001
-      Topic: /pathPoste23
+      Topic: /path_poste23
       Unreliable: false
       Value: true
     - Class: jsk_rviz_plugin/BoundingBoxArray
       Enabled: false
       Name: BoundingBoxArray
-      Topic: /boundingBoxes
+      Topic: /bounding_boxes
       Unreliable: false
       Value: false
       alpha: 0.800000012
@@ -271,7 +271,7 @@ Visualization Manager:
     - Class: jsk_rviz_plugin/BoundingBoxArray
       Enabled: true
       Name: mergeBoundingBoxArray
-      Topic: /mergeBoundingBoxes
+      Topic: /merge_bounding_boxes
       Unreliable: false
       Value: true
       alpha: 0.800000012
@@ -279,18 +279,6 @@ Visualization Manager:
       coloring: Label
       line width: 0.0500000007
       only edge: true
-      show coords: false
-    - Class: jsk_rviz_plugin/BoundingBoxArray
-      Enabled: false
-      Name: trackBoundingBoxArray
-      Topic: /trackBoundingBoxes
-      Unreliable: false
-      Value: false
-      alpha: 0.300000012
-      color: 25; 255; 0
-      coloring: Auto
-      line width: 0.00499999989
-      only edge: false
       show coords: false
     - Alpha: 1
       Autocompute Intensity Bounds: true
@@ -652,6 +640,7 @@ Visualization Manager:
       Use Fixed Frame: true
       Use rainbow: true
       Value: false
+<<<<<<< HEAD
     - Alpha: 1
       Buffer Length: 1
       Class: rviz/Path
@@ -675,9 +664,11 @@ Visualization Manager:
       Topic: /TestPath
       Unreliable: false
       Value: true
+=======
+>>>>>>> master
     - Class: rviz/Marker
       Enabled: true
-      Marker Topic: /marker_post1
+      Marker Topic: /marker_post_1
       Name: Post1
       Namespaces:
         my_namespace: true
@@ -685,7 +676,7 @@ Visualization Manager:
       Value: true
     - Class: rviz/Marker
       Enabled: true
-      Marker Topic: /marker_post2
+      Marker Topic: /marker_post_2
       Name: Post2
       Namespaces:
         my_namespace: true
@@ -693,7 +684,7 @@ Visualization Manager:
       Value: true
     - Class: rviz/Marker
       Enabled: true
-      Marker Topic: /marker_post3
+      Marker Topic: /marker_post_3
       Name: Post3
       Namespaces:
         my_namespace: true
@@ -701,7 +692,7 @@ Visualization Manager:
       Value: true
     - Class: rviz/Marker
       Enabled: true
-      Marker Topic: /marker_post4
+      Marker Topic: /marker_post_4
       Name: Post4
       Namespaces:
         my_namespace: true
@@ -709,7 +700,7 @@ Visualization Manager:
       Value: true
     - Class: rviz/Marker
       Enabled: true
-      Marker Topic: /marker_post5
+      Marker Topic: /marker_post_5
       Name: Post5
       Namespaces:
         my_namespace: true
@@ -717,7 +708,7 @@ Visualization Manager:
       Value: true
     - Class: rviz/Marker
       Enabled: true
-      Marker Topic: /marker_post6
+      Marker Topic: /marker_post_6
       Name: Post6
       Namespaces:
         my_namespace: true
@@ -754,8 +745,13 @@ Visualization Manager:
   Value: true
   Views:
     Current:
+<<<<<<< HEAD
       Class: rviz/Orbit
       Distance: 73.1632004
+=======
+      Angle: 0.170002773
+      Class: rviz/TopDownOrtho
+>>>>>>> master
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
         Stereo Focal Distance: 1
@@ -770,6 +766,7 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
+<<<<<<< HEAD
       Pitch: 0.499797285
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
@@ -779,6 +776,22 @@ Window Geometry:
   "&Displays":
     collapsed: false
   "&Time":
+=======
+      Scale: 43.5587082
+      Target Frame: <Fixed Frame>
+      Value: TopDownOrtho (rviz)
+      X: -0.539683223
+      Y: 6.08015156
+    Saved: ~
+Window Geometry:
+  Displays:
+    collapsed: false
+  Height: 1056
+  Hide Left Dock: false
+  Hide Right Dock: true
+  QMainWindow State: 000000ff00000000fd00000004000000000000016a00000396fc0200000008fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000006100fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000002800000396000000d700fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000010f00000250fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000002800000250000000ad00fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000007800000003efc0100000002fb0000000800540069006d00650100000000000007800000030000fffffffb0000000800540069006d00650100000000000004500000000000000000000006100000039600000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  Selection:
+>>>>>>> master
     collapsed: false
   "&Views":
     collapsed: false
