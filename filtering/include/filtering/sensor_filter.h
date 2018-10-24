@@ -6,6 +6,10 @@
 #include <sensor_msgs/PointCloud2.h>
 #include <pcl_conversions/pcl_conversions.h>
 
+typedef std::vector<float> VI;
+typedef std::vector<VI> VVI;
+typedef std::vector<VVI> VVVI;
+
 class SensorFilter
 {
 
@@ -20,15 +24,11 @@ private:
   void sensorCallback(const sensor_msgs::PointCloud2 &cloud);
   void phaseCallback(const std_msgs::Int8 phase_mode);
 
-  typedef std::vector<float> VI;
-  typedef std::vector<VI> VVI;
-  typedef std::vector<VVI> VVVI;
-
   //
   void exploration(const sensor_msgs::PointCloud2 &cloud_3D_usv);
   int isInMap(int i, int j);
   int readV(const VVVI &V, int i, int j);
-  void saveMatrix(const char * file_name, const VVVI &M);
+  //void saveMatrix(const char * file_name, const VVVI &M);
   void saveMatrix3D(const char *file_name, const VVVI &m, bool vel);
 
   // Node handlers

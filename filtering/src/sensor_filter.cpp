@@ -194,7 +194,7 @@ void SensorFilter::exploration(const sensor_msgs::PointCloud2 &cloud_3D_uas)
         {
             int iM = round(range - cell_div * fil_cloud_XYZ->points[i].x);
             int jM = round(range - cell_div * fil_cloud_XYZ->points[i].y);
-            if (cloud_dist < range && is_in_map(iM, jM) == 1 && readV(V, iM, jM) != 4)
+            if (cloud_dist < range && isInMap(iM, jM) == 1 && readV(V, iM, jM) != 4)
             {
                 if (V[iM][jM][0] != 1)
                 {
@@ -250,7 +250,7 @@ void SensorFilter::exploration(const sensor_msgs::PointCloud2 &cloud_3D_uas)
         {
             int iM = round(range - cell_div * fil_cloud_XYZ->points[i].x);
             int jM = round(range - cell_div * fil_cloud_XYZ->points[i].y);
-            if (cloud_dist < range && is_in_map(iM, jM) == 1 && readV(V, iM, jM) != 4)
+            if (cloud_dist < range && isInMap(iM, jM) == 1 && readV(V, iM, jM) != 4)
             {
                 if (V[iM][jM][0] == 1 && V_map[iM][jM][0] == 0)
                 {
@@ -278,9 +278,9 @@ void SensorFilter::exploration(const sensor_msgs::PointCloud2 &cloud_3D_uas)
     matrix_filename << envvar_home << "/Matlab_ws/matrix.txt";
     counter_filename << envvar_home << "/Matlab_ws/counter.txt";
     map_filename << envvar_home << "/Matlab_ws/map.txt";
-    save_matrix3d(matrix_filename.str().c_str(), V, false);
-    save_matrix3d(counter_filename.str().c_str(), cont_V, false);
-    save_matrix3d(map_filename.str().c_str(), V_map, false);  
+    saveMatrix3D(matrix_filename.str().c_str(), V, false);
+    saveMatrix3D(counter_filename.str().c_str(), cont_V, false);
+    saveMatrix3D(map_filename.str().c_str(), V_map, false);  
 }
 
 int SensorFilter::isInMap(int i, int j)
@@ -301,7 +301,7 @@ int SensorFilter::readV(const VVVI &V, int i, int j)
 }
 
 // FILE TO SAVE A MATRIX
-void SensorFilter::saveMatrix3D(char *file_name, const VVVI &m, bool vel)
+void SensorFilter::saveMatrix3D(const char *file_name, const VVVI &m, bool vel)
 {
     std::ofstream file;
     file.open(file_name);
