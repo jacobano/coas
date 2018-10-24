@@ -1,16 +1,16 @@
 <launch>
+    <arg name="bags_path" doc="path to bag files" default="$(env HOME)/bags" />
     <!-- Docking: 1 | Harbor: 2 | Sea: 3 -->
+    <!-- <arg name="phase" default="1"/> -->
     <node pkg="rostopic" type="rostopic" name="phase" args="pub /phase std_msgs/Int8 2"/>
 
-    <node pkg="rviz" type="rviz" name="rviz" args="-d /home/hector/coas_ws/src/coas/detection/rviz/harbor.rviz" required="true"/>
-    <node pkg="rosbag" type="play" name="rosbag" args="-l /media/hector/HDD/bags/Bags_Velodyne/2017-02-03-11-42-21.bag" required="true"/>
+    <node pkg="rviz" type="rviz" name="rviz" args="-d $(find detection)/rviz/harbor.rviz" required="true"/>
+    <node pkg="rosbag" type="play" name="rosbag" args="-l $(args bags_path)/bags/Bags_Velodyne/2017-02-03-11-42-21.bag" required="true"/>
 
     <node pkg="mapping" type="mapFilter_node" name="mapping_node" output="screen" required="true"/>
     <node pkg="mapping" type="voxelFilter_node" name="voxelFilter_node" required="true"/>
     <node pkg="detection" type="euclideanClusterer_node" name="euclideanClusterer_node" output="screen" required="true"/>
     <node pkg="detection" type="boundingBoxes_node" name="boundingBoxes_node" output="screen" required="true"/>
-
-    <!-- <arg name="phase" default="1"/> -->
 
     <!-- <node pkg="mapping" type="thinMapping_node" name="thinMapping_node" output="screen" required="true">
         <param name="phase" value="$(arg phase)"/>

@@ -20,7 +20,11 @@ Matching::Matching()
     pub_marker5 = n.advertise<visualization_msgs::Marker>("/marker_post5", 1);
     pub_marker6 = n.advertise<visualization_msgs::Marker>("/marker_post6", 1);
 
-    logOutput = "/home/hector/matlab_ws/COAS/";
+    char* envvar_home;
+    envvar_home = std::getenv("HOME");
+    std::stringstream logOutputAux;
+    logOutputAux << envvar_home << "/Matlab_ws/";
+    logOutput = logOutputAux.str();
 
     filePost1.open(logOutput + "matchPost1");
     filePost2.open(logOutput + "matchPost2");

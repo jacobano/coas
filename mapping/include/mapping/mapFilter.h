@@ -28,7 +28,7 @@ private:
   int is_in_map(int i, int j);
   int readV(const VVVI &V, int i, int j);
   void save_matrix(char *filename, const VVVI &M);
-  void save_matrix3d(char *fileName, const VVVI &m, bool vel);
+  void save_matrix3d(const char *fileName, const VVVI &m, bool vel);
   void phase_cb(const std_msgs::Int8 phaseMode);
 
   // Node handlers
@@ -41,7 +41,7 @@ private:
   ros::Publisher pub_filtered_map2, pub_matrix;
 
   // Variables
-  int phase, range_dock, range_sea, rang, rows, columns;
+  int phase, range_dock, range_sea, range, rows, columns;
   float cell_div; // number of cell per meter
 
   // Params

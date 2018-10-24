@@ -21,7 +21,11 @@ BoundingBoxes::BoundingBoxes()
     pub_pathPoste13 = n.advertise<nav_msgs::Path>("/pathPoste13", 1);
     pub_pathPoste23 = n.advertise<nav_msgs::Path>("/pathPoste23", 1);
 
-    logOutput = "/home/hector/matlab_ws/COAS/";
+    char* envvar_home;
+    envvar_home = std::getenv("HOME");
+    std::stringstream logOutputAux;
+    logOutputAux << envvar_home << "/Matlab_ws/";
+    logOutput = logOutputAux.str();
 
     fileToPosts.open(logOutput + "distancesToPosts");
     fileBetweenPosts.open(logOutput + "distancesBetweenPosts");
@@ -690,4 +694,5 @@ void BoundingBoxes::loop()
         sleep(0.1);
         ros::spinOnce();
     }
+    //ros::spin();
 }

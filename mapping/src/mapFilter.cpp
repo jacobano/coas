@@ -306,7 +306,7 @@ int MapFilter::readV(const VVVI &V, int i, int j)
 }
 
 // FILE TO SAVE A MATRIX
-void MapFilter::save_matrix3d(char *fileName, const VVVI &m, bool vel)
+void MapFilter::save_matrix3d(const char *fileName, const VVVI &m, bool vel)
 {
     std::ofstream file;
     file.open(fileName);

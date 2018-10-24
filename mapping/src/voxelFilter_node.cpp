@@ -11,5 +11,7 @@ int main(int _argc, char **_argv)
         sleep(1);
     }
 
+    //ros::spin(); //Quizás esto sea mejor
+
     return 0;
 }
