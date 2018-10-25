@@ -6,10 +6,7 @@ int main(int _argc, char **_argv)
 
     BoundingBoxes boundingBoxer;
 
-    while (ros::ok())
-    {
-        sleep(1);
-    }
+    ros::spin();
 
     return 0;
 }

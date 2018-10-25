@@ -35,8 +35,6 @@ BoundingBoxes::BoundingBoxes()
     file_post_3_time.open(log_output + "post3time");
 
     contTest = contTestPose = 0;
-
-    loop();
 }
 
 BoundingBoxes::~BoundingBoxes()
@@ -680,14 +678,5 @@ void BoundingBoxes::saveDistances(bool b, nav_msgs::Path path1, nav_msgs::Path p
             file_distance_between_posts << dist_1 << " " << dist_2 << " " << dist_3 << std::endl;
             file_distance_between_posts_times << ros::Time::now().toSec() - time_start << std::endl;
         }
-    }
-}
-
-void BoundingBoxes::loop()
-{
-    while (ros::ok())
-    {
-        sleep(0.1);
-        ros::spinOnce();
     }
 }

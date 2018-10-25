@@ -19,8 +19,6 @@ public:
   BoundingBoxes();
   ~BoundingBoxes();
 
-  void loop();
-
 private:
   // Callbacks
   void phaseCallback(const std_msgs::Int8 phaseMode);

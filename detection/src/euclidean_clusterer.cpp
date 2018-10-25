@@ -12,7 +12,6 @@ EuclideanClusterer::EuclideanClusterer()
 
     // Publishers
     pub_point_clouds = n.advertise<detection::VectorPointCloud>("/vector_pointclouds", 1);
-    loop();
 }
 
 EuclideanClusterer::~EuclideanClusterer()
@@ -200,13 +199,4 @@ void EuclideanClusterer::cloudCallback(const boost::shared_ptr<const sensor_msgs
 
     pub_point_clouds.publish(vector_pointclouds);
     std::cout << "[ EUCL] Time: " << ros::Time::now().toSec() - begin << std::endl;
-}
-
-void EuclideanClusterer::loop()
-{
-    while (ros::ok())
-    {
-        sleep(0.1);
-        ros::spinOnce();
-    }
 }

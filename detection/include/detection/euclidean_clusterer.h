@@ -14,8 +14,6 @@ public:
   EuclideanClusterer();
   ~EuclideanClusterer();
 
-  void loop();
-
 private:
   // Callbacks
   void cloudCallback(const sensor_msgs::PointCloud2ConstPtr &input);
