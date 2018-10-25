@@ -166,13 +166,6 @@ add_executable(sensor_filter_node src/sensor_filter_node.cpp)
 target_link_libraries(sensor_filter_node sensor_filter ${catkin_LIBRARIES})
 add_dependencies(sensor_filter_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-add_library(voxel_filter src/voxel_filter.cpp)
-add_dependencies(voxel_filter ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
-add_executable(voxel_filter_node src/voxel_filter_node.cpp)
-target_link_libraries(voxel_filter_node voxel_filter ${catkin_LIBRARIES})
-add_dependencies(voxel_filter_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
 #############
 ## Install ##
 #############

@@ -1,9 +1,12 @@
 #include <filtering/sensor_filter.h>
 
-SensorFilter::SensorFilter()
+SensorFilter::SensorFilter():
+n(),
+private_nh("~"),
+use_voxel_filter(true)
 {
-    n = ros::NodeHandle();
-
+    // Parameters
+    private_nh.getParam("use_voxel_filter", use_voxel_filter);
     // // Subscriptions
     // matrix_sub = n.subscribe("/v_map", 1, &SensorFilter::matrix_cb, this);
     sub_phase = n.subscribe("/phase", 1, &SensorFilter::phaseCallback, this);
@@ -19,8 +22,6 @@ SensorFilter::SensorFilter()
     range = range_dock * cell_div;
     rows = 2 * range + 1;
     columns = 2 * range + 1;
-
-    loop();
 }
 
 SensorFilter::~SensorFilter()
@@ -262,10 +263,25 @@ void SensorFilter::exploration(const sensor_msgs::PointCloud2 &cloud_3D_uas)
             }
         }
     }
-    //Convert the pointcloud to be used in ROS, using variable sensor_msgs::PointCloud2 output;
-    pcl::toROSMsg(*fil_data_cloud, filtered_cloud_3D);
+
+    if (use_voxel_filter)
+    {
+        //Before publishing the cloud apply a voxel filter to it
+        pcl::PointCloud<pcl::PointXYZ> voxel_filtered_cloud;
+        pcl::VoxelGrid<pcl::PointXYZ> voxelGridFilter;
+        voxelGridFilter.setInputCloud(fil_data_cloud);
+        voxelGridFilter.setLeafSize(0.08, 0.08, 0.08);
+        voxelGridFilter.filter(voxel_filtered_cloud);
+        pcl::toROSMsg(voxel_filtered_cloud, filtered_cloud_3D);  
+    }
+    else
+    {
+        pcl::toROSMsg(*fil_data_cloud, filtered_cloud_3D);
+    }
+
     filtered_cloud_3D.header.frame_id = "velodyne";
     filtered_cloud_3D.header.stamp = ros::Time();
+
     // Publish filtered cloud
     pub_filtered_cloud_3D.publish(filtered_cloud_3D);
 
@@ -321,11 +337,3 @@ void SensorFilter::saveMatrix3D(const char *file_name, const VVVI &m, bool vel)
     file.close();
 }
 
-void SensorFilter::loop()
-{
-    while (ros::ok())
-    {
-        sleep(0.1);
-        ros::spinOnce();
-    }
-}
