@@ -8,13 +8,9 @@ BoundingBoxes::BoundingBoxes()
 
     // Subscriptions
     sub_velodyne = n.subscribe("/filter_points", 1, &BoundingBoxes::cloudCallback, this);
-    //sub_vector_point_clouds = n.subscribe("/vector_pointclouds", 1, &BoundingBoxes::clustersCallback, this);
     sub_phase = n.subscribe("/phase", 1, &BoundingBoxes::phaseCallback, this);
 
     // Publishers
-    // Euclidean Clusterer Publisher
-    pub_point_clouds = n.advertise<detection::VectorPointCloud>("/vector_pointclouds", 1);
-
     pub_boxes = n.advertise<jsk_recognition_msgs::BoundingBoxArray>("/bounding_boxes", 1);
     pub_merge_boxes = n.advertise<jsk_recognition_msgs::BoundingBoxArray>("/merge_bounding_boxes", 1);
     pub_reference_boxes = n.advertise<jsk_recognition_msgs::BoundingBoxArray>("/reference_bounding_boxes", 1);
@@ -224,7 +220,6 @@ void BoundingBoxes::cloudCallback(const sensor_msgs::PointCloud2ConstPtr &input)
         ++j;
     }
 
-    //pub_point_clouds.publish(clusters_vector);
     std::cout << "[ EUCL] Time: " << ros::Time::now().toSec() - time_start << std::endl;
 
     //*****************************************************************************
