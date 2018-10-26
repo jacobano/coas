@@ -11,9 +11,6 @@
     <node pkg="rviz" type="rviz" name="rviz" args="-d $(find detection)/rviz/docking.rviz" required="true"/>
 
     <node pkg="filtering" type="sensor_filter_node" name="sensor_filter_node" output="screen" required="true"/>
-    <node pkg="filtering" type="voxel_filter_node" name="voxel_filter_node" output="screen" required="true"/>
-
-    <node pkg="detection" type="euclideanClusterer_node" name="euclideanClusterer_node" output="screen" required="true"/>
-    <node pkg="detection" type="boundingBoxes_node" name="boundingBoxes_node" output="screen" required="true"/>
+    <node pkg="detection" type="bounding_boxes_node" name="bounding_boxes_node" output="screen" required="true"/>
     <node pkg="detection" type="matching_node" name="matching_node" output="screen" required="true"/>
 </launch>

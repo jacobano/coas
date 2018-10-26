@@ -39,6 +39,7 @@ catkin_package(
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
+  ${EIGEN3_INCLUDE_DIR}
 )
 
 #find_package(octomap REQUIRED)
@@ -46,15 +47,7 @@ include_directories(
 #link_directories(${OCTOMAP_LIBRARY_DIRS})
 #target_link_libraries(${OCTOMAP_LIBRARIES})
 
-include_directories(src ${EIGEN3_INCLUDE_DIR})
-
-add_library(euclidean_clusterer src/euclidean_clusterer.cpp)
-add_dependencies(euclidean_clusterer ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
-add_executable(euclidean_clusterer_node src/euclidean_clusterer_node.cpp)
-target_link_libraries(euclidean_clusterer_node euclidean_clusterer bounding_boxes ${catkin_LIBRARIES})
-add_dependencies(euclidean_clusterer_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
+#include_directories(src ${EIGEN3_INCLUDE_DIR})
 
 add_library(bounding_boxes src/bounding_boxes.cpp)
 add_dependencies(bounding_boxes ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})

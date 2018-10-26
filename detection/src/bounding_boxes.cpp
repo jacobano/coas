@@ -7,21 +7,30 @@ BoundingBoxes::BoundingBoxes()
     // params();
 
     // Subscriptions
-    sub_vector_point_clouds = n.subscribe("/vector_pointclouds", 1, &BoundingBoxes::clustersCallback, this);
+    sub_velodyne = n.subscribe("/filter_points", 1, &BoundingBoxes::cloudCallback, this);
+    //sub_vector_point_clouds = n.subscribe("/vector_pointclouds", 1, &BoundingBoxes::clustersCallback, this);
     sub_phase = n.subscribe("/phase", 1, &BoundingBoxes::phaseCallback, this);
 
     // Publishers
+    // Euclidean Clusterer Publisher
+    pub_point_clouds = n.advertise<detection::VectorPointCloud>("/vector_pointclouds", 1);
+
     pub_boxes = n.advertise<jsk_recognition_msgs::BoundingBoxArray>("/bounding_boxes", 1);
     pub_merge_boxes = n.advertise<jsk_recognition_msgs::BoundingBoxArray>("/merge_bounding_boxes", 1);
     pub_reference_boxes = n.advertise<jsk_recognition_msgs::BoundingBoxArray>("/reference_bounding_boxes", 1);
-    pub_path_post_1 = n.advertise<nav_msgs::Path>("/path_poste1", 1);
-    pub_path_post_3 = n.advertise<nav_msgs::Path>("/path_poste3", 1);
-    pub_path_post_2 = n.advertise<nav_msgs::Path>("/path_poste2", 1);
-    pub_path_post_12 = n.advertise<nav_msgs::Path>("/path_poste12", 1);
-    pub_path_post_13 = n.advertise<nav_msgs::Path>("/path_poste13", 1);
-    pub_path_post_23 = n.advertise<nav_msgs::Path>("/path_poste23", 1);
+    pub_path_post_1 = n.advertise<nav_msgs::Path>("/path_poste_1", 1);
+    pub_path_post_3 = n.advertise<nav_msgs::Path>("/path_poste_2", 1);
+    pub_path_post_2 = n.advertise<nav_msgs::Path>("/path_poste_3", 1);
+    pub_path_post_12 = n.advertise<nav_msgs::Path>("/path_poste_12", 1);
+    pub_path_post_13 = n.advertise<nav_msgs::Path>("/path_poste_13", 1);
+    pub_path_post_23 = n.advertise<nav_msgs::Path>("/path_poste_23", 1);
 
-    log_output = "/home/hector/matlab_ws/COAS/";
+
+    char* envvar_home;
+    envvar_home = std::getenv("HOME");
+    std::stringstream log_output_aux_stream;
+    log_output_aux_stream << envvar_home << "/Matlab_ws/";
+    log_output = log_output_aux_stream.str();
 
     file_distance_to_posts.open(log_output + "distancesToPosts");
     file_distance_between_posts.open(log_output + "distancesBetweenPosts");
@@ -35,8 +44,6 @@ BoundingBoxes::BoundingBoxes()
     file_post_3_time.open(log_output + "post3time");
 
     contTest = contTestPose = 0;
-
-    loop();
 }
 
 BoundingBoxes::~BoundingBoxes()
@@ -58,57 +65,179 @@ void BoundingBoxes::phaseCallback(const std_msgs::Int8 phaseMode)
     phase = phaseMode.data;
     switch (phase)
     {
-    // Docking
-    case 1:
-        close_distance = 1.0;
-        xy_min_post = 0.1;
-        xy_max_post = 0.6;
-        z_min_post = 1;
-        z_max_post = 3.0;
-        min_distance_post_12 = 3.5;
-        max_distance_post_12 = 3.9;
-        min_distance_post_13 = 8.5;
-        max_distance_post_13 = 8.8;
-        break;
-    // Harbor
-    case 2:
-        close_distance = 1.0;
-        xy_min_post = 0.3;
-        xy_max_post = 1.6;
-        z_min_post = 0.5;
-        z_max_post = 2.0;
-        min_distance_post_12 = 0.0;
-        max_distance_post_12 = 20.0;
-        min_distance_post_13 = 15.0;
-        max_distance_post_13 = 17.0;
-        break;
-    // Sea
-    case 3:
-        close_distance = 5.0;
-        xy_min_post = 0.0;
-        xy_max_post = 0.0;
-        z_min_post = 0.0;
-        z_max_post = 0.0;
-        min_distance_post_12 = 0.0;
-        max_distance_post_12 = 0.0;
-        min_distance_post_13 = 0.0;
-        max_distance_post_13 = 0.0;
-        break;
+        // Docking
+        case 1:
+            // Euclidean Clusterer Parameters
+            distance_threshold = 0.4;
+            cluster_tolerance = 0.8;
+            min_cluster_size = 30;
+            max_cluster_size = 600;
+            // Bounding Boxes parameters
+            close_distance = 1.0;
+            xy_min_post = 0.1;
+            xy_max_post = 0.6;
+            z_min_post = 1;
+            z_max_post = 3.0;
+            min_distance_post_12 = 3.5;
+            max_distance_post_12 = 3.9;
+            min_distance_post_13 = 8.5;
+            max_distance_post_13 = 8.8;
+            break;
+        // Harbor
+        case 2:
+            // Euclidean Clusterer Parameters
+            distance_threshold = 0.5;
+            cluster_tolerance = 0.8;
+            min_cluster_size = 30;
+            max_cluster_size = 25000;
+            // Bounding Boxes parameters
+            close_distance = 1.0;
+            xy_min_post = 0.3;
+            xy_max_post = 1.6;
+            z_min_post = 0.5;
+            z_max_post = 2.0;
+            min_distance_post_12 = 0.0;
+            max_distance_post_12 = 20.0;
+            min_distance_post_13 = 15.0;
+            max_distance_post_13 = 17.0;
+            break;
+        // Sea
+        case 3:
+            // Euclidean Clusterer Parameters
+            distance_threshold = 0.5;
+            cluster_tolerance = 0.8;
+            min_cluster_size = 2;
+            max_cluster_size = 25000;
+            // Bounding Boxes parameters
+            close_distance = 5.0;
+            xy_min_post = 0.0;
+            xy_max_post = 0.0;
+            z_min_post = 0.0;
+            z_max_post = 0.0;
+            min_distance_post_12 = 0.0;
+            max_distance_post_12 = 0.0;
+            min_distance_post_13 = 0.0;
+            max_distance_post_13 = 0.0;
+            break;
     }
 }
 
-void BoundingBoxes::clustersCallback(const detection::VectorPointCloud input)
+void BoundingBoxes::cloudCallback(const sensor_msgs::PointCloud2ConstPtr &input)
 {
-    double time_begin = ros::Time::now().toSec();
-    detection::VectorPointCloud clusters = input;
-    if (!clusters.clouds.empty())
+    // Euclidean Clusterer Part
+    double time_start = ros::Time::now().toSec();
+
+    sensor_msgs::PointCloud2 input_cloud = *input;
+    pcl::PointCloud<pcl::PointXYZ>::Ptr downsampled_XYZ(new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_f(new pcl::PointCloud<pcl::PointXYZ>);
+    // Change the variable type from sensor_msgs::PointCloud2 to pcl::PointXYZ
+    pcl::fromROSMsg(input_cloud, *downsampled_XYZ);
+    // Create the object SACSegmentation, define the model and the type of the method
+    pcl::ModelCoefficients::Ptr coefficients(new pcl::ModelCoefficients());
+    pcl::PointIndices::Ptr inliers(new pcl::PointIndices());
+    // Create the object SACSegmentation
+    pcl::SACSegmentation<pcl::PointXYZ> seg;
+    // Optional
+    seg.setOptimizeCoefficients(true);
+    // Necessary
+    seg.setModelType(pcl::SACMODEL_PLANE);
+    // More info: wikipedia.org/wiki/RANSAC
+    seg.setMethodType(pcl::SAC_RANSAC);
+    seg.setMaxIterations(100);
+    // How close must be a point from the model to consider it in line
+    seg.setDistanceThreshold(distance_threshold); // (default 0.02)
+
+    int i = 0, nr_points = (int)downsampled_XYZ->points.size();
+
+    // Contains the point cloud of the plane
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_plane(new pcl::PointCloud<pcl::PointXYZ>());
+    if (phase == 1 || phase == 2)
+    {
+        float percentage;
+        if (phase == 1)
+            percentage = 0.3;
+        if (phase == 2)
+            percentage = 0.9;
+
+        // While 30% [90%] of the original point cloud still there
+        while (downsampled_XYZ->points.size() > percentage * nr_points) // docking = 0.9 // default = 0.3
+        {
+            // Segment the largest planar component from the remaining cloud
+            seg.setInputCloud(downsampled_XYZ);
+            seg.segment(*inliers, *coefficients);
+
+            if (inliers->indices.size() == 0)
+            {
+                std::cerr << "Could not estimate a planar model for the given dataset." << std::endl;
+                break;
+            }
+            // Extract the planar inliers from the input cloud
+            pcl::ExtractIndices<pcl::PointXYZ> extract;
+            extract.setInputCloud(downsampled_XYZ);
+            extract.setIndices(inliers);
+            extract.setNegative(false);
+            // Get the points associated with the planar surface
+            extract.filter(*cloud_plane);
+            // Remove the planar inliers, extract the rest
+            extract.setNegative(true);
+            extract.filter(*cloud_f);
+            downsampled_XYZ.swap(cloud_f);
+            i++;
+        }
+    }
+    // Creating the KdTree object for the search method of the extraction
+    pcl::search::KdTree<pcl::PointXYZ>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZ>);
+    tree->setInputCloud(downsampled_XYZ);
+
+    std::vector<pcl::PointIndices> cluster_indices;
+    pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
+    ec.setClusterTolerance(cluster_tolerance); // default = 0.02 (2cm)
+    ec.setMinClusterSize(min_cluster_size);    // Sea = 2 // Docking = 30 // default = 100
+    ec.setMaxClusterSize(max_cluster_size);
+    ec.setSearchMethod(tree);
+    ec.setInputCloud(downsampled_XYZ);
+    ec.extract(cluster_indices);
+
+    // Create a publisher for each cluster
+    for (int i = 0; i < cluster_indices.size(); ++i)
+    {
+        std::string topicName = "/cluster" + boost::lexical_cast<std::string>(i);
+        ros::Publisher pub = n.advertise<sensor_msgs::PointCloud2>(topicName, 1);
+        pub_vec_point_clouds.push_back(pub);
+    }
+    int j = 0;
+    detection::VectorPointCloud clusters_vector;
+    for (std::vector<pcl::PointIndices>::const_iterator it = cluster_indices.begin(); it != cluster_indices.end(); ++it)
+    {
+        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_cluster(new pcl::PointCloud<pcl::PointXYZ>);
+        for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end(); pit++)
+            cloud_cluster->points.push_back(downsampled_XYZ->points[*pit]);
+        cloud_cluster->width = cloud_cluster->points.size();
+        cloud_cluster->height = 1;
+        cloud_cluster->is_dense = true;
+        // Convert the point cloud into a typed message to be used in ROS
+        sensor_msgs::PointCloud2::Ptr output(new sensor_msgs::PointCloud2);
+        pcl::toROSMsg(*cloud_cluster, *output);
+        output->header.frame_id = input_cloud.header.frame_id;
+        clusters_vector.clouds.push_back(*output);
+        pub_vec_point_clouds[j].publish(output);
+        ++j;
+    }
+
+    //pub_point_clouds.publish(clusters_vector);
+    std::cout << "[ EUCL] Time: " << ros::Time::now().toSec() - time_start << std::endl;
+
+    //*****************************************************************************
+    // Bounding Boxes part
+    time_start = ros::Time::now().toSec();
+    if (!clusters_vector.clouds.empty())
     {
         label_box = label_merge_box = 0;
         // Work with every single cluster
-        for (int i = 0; i < clusters.clouds.size(); i++)
+        for (int i = 0; i < clusters_vector.clouds.size(); i++)
         {
             pcl::PCLPointCloud2 pcl_pc2;
-            pcl_conversions::toPCL(clusters.clouds[i], pcl_pc2);
+            pcl_conversions::toPCL(clusters_vector.clouds[i], pcl_pc2);
             pcl::PointCloud<pcl::PointXYZ>::Ptr temp_cloud(new pcl::PointCloud<pcl::PointXYZ>);
             pcl::fromPCLPointCloud2(pcl_pc2, *temp_cloud);
             // Reinitialize variables
@@ -129,7 +258,7 @@ void BoundingBoxes::clustersCallback(const detection::VectorPointCloud input)
         // Merge all bounding boxes that form one polygon into a new bounding box
         mergeBoundingBoxes();
     }
-    std::cout << "[ BBXS] Time: " << ros::Time::now().toSec() - time_begin << std::endl;
+    std::cout << "[ BBXS] Time: " << ros::Time::now().toSec() - time_start << std::endl;
     std::cout << " - - - - - - - - - - - - - - - - -" << std::endl;
 
     cleanVariables();
@@ -460,17 +589,6 @@ void BoundingBoxes::calculateVectorPolygons()
     }
 }
 
-Eigen::Vector4f BoundingBoxes::calculatePC2Centroid(const sensor_msgs::PointCloud2 pc2)
-{
-    Eigen::Vector4f centroidPC2;
-    pcl::PCLPointCloud2 pcl_pc2;
-    pcl_conversions::toPCL(pc2, pcl_pc2);
-    pcl::PointCloud<pcl::PointXYZ>::Ptr temp_pcl(new pcl::PointCloud<pcl::PointXYZ>);
-    pcl::fromPCLPointCloud2(pcl_pc2, *temp_pcl);
-    pcl::compute3DCentroid(*temp_pcl, centroidPC2);
-    return centroidPC2;
-}
-
 float BoundingBoxes::calculateDistance2Points(float x1, float y1, float z1, float x2, float y2, float z2)
 {
     float distance;
@@ -528,6 +646,54 @@ void BoundingBoxes::mergeBoundingBoxes()
 void BoundingBoxes::getParameters()
 {
     // ros::NodeHandle nparam("~");
+    // Euclidean Clustererer Parameters
+    // if (nparam.getParam("distance_threshold", distance_threshold))
+    // {
+    //     ROS_WARN("Got EuclideanClusterer param distance_threshold: %f", distance_threshold);
+    // }
+    // else
+    // {
+    //     distance_threshold = 0.02;
+    //     ROS_WARN("Failed to get EuclideanClusterer param distance_threshold: %f", distance_threshold);
+    // }
+    // if (nparam.getParam("cluster_tolerance", cluster_tolerance))
+    // {
+    //     ROS_WARN("Got EuclideanClusterer param param cluster_tolerance: %f", cluster_tolerance);
+    // }
+    // else
+    // {
+    //     cluster_tolerance = 0.02;
+    //     ROS_WARN("Failed to get EuclideanClusterer param cluster_tolerance: %f", cluster_tolerance);
+    // }
+    // if (nparam.getParam("min_cluster_size", min_cluster_size))
+    // {
+    //     ROS_WARN("Got EuclideanClusterer param min_cluster_size: %f", min_cluster_size);
+    // }
+    // else
+    // {
+    //     min_cluster_size = 100;
+    //     ROS_WARN("Failed to get EuclideanClusterer param min_cluster_size: %f", min_cluster_size);
+    // }
+    // if (nparam.getParam("max_cluster_size", max_cluster_size))
+    // {
+    //     ROS_WARN("Got EuclideanClusterer param max_cluster_size: %f", max_cluster_size);
+    // }
+    // else
+    // {
+    //     max_cluster_size = 25000;
+    //     ROS_WARN("Failed to get EuclideanClusterer param max_cluster_size: %f", max_cluster_size);
+    // }
+    // if (nparam.getParam("phase", phase))
+    // {
+    //     ROS_WARN("Got EuclideanClusterer param phase: %f", phase);
+    // }
+    // else
+    // {
+    //     ROS_WARN("Failed to get EuclideanClusterer param phase: %f", phase);
+    // }
+
+    // Bounding Boxes Parameters
+    //***************************************************************************
     // if (nparam.getParam("close_distance", close_distance))
     // {
     //     ROS_WARN("Got BoundingBoxes param close_distance: %f", close_distance);
@@ -608,7 +774,7 @@ void BoundingBoxes::getParameters()
     // {
     //     max_distance_post_13 = 13.5;
     //     ROS_WARN("Failed to get BoundingBoxes param max_distance_post_13: %f", max_distance_post_13);
-    // }
+    // }  
 }
 
 void BoundingBoxes::savePose(int nPost, nav_msgs::Path path)
@@ -680,14 +846,5 @@ void BoundingBoxes::saveDistances(bool b, nav_msgs::Path path1, nav_msgs::Path p
             file_distance_between_posts << dist_1 << " " << dist_2 << " " << dist_3 << std::endl;
             file_distance_between_posts_times << ros::Time::now().toSec() - time_start << std::endl;
         }
-    }
-}
-
-void BoundingBoxes::loop()
-{
-    while (ros::ok())
-    {
-        sleep(0.1);
-        ros::spinOnce();
     }
 }

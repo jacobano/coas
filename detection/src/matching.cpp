@@ -5,12 +5,12 @@ Matching::Matching()
     n = ros::NodeHandle();
 
     // Subscriptions
-    ros::Subscriber sub_path_post_2 = n.subscribe("/path_poste2", 1, &Matching::pathPost2Callback, this);
-    ros::Subscriber sub_path_post_3 = n.subscribe("/path_poste3", 1, &Matching::pathPost3Callback, this);
-    ros::Subscriber sub_path_post_1 = n.subscribe("/path_poste1", 1, &Matching::pathPost1Callback, this);
-    ros::Subscriber sub_path_post_12 = n.subscribe("/path_poste12", 1, &Matching::pathPost12Callback, this);
-    ros::Subscriber sub_path_post_13 = n.subscribe("/path_poste13", 1, &Matching::pathPost13Callback, this);
-    ros::Subscriber sub_path_post_23 = n.subscribe("/path_poste23", 1, &Matching::pathPost23Callback, this);
+    sub_path_post_1 = n.subscribe("/path_poste_1", 1, &Matching::pathPost1Callback, this);
+    sub_path_post_2 = n.subscribe("/path_poste_2", 1, &Matching::pathPost2Callback, this);
+    sub_path_post_3 = n.subscribe("/path_poste_3", 1, &Matching::pathPost3Callback, this);
+    sub_path_post_12 = n.subscribe("/path_poste_12", 1, &Matching::pathPost12Callback, this);
+    sub_path_post_13 = n.subscribe("/path_poste_13", 1, &Matching::pathPost13Callback, this);
+    sub_path_post_23 = n.subscribe("/path_poste_23", 1, &Matching::pathPost23Callback, this);
 
     // Publishers
     pub_marker_1 = n.advertise<visualization_msgs::Marker>("/marker_post_1", 1);
@@ -37,7 +37,6 @@ Matching::Matching()
 
     toDo();
 
-    loop();
 }
 
 Matching::~Matching()
@@ -365,14 +364,5 @@ void Matching::toDo()
             now_path_post_23.poses.clear();
         }
         break;
-    }
-}
-
-void Matching::loop()
-{
-    while (ros::ok())
-    {
-        sleep(0.1);
-        ros::spinOnce();
     }
 }

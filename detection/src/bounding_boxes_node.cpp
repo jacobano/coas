@@ -2,7 +2,7 @@
 
 int main(int _argc, char **_argv)
 {
-    ros::init(_argc, _argv, "boundingBoxes_node");
+    ros::init(_argc, _argv, "bounding_boxes_node");
 
     BoundingBoxes boundingBoxer;
 

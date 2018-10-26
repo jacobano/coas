@@ -11,7 +11,6 @@ public:
   Matching();
   ~Matching();
 
-  void loop();
   void toDo();
 
 private:

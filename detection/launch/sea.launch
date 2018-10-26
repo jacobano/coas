@@ -9,9 +9,8 @@
     <node pkg="rosbag" type="play" name="rosbag" args=" --loop --start=40 -r 1 --duration=15 $(bags_path)/bags/Na/20180425_Pruebas/2018-04-25-12-57-04.bag" required="true"/>
 
     <node pkg="filtering" type="sensor_filter_node" name="sensor_filter_node" output="screen" required="true"/>
-    <node pkg="filtering" type="voxel_filter_node" name="voxel_filter_node" output="screen" required="true"/>
-    <node pkg="detection" type="euclideanClusterer_node" name="euclideanClusterer_node" output="screen" required="true"/>
-    <node pkg="detection" type="boundingBoxes_node" name="boundingBoxes_node" output="screen" required="true"/>
+    <node pkg="detection" type="euclidean_clusterer_node" name="euclidean_clusterer_node" output="screen" required="true"/>
+    <node pkg="detection" type="bounding_boxes_node" name="bounding_boxes_node" output="screen" required="true"/>
     <!-- <node pkg="tracking" type="tracking_node" name="tracking_node" required="true">
         <param name="phase" value="$(arg phase)"/>
     </node> -->
