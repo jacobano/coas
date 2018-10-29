@@ -631,25 +631,25 @@ void BoundingBoxes::mergeBoundingBoxes()
         for (int k = 0; k < polygon_cloud_temp.size(); k++)
         {
             if ( (fabs(centroid_polygon_cloud[0] - boxes_.boxes[vec_label_polygon_[k]].pose.position.x) + 
-                  boxes_.boxes[vec_label_polygon_[k]].dimensions.x) > max_dist_x_polygon_)
+                  boxes_.boxes[vec_label_polygon_[k]].dimensions.x/2) > max_dist_x_polygon_)
             {
                 max_dist_x_polygon_ = fabs(centroid_polygon_cloud[0]
                                            - boxes_.boxes[vec_label_polygon_[k]].pose.position.x)  
-                                      + boxes_.boxes[vec_label_polygon_[k]].dimensions.x;
+                                      + boxes_.boxes[vec_label_polygon_[k]].dimensions.x/2;
             }
             if ( (fabs(centroid_polygon_cloud[1] - boxes_.boxes[vec_label_polygon_[k]].pose.position.y) + 
-                  boxes_.boxes[vec_label_polygon_[k]].dimensions.y) > max_dist_y_polygon_)
+                  boxes_.boxes[vec_label_polygon_[k]].dimensions.y/2) > max_dist_y_polygon_)
             {
                 max_dist_y_polygon_ = fabs(centroid_polygon_cloud[1] 
                                            - boxes_.boxes[vec_label_polygon_[k]].pose.position.y) 
-                                      + boxes_.boxes[vec_label_polygon_[k]].dimensions.y;
+                                      + boxes_.boxes[vec_label_polygon_[k]].dimensions.y/2;
             }
             if ( (fabs(centroid_polygon_cloud[2] - boxes_.boxes[vec_label_polygon_[k]].pose.position.z) + 
-                  boxes_.boxes[vec_label_polygon_[k]].dimensions.z) > max_dist_z_polygon_)
+                  boxes_.boxes[vec_label_polygon_[k]].dimensions.z/2) > max_dist_z_polygon_)
             {
                 max_dist_z_polygon_ = fabs(centroid_polygon_cloud[2] 
                                            - boxes_.boxes[vec_label_polygon_[k]].pose.position.z) 
-                                      + boxes_.boxes[vec_label_polygon_[k]].dimensions.z;
+                                      + boxes_.boxes[vec_label_polygon_[k]].dimensions.z/2;
             }
         }
         // Create the bounding box that includes the others
