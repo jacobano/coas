@@ -6,6 +6,8 @@
     <node pkg="rviz" type="rviz" name="rviz" args="-d $(find detection)/rviz/harbor.rviz" required="true"/>
     <node pkg="rosbag" type="play" name="rosbag" args="-l $(arg bags_path)/Bags_Velodyne/2017-02-03-11-42-21.bag" required="true"/>
 
-    <node pkg="filtering" type="sensor_filter_node" name="sensor_filter_node" output="screen" required="true"/>
+    <node pkg="filtering" type="sensor_filter_node" name="sensor_filter_node" output="screen" required="true">
+        <param name="use_voxel_filter" value="true" type="bool"/>
+    </node>
     <node pkg="detection" type="bounding_boxes_node" name="bounding_boxes_node" output="screen" required="true"/>
 </launch>

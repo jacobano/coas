@@ -44,41 +44,45 @@ private:
   nav_msgs::Path constructPath(std::vector<float> x, std::vector<float> y, std::vector<float> z, int length);
 
   // Node handlers
-  ros::NodeHandle n;
+  ros::NodeHandle nh_;
 
   // Subscribers
-  ros::Subscriber sub_velodyne; // PointCloud subscriber
-  ros::Subscriber sub_phase;
+  ros::Subscriber sub_filter_points_; // PointCloud subscriber
+  ros::Subscriber sub_phase_;
   
   // Cluster Publishers
-  ros::Publisher pub_point_clouds;
-  std::vector<ros::Publisher> pub_vec_point_clouds;
+  ros::Publisher pub_point_clouds_;
+  std::vector<ros::Publisher> pub_vec_point_clouds_;
   // Bounding Boxer Publishers
-  ros::Publisher pub_boxes, pub_merge_boxes, pub_reference_boxes;
-  ros::Publisher pub_path_post_1, pub_path_post_2, pub_path_post_3, pub_path_post_12, pub_path_post_13, pub_path_post_23;
+  ros::Publisher pub_boxes_, pub_merge_boxes_, pub_reference_boxes_;
+  ros::Publisher pub_path_post_1_, pub_path_post_2_, pub_path_post_3_; 
+  ros::Publisher pub_path_post_12_, pub_path_post_13_, pub_path_post_23_;
 
   // Variables
-  int counter_posts = 0;
-  Eigen::Vector4f centroid;
-  int label_box, label_merge_box;
-  std::vector<int> vec_label_polygon;
-  std::vector<std::vector<int>> vec_vec_label_polygon;
-  jsk_recognition_msgs::BoundingBox box;
-  jsk_recognition_msgs::BoundingBoxArray boxes, reference_boxes, merge_boxes;
-  float x_max, x_min, y_max, y_min, z_max, z_min, x_center, y_center, z_center;
-  float max_dist_x, max_dist_y, max_dist_z, max_dist_x_polygon, max_dist_y_polygon, max_dist_z_polygon;
-  nav_msgs::Path path_post_1, path_post_2, path_post_3, path_post_12, path_post_13, path_post_23;
+  int counter_posts_ = 0;
+  Eigen::Vector4f centroid_;
+  int label_box_, label_merge_box_;
+  std::vector<int> vec_label_polygon_;
+  std::vector<std::vector<int>> vec_vec_label_polygon_;
+  jsk_recognition_msgs::BoundingBox box_;
+  jsk_recognition_msgs::BoundingBoxArray boxes_, reference_boxes_, merge_boxes_;
+  float x_max_, x_min_, y_max_, y_min_, z_max_, z_min_, x_center_, y_center_, z_center_;
+  float max_dist_x_, max_dist_y_, max_dist_z_, max_dist_x_polygon_, max_dist_y_polygon_, max_dist_z_polygon_;
+  nav_msgs::Path path_post_1_, path_post_2_, path_post_3_, path_post_12_, path_post_13_, path_post_23_;
 
-  std::string log_output;
-  int contTest, contTestPose;
-  double time_start, time_pose_start;
-  std::ofstream file_distance_to_posts, file_distance_between_posts, file_distance_to_posts_times, file_distance_between_posts_times;
-  std::ofstream file_post_1, file_post_2, file_post_3, file_post_1_time, file_post_2_time, file_post_3_time;
+  std::string log_output_;
+  int contTest_, contTestPose_;
+  double time_start_, time_pose_start_;
+  std::ofstream file_distance_to_posts_, file_distance_between_posts_; 
+  std::ofstream file_distance_to_posts_times_, file_distance_between_posts_times_;
+  std::ofstream file_post_1_, file_post_2_, file_post_3_;
+  std::ofstream file_post_1_time_, file_post_2_time_, file_post_3_time_;
 
   // Phase
-  int phase; // 1 Docking - 2 Harbor - 3 Sea
+  int phase_; // 1 Docking - 2 Harbor - 3 Sea
   // Euclidean Clusterer specific parameters
-  float distance_threshold, cluster_tolerance, min_cluster_size, max_cluster_size;
+  float distance_threshold_, cluster_tolerance_, min_cluster_size_, max_cluster_size_;
   // Bounding Boxes specific parameters
-  float close_distance, xy_min_post, xy_max_post, z_min_post, z_max_post, min_distance_post_12, max_distance_post_12, min_distance_post_13, max_distance_post_13;
+  float close_distance_, xy_min_post_, xy_max_post_, z_min_post_, z_max_post_;
+  float min_distance_post_12_, max_distance_post_12_, min_distance_post_13_, max_distance_post_13_;
 };

@@ -259,7 +259,7 @@ void Matching::toDo()
     pub_marker_5.publish(marker_post_5);
     marker_post_6.action = visualization_msgs::Marker::DELETE;
     pub_marker_6.publish(marker_post_6);
-    // At the initial instant it storage the first entry as valid labels
+    // At the initial instant it stores the first entry as valid labels
     switch (counter)
     {
     case 0:
@@ -281,7 +281,7 @@ void Matching::toDo()
             (!now_path_post_13.poses.empty() && (!now_path_post_12.poses.empty() || !now_path_post_23.poses.empty())) ||
             (!now_path_post_23.poses.empty() && (!now_path_post_12.poses.empty() || !now_path_post_13.poses.empty())))
         {
-            // Storage the six relevant waypoints of the actual state in a vector
+            // Store the six relevant waypoints of the actual state in a vector
             if (!now_path_post_12.poses.empty())
             {
                 now_path_posts.poses.push_back(now_path_post_12.poses.at(0));

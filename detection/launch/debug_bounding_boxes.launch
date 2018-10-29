@@ -1,0 +1,5 @@
+ 
+<launch>
+	<node pkg="detection" type="bounding_boxes_node" name="bounding_boxes_node" output="screen" required="true"
+        launch-prefix="gdb --args"/>
+</launch>
