@@ -4,7 +4,7 @@
     <node pkg="rostopic" type="rostopic" name="phase" args="pub /phase std_msgs/Int8 3"/>
 
     <node pkg="rviz" type="rviz" name="rviz" args="-d $(find detection)/rviz/sea.rviz" required="true"/>
-    <node pkg="rosbag" type="play" name="rosbag" args=" --loop --start=40 -r 1 --duration=15 $(bags_path)/bags/Na/20180425_Pruebas/2018-04-25-12-57-04.bag" required="true"/>
+    <node pkg="rosbag" type="play" name="rosbag" args=" --loop --start=40 -r 1 --duration=15 $(arg bags_path)/Na/20180425_Pruebas/2018-04-25-12-57-04.bag" required="true"/>
 
     <node pkg="filtering" type="sensor_filter_node" name="sensor_filter_node" output="screen" required="true">
         <param name="use_voxel_filter" value="true" type="bool"/>
