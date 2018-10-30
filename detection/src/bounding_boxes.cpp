@@ -33,8 +33,14 @@ BoundingBoxes::BoundingBoxes()
     file_post_1_time.open(log_output + "post1time");
     file_post_2_time.open(log_output + "post2time");
     file_post_3_time.open(log_output + "post3time");
+    file_merge_box_1.open(log_output + "Test_Pos_Merge_BBXS_Sea/mergeBox1");
+    file_merge_box_2.open(log_output + "Test_Pos_Merge_BBXS_Sea/mergeBox2");
+    file_merge_box_3.open(log_output + "Test_Pos_Merge_BBXS_Sea/mergeBox3");
+    file_merge_box_1_time.open(log_output + "Test_Pos_Merge_BBXS_Sea/mergeBox1time");
+    file_merge_box_2_time.open(log_output + "Test_Pos_Merge_BBXS_Sea/mergeBox2time");
+    file_merge_box_3_time.open(log_output + "Test_Pos_Merge_BBXS_Sea/mergeBox3time");
 
-    contTest = contTestPose = 0;
+    contTest = contTestPose = contTimeMergeBoxes = 0;
 }
 
 BoundingBoxes::~BoundingBoxes()
@@ -49,6 +55,12 @@ BoundingBoxes::~BoundingBoxes()
     file_post_1_time.close();
     file_post_2_time.close();
     file_post_3_time.close();
+    file_merge_box_1.close();
+    file_merge_box_2.close();
+    file_merge_box_3.close();
+    file_merge_box_1_time.close();
+    file_merge_box_2_time.close();
+    file_merge_box_3_time.close();
 }
 
 void BoundingBoxes::phaseCallback(const std_msgs::Int8 phaseMode)
@@ -506,21 +518,50 @@ void BoundingBoxes::mergeBoundingBoxes()
         {
             if (fabs(centroid_polygon_cloud[0] - boxes.boxes[vec_label_polygon[k]].pose.position.x) + boxes.boxes[vec_label_polygon[k]].dimensions.x > max_dist_x_polygon)
             {
-                max_dist_x_polygon = fabs(centroid_polygon_cloud[0] - boxes.boxes[vec_label_polygon[k]].pose.position.x) + boxes.boxes[vec_label_polygon[k]].dimensions.x;
+                max_dist_x_polygon = fabs(centroid_polygon_cloud[0] - boxes.boxes[vec_label_polygon[k]].pose.position.x) + boxes.boxes[vec_label_polygon[k]].dimensions.x / 2;
             }
             if (fabs(centroid_polygon_cloud[1] - boxes.boxes[vec_label_polygon[k]].pose.position.y) + boxes.boxes[vec_label_polygon[k]].dimensions.y > max_dist_y_polygon)
             {
-                max_dist_y_polygon = fabs(centroid_polygon_cloud[1] - boxes.boxes[vec_label_polygon[k]].pose.position.y) + boxes.boxes[vec_label_polygon[k]].dimensions.y;
+                max_dist_y_polygon = fabs(centroid_polygon_cloud[1] - boxes.boxes[vec_label_polygon[k]].pose.position.y) + boxes.boxes[vec_label_polygon[k]].dimensions.y / 2;
             }
             if (fabs(centroid_polygon_cloud[2] - boxes.boxes[vec_label_polygon[k]].pose.position.z) + boxes.boxes[vec_label_polygon[k]].dimensions.z > max_dist_z_polygon)
             {
-                max_dist_z_polygon = fabs(centroid_polygon_cloud[2] - boxes.boxes[vec_label_polygon[k]].pose.position.z) + boxes.boxes[vec_label_polygon[k]].dimensions.z;
+                max_dist_z_polygon = fabs(centroid_polygon_cloud[2] - boxes.boxes[vec_label_polygon[k]].pose.position.z) + boxes.boxes[vec_label_polygon[k]].dimensions.z / 2;
             }
         }
         // Create the bounding box that includes the others
         constructBoundingBoxes(centroid_polygon_cloud[0], centroid_polygon_cloud[1], centroid_polygon_cloud[2], max_dist_x_polygon, max_dist_y_polygon, max_dist_z_polygon, true);
     }
     pub_merge_boxes.publish(merge_boxes);
+    if (contTimeMergeBoxes == 0)
+    {
+        time_pose_merge_start = ros::Time::now().toSec();
+        contTimeMergeBoxes++;
+    }
+    for (int i = 0; i < merge_boxes.boxes.size(); i++)
+    {
+        switch (merge_boxes.boxes.size())
+        {
+        case 1:
+            file_merge_box_1 << merge_boxes.boxes.at(0).pose.position.x << " " << merge_boxes.boxes.at(0).pose.position.y << std::endl;
+            file_merge_box_1_time << ros::Time::now().toSec() - time_pose_merge_start << std::endl;
+            break;
+        case 2:
+            file_merge_box_1 << merge_boxes.boxes.at(0).pose.position.x << " " << merge_boxes.boxes.at(0).pose.position.y << std::endl;
+            file_merge_box_1_time << ros::Time::now().toSec() - time_pose_merge_start << std::endl;
+            file_merge_box_2 << merge_boxes.boxes.at(1).pose.position.x << " " << merge_boxes.boxes.at(1).pose.position.y << std::endl;
+            file_merge_box_2_time << ros::Time::now().toSec() - time_pose_merge_start << std::endl;
+            break;
+        case 3:
+            file_merge_box_1 << merge_boxes.boxes.at(0).pose.position.x << " " << merge_boxes.boxes.at(0).pose.position.y << std::endl;
+            file_merge_box_1_time << ros::Time::now().toSec() - time_pose_merge_start << std::endl;
+            file_merge_box_2 << merge_boxes.boxes.at(1).pose.position.x << " " << merge_boxes.boxes.at(1).pose.position.y << std::endl;
+            file_merge_box_2_time << ros::Time::now().toSec() - time_pose_merge_start << std::endl;
+            file_merge_box_3 << merge_boxes.boxes.at(2).pose.position.x << " " << merge_boxes.boxes.at(2).pose.position.y << std::endl;
+            file_merge_box_3_time << ros::Time::now().toSec() - time_pose_merge_start << std::endl;
+            break;
+        }
+    }
 }
 
 void BoundingBoxes::getParameters()

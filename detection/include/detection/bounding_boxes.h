@@ -64,10 +64,11 @@ private:
   nav_msgs::Path path_post_1, path_post_2, path_post_3, path_post_12, path_post_13, path_post_23;
 
   std::string log_output;
-  int contTest, contTestPose;
-  double time_start, time_pose_start;
+  int contTest, contTestPose, contTimeMergeBoxes;
+  double time_start, time_pose_start, time_pose_merge_start;
   std::ofstream file_distance_to_posts, file_distance_between_posts, file_distance_to_posts_times, file_distance_between_posts_times;
   std::ofstream file_post_1, file_post_2, file_post_3, file_post_1_time, file_post_2_time, file_post_3_time;
+  std::ofstream file_merge_box_1, file_merge_box_2, file_merge_box_3, file_merge_box_1_time, file_merge_box_2_time, file_merge_box_3_time;
 
   // Params
   int phase; // 1 Docking - 2 Harbor - 3 Sea
